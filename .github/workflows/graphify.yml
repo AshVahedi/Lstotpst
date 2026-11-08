@@ -5,6 +5,7 @@ on:
     paths:
       - 'Assets/**/*.cs'
       - 'Assets/**/*.asmdef'
+      - 'Assets/**/*.asmref'
       - 'Tools/**'
       - 'Tests/**/*.csproj'
       - 'Packages/manifest.json'
@@ -19,6 +20,7 @@ on:
     paths:
       - 'Assets/**/*.cs'
       - 'Assets/**/*.asmdef'
+      - 'Assets/**/*.asmref'
       - 'Tools/**'
       - 'Tests/**/*.csproj'
       - 'Packages/manifest.json'

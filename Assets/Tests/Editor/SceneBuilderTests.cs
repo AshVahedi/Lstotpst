@@ -92,6 +92,35 @@ namespace LastOutpost.Tests.Editor
                 Assert.That(EditorBuildSettings.scenes.Any(s => s.path == existing.path && s.enabled == existing.enabled), Is.True);
         }
 
+        [TestCase(false)]
+        [TestCase(true)]
+        public void FailedSaveRestoresPreviousLoadedHierarchyAndLeavesDiskUnchanged(bool throws)
+        {
+            string scenePath = PrototypeSceneBuilder.Generate(TestRoot, false);
+            Scene scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Additive);
+            GameObject previous = scene.GetRootGameObjects().Single(g => g.GetComponent<GeneratedLevelRoot>() != null);
+            previous.name = "Previously generated root";
+            var unrelated = new GameObject("Unrelated unsaved edit");
+            SceneManager.MoveGameObjectToScene(unrelated, scene);
+            EditorSceneManager.SaveScene(scene);
+            // Verify an unsaved edit survives too; the replacement transaction must not revert it.
+            previous.transform.position = new Vector3(3, 2, 0);
+            EditorSceneManager.MarkSceneDirty(scene);
+            byte[] before = File.ReadAllBytes(scenePath);
+            var buildScenesBefore = EditorBuildSettings.scenes.Select(s => (s.path, s.enabled)).ToArray();
+
+            Assert.Throws<System.InvalidOperationException>(() => PrototypeSceneBuilder.Generate(TestRoot, true,
+                (candidate, path) => throws ? throw new System.InvalidOperationException("Injected save failure") : false));
+
+            GameObject restored = scene.GetRootGameObjects().Single(g => g.GetComponent<GeneratedLevelRoot>() != null);
+            Assert.That(restored.name, Is.EqualTo("Previously generated root"));
+            Assert.That(restored.transform.position, Is.EqualTo(new Vector3(3, 2, 0)));
+            Assert.That(scene.GetRootGameObjects().Contains(unrelated), Is.True);
+            AssertReferences(restored.GetComponent<OutpostSession>(), "settings");
+            Assert.That(File.ReadAllBytes(scenePath), Is.EqualTo(before));
+            Assert.That(EditorBuildSettings.scenes.Select(s => (s.path, s.enabled)).ToArray(), Is.EqualTo(buildScenesBefore));
+        }
+
         private static void AssertReferences(UnityEngine.Object component, params string[] fields)
         {
             Assert.That(component, Is.Not.Null);

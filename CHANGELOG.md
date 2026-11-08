@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased — Task 003 readiness audit (version retained at 0.1.0)
+
+- Verified Tasks 001–002/Graphify ancestry and open, unmerged PRs #1–2; based the
+  dedicated audit branch on `development/graphify-workflow` without merging them.
+- Audited eight assembly definitions, initialization, generator wiring, hitscan
+  combat/purchases/outcomes and portrait Android settings; documented unverified
+  package resolution, generated assets, Unity APIs/tests and APK/device gates.
+- Added generator scene-replacement rollback for failed/thrown saves and two
+  authored Unity Editor regression cases; Unity execution remains unavailable.
+- Added independent assembly/GUID/platform/cycle validation, 22 mutation tests,
+  CI evidence artifact and `.asmref` graph-workflow triggers.
+- Reran 82 gameplay and 7 Graphify tests: 111 independent tests passed including
+  the new 22. All 38 asset C# sources parse; this is not Unity compilation.
+- Refreshed Graphify artifacts; added exact first-launch/Android instructions and
+  readiness report. Verdict: READY WITH KNOWN LIMITATIONS. No gameplay features added.
+
 ## Unreleased — Graphify development workflow
 
 - Added pinned graphifyy 0.9.104 in a development-only Python environment, official

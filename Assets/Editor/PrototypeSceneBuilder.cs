@@ -31,7 +31,9 @@ namespace LastOutpost.Editor
         /// <summary>Batch entry point: -executeMethod LastOutpost.Editor.PrototypeSceneBuilder.GenerateBatch.</summary>
         public static void GenerateBatch() => Generate();
 
-        public static string Generate(string outputRoot = OutputRoot, bool registerBuildScene = true)
+        /// <param name="saveScene">Optional persistence callback for Editor automation; false or an exception rolls back the scene replacement.</param>
+        public static string Generate(string outputRoot = OutputRoot, bool registerBuildScene = true,
+            Func<Scene, string, bool> saveScene = null)
         {
             if (Application.isPlaying) throw new InvalidOperationException("Generate the prototype outside Play Mode.");
             if (string.IsNullOrWhiteSpace(outputRoot) || !outputRoot.StartsWith("Assets/", StringComparison.Ordinal) ||
@@ -50,7 +52,8 @@ namespace LastOutpost.Editor
             EnemyActor boss = SaveEnemy(outputRoot + "/Prefabs/Boss.prefab", "Boss", sprite, material,
                 new Color(0.65f, 0.25f, 0.8f), new Vector2(1.8f, 1.2f));
             string scenePath = outputRoot + SceneRelativePath;
-            BuildScene(scenePath, settings, sprite, material, platformPrefab, basic, fast, boss);
+            BuildScene(scenePath, settings, sprite, material, platformPrefab, basic, fast, boss,
+                saveScene ?? ((scene, path) => EditorSceneManager.SaveScene(scene, path)));
             if (registerBuildScene) RegisterBuildScene(scenePath);
             AssetDatabase.SaveAssets();
             return scenePath;
@@ -153,7 +156,8 @@ namespace LastOutpost.Editor
         }
 
         private static void BuildScene(string path, PrototypeSettings settings, Sprite sprite, Material material,
-            GameObject platformPrefab, EnemyActor basic, EnemyActor fast, EnemyActor boss)
+            GameObject platformPrefab, EnemyActor basic, EnemyActor fast, EnemyActor boss,
+            Func<Scene, string, bool> saveScene)
         {
             Scene previousActive = SceneManager.GetActiveScene();
             Scene scene = SceneManager.GetSceneByPath(path);
@@ -161,6 +165,7 @@ namespace LastOutpost.Editor
             if (!alreadyLoaded) scene = File.Exists(path) ? EditorSceneManager.OpenScene(path, OpenSceneMode.Additive) :
                 EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
             GameObject generated = null;
+            int replacementUndoGroup = -1;
             try
             {
                 SceneManager.SetActiveScene(scene);
@@ -168,7 +173,6 @@ namespace LastOutpost.Editor
                 foreach (GameObject candidate in scene.GetRootGameObjects())
                     if (candidate.GetComponent<GeneratedLevelRoot>() != null) oldRoots.Add(candidate);
                 generated = new GameObject("Last Outpost Prototype");
-                SceneManager.MoveGameObjectToScene(generated, scene);
                 generated.AddComponent<GeneratedLevelRoot>();
                 OutpostSession session = generated.AddComponent<OutpostSession>();
                 session.Configure(settings);
@@ -183,18 +187,26 @@ namespace LastOutpost.Editor
                 generated.AddComponent<PrototypeHud>().Configure(session);
                 CreateCamera(generated.transform, platform.transform);
                 CreateScenery(generated.transform, sprite, material);
-                // Replace owned content only after a complete new root has been assembled.
-                foreach (GameObject oldRoot in oldRoots) UnityEngine.Object.DestroyImmediate(oldRoot);
+                // An isolated Undo group restores the previous hierarchy if persistence fails.
+                // Do not roll back unrelated edits or earlier asset generation/import operations.
+                Undo.IncrementCurrentGroup();
+                replacementUndoGroup = Undo.GetCurrentGroup();
+                Undo.SetCurrentGroupName("Replace Last Outpost prototype");
+                Undo.RegisterCreatedObjectUndo(generated, "Create replacement prototype");
+                foreach (GameObject oldRoot in oldRoots) Undo.DestroyObjectImmediate(oldRoot);
                 EditorSceneManager.MarkSceneDirty(scene);
-                if (!EditorSceneManager.SaveScene(scene, path)) throw new InvalidOperationException("Could not save generated scene: " + path);
+                if (!saveScene(scene, path)) throw new InvalidOperationException("Could not save generated scene: " + path);
+                Undo.CollapseUndoOperations(replacementUndoGroup);
             }
             catch
             {
+                if (replacementUndoGroup >= 0) Undo.RevertAllDownToGroup(replacementUndoGroup);
                 if (generated != null) UnityEngine.Object.DestroyImmediate(generated);
                 throw;
             }
             finally
             {
+                if (replacementUndoGroup >= 0) Undo.IncrementCurrentGroup();
                 if (previousActive.IsValid() && previousActive.isLoaded) SceneManager.SetActiveScene(previousActive);
                 if (!alreadyLoaded) EditorSceneManager.CloseScene(scene, true);
             }

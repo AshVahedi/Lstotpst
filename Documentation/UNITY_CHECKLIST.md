@@ -1,11 +1,12 @@
-# Unity and Android validation checklist — Task 002
+# Unity and Android validation checklist — Task 003
 
 All Unity/Android items are **pending**, even where implementation source exists.
 The environment has .NET, but no Unity Editor installation was found.
 
 ## Import and generation
 
-- [ ] Check out `development/task-002-unity-integration` or its reviewed successor.
+- [ ] Check out `development/task-003-unity-readiness-audit` or its reviewed successor.
+      PRs #1–2 were unmerged at audit time; see [exact setup](UNITY_FIRST_LAUNCH.md).
 - [ ] Install Unity 6000.3.0f1 through Hub; add Android Build Support, matching
       SDK/NDK Tools and OpenJDK when preparing device builds.
 - [ ] Open the existing project root and wait for complete import/package resolution.
@@ -23,7 +24,8 @@ The environment has .NET, but no Unity Editor installation was found.
 ## Actual Unity tests
 
 - [ ] Run shared core/simulation **EditMode** cases (82 authored cases).
-- [ ] Run **Editor generator tests** (2 cases), which create/clean their own output.
+- [ ] Run **Editor generator tests** (4 cases, including failed/thrown save rollback),
+      which create/clean their own output. EditMode total should be 86.
 - [ ] Run **PlayMode** integration tests (17 cases). These use real Unity objects,
       controlled session stepping, destruction frames and HUD command entry points.
 - [ ] Preserve the real Unity XML/log files. Investigate failures rather than

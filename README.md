@@ -12,7 +12,7 @@ validated playable build or Android APK. No Unity Editor is installed here.
 
 ## Run the prototype locally
 
-1. Check out `development/task-002-unity-integration` from
+1. Check out `development/task-003-unity-readiness-audit` from
    [AshVahedi/Lstotpst](https://github.com/AshVahedi/Lstotpst).
 2. Open this repository root using **Unity 6.3 LTS, 6000.3.0f1**. Allow package
    resolution/import and inspect the Console for compiler/import errors.
@@ -26,9 +26,16 @@ validated playable build or Android APK. No Unity Editor is installed here.
    Complete [the Unity checklist](Documentation/UNITY_CHECKLIST.md) before
    considering this a verified playable milestone.
 
+Follow [the exact first-launch procedure](Documentation/UNITY_FIRST_LAUNCH.md)
+and [Task 003 readiness audit](Documentation/UNITY_READINESS_REPORT.md).
+PRs #1 and #2 were open/unmerged at audit time; this branch is based on the
+Graphify branch containing all completed work. Verdict: **READY WITH KNOWN
+LIMITATIONS**. No Unity compilation, scene execution or APK build has run.
+
 The generator is designed to be repeatable: stable output paths/GUIDs, one owned
 scene root, no duplicate build entries, and preserved settings tuning/unrelated
-scene roots. Its two idempotence tests require Unity and **have not run here**.
+scene roots. Its four Editor tests (including save-failure rollback) require
+Unity and **have not run here**.
 Rerunning regenerates the owned placeholder prefabs/root; do not put manual art
 edits there. The menu asks to save modified scenes first. See
 [setup details](Documentation/TASK002_INTEGRATION.md) for batch commands and ownership.
@@ -67,6 +74,8 @@ without physics queries or collision callbacks. Only living enemies attack.
 dotnet restore Tests/LastOutpost.Core.Tests.csproj
 dotnet test Tests/LastOutpost.Core.Tests.csproj --no-restore --configuration Release --logger "trx;LogFileName=core-tests.trx" --results-directory TestResults
 python3 Tools/validate_project.py
+python3 -m unittest discover -s Tools/tests -v
+python3 Tools/validate_assemblies.py --json TestResults/unity-static-audit.json
 dotnet run --project Tools/UnitySyntaxCheck/UnitySyntaxCheck.csproj --configuration Release -- .
 ```
 
@@ -75,8 +84,12 @@ integration cases. They compile the actual pure C# source to .NET Standard 2.1
 and execute in .NET 8, including a complete deterministic run with enemy attacks
 and tactical ammunition purchases. This is not a scene test.
 
-**19 additional Unity-specific tests are authored and unexecuted:** 17 PlayMode
-and 2 Editor generator tests. The shared 82 have also not run inside Unity.
+Task 003 reran **111 independent tests: 82 gameplay, 7 Graphify and 22 assembly
+validator tests, all passed; 0 failed/skipped**. The assembly audit checks cycles,
+GUID/name references, platform restrictions and runtime/Editor/test boundaries.
+
+**21 additional Unity-specific tests are authored and unexecuted:** 17 PlayMode
+and 4 Editor generator cases. The shared 82 have also not run inside Unity.
 Metadata/layer validation passes. All 38 asset C# sources parse without syntax
 errors, using Roslyn from the installed SDK. Syntax parsing performs **no Unity
 API/type binding or Editor compilation**, and uses no Unity stubs.
@@ -102,7 +115,7 @@ Assets/
   LastOutpostGenerated/    Produced by Unity only; absent until generation runs
 Packages/ ProjectSettings/ Unity toolchain and portrait Android intent
 Tests/                     Independent .NET library and NUnit runner
-Tools/                     Metadata/architecture validator and C# syntax-only tool
+Tools/                     Metadata/assembly validators, tests and C# syntax-only tool
 Documentation/             Architecture, integration contract, verification, checklist
 .github/workflows/         Executed .NET/static CI, no unlicensed Unity runner
 ```
