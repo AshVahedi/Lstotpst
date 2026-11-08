@@ -1,0 +1,81 @@
+name: Code architecture graph
+
+on:
+  push:
+    paths:
+      - 'Assets/**/*.cs'
+      - 'Assets/**/*.asmdef'
+      - 'Tools/**'
+      - 'Tests/**/*.csproj'
+      - 'Packages/manifest.json'
+      - 'global.json'
+      - '.github/workflows/**'
+      - '.graphifyignore'
+      - '.graphifyrc'
+      - '.gitignore'
+      - 'AGENTS.md'
+      - '.codex/**'
+  pull_request:
+    paths:
+      - 'Assets/**/*.cs'
+      - 'Assets/**/*.asmdef'
+      - 'Tools/**'
+      - 'Tests/**/*.csproj'
+      - 'Packages/manifest.json'
+      - 'global.json'
+      - '.github/workflows/**'
+      - '.graphifyignore'
+      - '.graphifyrc'
+      - '.gitignore'
+      - 'AGENTS.md'
+      - '.codex/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  code-graph:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GRAPHIFY_BACKEND: none
+      GRAPHIFY_QUERY_LOG_DISABLE: '1'
+      GRAPHIFY_MAX_WORKERS: '1'
+      GRAPHIFY_OUT: graphify-out
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: Tools/Graphify/requirements-lock.txt
+      - name: Install pinned development-only Graphify dependencies
+        run: python -m pip install -r Tools/Graphify/requirements-lock.txt
+      - name: Restore a consistent graph, manifest and AST cache
+        uses: actions/cache@v4
+        with:
+          path: graphify-out/
+          key: graphify-${{ runner.os }}-${{ hashFiles('Tools/Graphify/requirements-lock.txt', '.graphifyignore', '.graphifyrc') }}-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            graphify-${{ runner.os }}-${{ hashFiles('Tools/Graphify/requirements-lock.txt', '.graphifyignore', '.graphifyrc') }}-${{ github.ref_name }}-
+            graphify-${{ runner.os }}-${{ hashFiles('Tools/Graphify/requirements-lock.txt', '.graphifyignore', '.graphifyrc') }}-
+      - name: Update the code graph and validate source freshness
+        run: python Tools/Graphify/update.py
+      - name: Test real generation, incremental edits, deletions and exclusions
+        run: python -m unittest discover -s Tools/Graphify/tests -v
+      - name: Verify complete artifacts before publication
+        run: python Tools/Graphify/update.py --check
+      - name: Publish the architecture map for this revision
+        uses: actions/upload-artifact@v4
+        with:
+          name: last-outpost-code-graph-${{ github.sha }}
+          include-hidden-files: true
+          if-no-files-found: error
+          path: |
+            graphify-out/graph.json
+            graphify-out/graph.html
+            graphify-out/GRAPH_REPORT.md
+            graphify-out/manifest.json
+            graphify-out/.graphify_build.json

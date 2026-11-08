@@ -121,3 +121,13 @@ See [architecture](Documentation/ARCHITECTURE.md),
 Next task: validate import, generator, all Unity tests, portrait gameplay and
 Android development build in a Unity-capable environment; fix observed issues,
 commit generated assets, and promote to 0.2.0 only after that validation.
+
+## Queryable architecture map for Codex
+
+Development-only [Graphify setup and query guide](Documentation/GRAPHIFY.md) registers
+its official project Codex skill, provides local incremental updates, and publishes
+fresh architecture artifacts from `.github/workflows/graphify.yml`.
+The committed [report](graphify-out/GRAPH_REPORT.md), [JSON graph](graphify-out/graph.json)
+and downloadable [visualization](graphify-out/graph.html) provide a persistent map.
+Run `python3 Tools/Graphify/setup.py` once, activate `.venv-graphify`, then use
+`graphify explain "GameRun.Tick()"` before changing important systems.
