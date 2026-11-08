@@ -1,63 +1,76 @@
-# Local Unity validation and next implementation
+# Unity and Android validation checklist — Task 003
 
-Everything below is **pending**. A passing .NET suite does not check Unity import,
-scene execution, touch interaction, Android builds, or physical-device behavior.
+All Unity/Android items are **pending**, even where implementation source exists.
+The environment has .NET, but no Unity Editor installation was found.
 
-## Verify the foundation
+## Import and generation
 
-- [ ] Clone the repository's `main` branch and review the initial foundation.
-- [ ] Install Unity Hub and Unity **6000.3.0f1**, Android Build Support, matching
-      Android SDK/NDK Tools, and OpenJDK.
-- [ ] Open the project root; let Unity generate its Library and complete package
-      resolution. Review generated project-setting changes and packages lock file.
-- [ ] Confirm no asset import, assembly definition, compiler, or package errors.
-- [ ] Confirm 2D default behavior, portrait orientation, disabled landscape
-      autorotation, minimum Android API 26, ARM64 and IL2CPP.
-- [ ] Run all EditMode tests in Unity Test Runner; compare against the independent
-      suite and preserve real editor test results. No PlayMode tests exist yet.
-- [ ] Confirm core assembly has no engine references and test files are excluded
-      from a player build by their Editor-only test assembly.
-- [ ] Re-run independent .NET tests and the static validator after migrations.
+- [ ] Check out `development/task-003-unity-readiness-audit` or its reviewed successor.
+      PRs #1–2 were unmerged at audit time; see [exact setup](UNITY_FIRST_LAUNCH.md).
+      Task 004's successor includes [cloud CI setup](CLOUD_UNITY_VERIFICATION.md);
+      PR #3 also remained unmerged at its start. CI configuration is not execution.
+- [ ] Install Unity 6000.3.0f1 through Hub; add Android Build Support, matching
+      SDK/NDK Tools and OpenJDK when preparing device builds.
+- [ ] Open the existing project root and wait for complete import/package resolution.
+- [ ] Resolve any real Console compiler, API, assembly or asset-import errors.
+- [ ] Confirm 2D defaults, portrait orientation/disabled landscape autorotation,
+      API 26 minimum, ARM64 and IL2CPP. Do not infer these from hand-authored YAML alone.
+- [ ] Run **Last Outpost → Generate Level 1 Prototype**. Confirm one scene,
+      one marked root, four prefabs, one settings asset, camera, motor, spawner,
+      tracers and HUD references, plus one enabled build entry.
+- [ ] Run generation a second time; confirm no duplicate roots, actors, build
+      entries or assets, stable GUIDs and preserved settings tuning/unrelated roots.
+- [ ] Review and commit generated assets/.meta, imported ProjectSettings defaults
+      and Packages/packages-lock.json. No serialized scene/prefab was validated here.
 
-## Recommended next Codex task: first playable scene (Milestone 3)
+## Actual Unity tests
 
-Work in a Unity-capable environment so integration is actually testable.
+- [ ] Run shared core/simulation **EditMode** cases (82 authored cases).
+- [ ] Run **Editor generator tests** (4 cases, including failed/thrown save rollback),
+      which create/clean their own output. EditMode total should be 86.
+- [ ] Run **PlayMode** integration tests (17 cases). These use real Unity objects,
+      controlled session stepping, destruction frames and HUD command entry points.
+- [ ] Preserve the real Unity XML/log files. Investigate failures rather than
+      counting .NET passes or syntax parsing as Unity passes.
 
-1. Add Unity gameplay/presentation assemblies referencing core. Introduce
-   ScriptableObject authoring adapters only where needed; keep rules in core.
-2. Build one portrait, side-view placeholder scene with orthographic camera,
-   an original modular vehicle shape, distinct Basic/Fast/boss shapes, and a
-   horizontal industrial route. Use no copied assets.
-3. Add an independent configurable route mover: ordinary travel speed, encounter
-   slowdown/stop, boss stop until defeat. No manual steering. Keep movement
-   separate from targeting/firing and from presentation offsets.
-4. Map deterministic core enemy roster members to Unity objects; move living
-   enemies toward the platform. Never allow a dead/spawning visual to grant
-   another core reward. Track roster membership across delayed spawns if used.
-5. Supply current range snapshots and elapsed level time to automatic weapons and
-   living enemy attacks. Maintain the unlimited basic gun when missile ammo is
-   empty. Represent successful shots with simple tracer/projectile feedback;
-   apply damage once according to the core immediate-hit contract.
-6. Collect rewards once; refresh level status after all combat in each tick.
-   Stop simulation on terminal status, especially simultaneous boss/player death.
-7. Add Start, Gameplay, Victory, and Defeat views and a minimal touch-friendly HUD
-   for health, Energy, ammo, wave, progress, and the three tactical purchases.
-   Show costs and rejection feedback. UI invokes rules and renders results.
-8. Write and execute PlayMode tests for travel, stopping at boss, spawn order,
-   automatic targeting/fire, callback-safe drops, purchase wiring, simultaneous
-   death, restart/reset, and victory/defeat screens. Capture a real gameplay run.
+Optional CLI equivalents, with UNITY_EDITOR set to a licensed Editor executable:
 
-Do not add another level, monetization, saves, permanent shops, or online systems.
+```sh
+mkdir -p TestResults
+"$UNITY_EDITOR" -batchmode -nographics -projectPath "$PWD" -runTests -testPlatform EditMode -testResults TestResults/unity-editmode.xml -logFile TestResults/unity-editmode.log
+"$UNITY_EDITOR" -batchmode -nographics -projectPath "$PWD" -runTests -testPlatform PlayMode -testResults TestResults/unity-playmode.xml -logFile TestResults/unity-playmode.log
+```
 
-## Android validation after the playable milestone
+## Manual portrait gameplay
 
-- [ ] Add the playable scene to Build Profiles/Build Settings and select Android.
-- [ ] Confirm the target SDK is valid for the installed Unity Android toolchain;
-      change the development application identifier if needed.
-- [ ] Generate a development APK and record the editor/toolchain versions and log.
-- [ ] Install on a physical Android device and confirm portrait behavior, safe
-      areas, readable HUD, touch buttons, pause/resume, performance, and restart.
-- [ ] Verify victory, defeat, empty-ammo fallback, insufficient funds, capped
-      repairs/refills, special strike, boss stop, and duplicate-death callbacks.
+- [ ] Open the generated IndustrialWasteland scene, set Game View to 540 × 960,
+      enter Play Mode and press START RUN. Confirm no simulation on the start screen.
+- [ ] Confirm automatic horizontal route movement, ordinary encounter slowdown,
+      boss stop and terminal stop, independent of render frame rate.
+- [ ] Confirm Basic/Fast/boss shapes, health bars, approach and distinct attack timing.
+- [ ] Confirm closest-live targeting, attack intervals, one damage application per
+      visual tracer and continued basic fire at zero missile ammo.
+- [ ] Defeat enemies; confirm each reward and destroyed view occurs once.
+- [ ] Exercise all purchase buttons with sufficient and insufficient Energy,
+      full health/ammo, capped partial effects, no special target and destroyed platform.
+- [ ] Confirm exactly three waves then boss, no premature wave advancement,
+      travel delays, victory and defeat views and once-only finish notifications.
+- [ ] Restart from both outcomes; verify fresh health, Energy, ammo, timers,
+      position, enemies and event subscriptions. Pause/resume the application.
+- [ ] Inspect HUD safe-area/readability and touch targets across portrait sizes.
+- [ ] Record a real playthrough. No graphical/gameplay quality or balance claim
+      is supported by the current headless tests alone.
 
-No APK build can succeed before the playable scene exists and is in the build list.
+## Android gate and version
+
+- [ ] Select Android Build Profile and confirm the generated scene is included.
+- [ ] Verify installed SDK/NDK/JDK/target API compatibility, development identifier
+      and portrait device settings; generate a development APK and preserve logs.
+- [ ] Install on a physical device and check touch, safe areas, pause/resume,
+      victory/defeat/restart, empty-ammo fallback, performance and memory.
+- [ ] Rerun .NET/static CI after fixes; review generated source/asset changes.
+- [ ] Promote VERSION.md, bundleVersion and changelog to 0.2.0 only when the
+      integration milestone is verified; keep unverified checks explicitly pending.
+
+Recommended next task is validation and fixes, not another level or feature set.
+Do not add monetization, multiplayer, permanent shops or unrelated project changes.

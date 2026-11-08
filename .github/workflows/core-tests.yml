@@ -23,10 +23,18 @@ jobs:
         run: dotnet test Tests/LastOutpost.Core.Tests.csproj --no-restore --configuration Release --logger "trx;LogFileName=core-tests.trx" --results-directory TestResults
       - name: Validate Unity metadata and architecture boundaries
         run: python3 Tools/validate_project.py
+      - name: Test independent assembly and serialized GUID validation
+        run: python3 -m unittest discover -s Tools/tests -v
+      - name: Audit assembly references, cycles and platform restrictions
+        run: python3 Tools/validate_assemblies.py --json TestResults/unity-static-audit.json
+      - name: Parse Unity C# syntax without API binding
+        run: dotnet run --project Tools/UnitySyntaxCheck/UnitySyntaxCheck.csproj --configuration Release -- .
       - name: Preserve actual test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: core-test-results
-          path: TestResults/*.trx
+          path: |
+            TestResults/*.trx
+            TestResults/unity-static-audit.json
           if-no-files-found: error

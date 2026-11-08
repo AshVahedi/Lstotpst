@@ -1,0 +1,441 @@
+{
+  ".github/workflows/core-tests.yml": {
+    "mtime": 1794166455.162639,
+    "seen": 1794166500.6842732,
+    "ast_hash": "184167ef958a62df9ea71abfde0e53f8",
+    "semantic_hash": ""
+  },
+  "Assets/Editor/PrototypeSceneBuilder.cs": {
+    "mtime": 1794166782.6177766,
+    "seen": 1794166787.0314376,
+    "ast_hash": "07697b57d330767f35380b95cef7af0a",
+    "semantic_hash": ""
+  },
+  "Assets/Scripts/Core/Combat/Ammunition.cs": {
+    "mtime": 1794152693.024263,
+    "seen": 1794163132.076702,
+    "ast_hash": "57796c17b9f900bc53bf559518882a1b",
+    "semantic_hash": "57796c17b9f900bc53bf559518882a1b"
+  },
+  "Assets/Scripts/Core/Combat/Targeting.cs": {
+    "mtime": 1794152693.392257,
+    "seen": 1794163132.0767384,
+    "ast_hash": "38371d54516682a88de4151d997d1e38",
+    "semantic_hash": "38371d54516682a88de4151d997d1e38"
+  },
+  "Assets/Scripts/Core/Combat/Weapon.cs": {
+    "mtime": 1794152693.764251,
+    "seen": 1794163132.0767703,
+    "ast_hash": "8e408146d7ad0a2b8dd3079c8ee37bdf",
+    "semantic_hash": "8e408146d7ad0a2b8dd3079c8ee37bdf"
+  },
+  "Assets/Scripts/Core/Configuration/PrototypeContent.cs": {
+    "mtime": 1794152790.3507879,
+    "seen": 1794163132.0768006,
+    "ast_hash": "defe8a0757b54de9bde0592a4129faca",
+    "semantic_hash": "defe8a0757b54de9bde0592a4129faca"
+  },
+  "Assets/Scripts/Core/Economy/ResourceWallet.cs": {
+    "mtime": 1794152692.2522757,
+    "seen": 1794163132.076832,
+    "ast_hash": "e04cc5f099a624883f753233ad819487",
+    "semantic_hash": "e04cc5f099a624883f753233ad819487"
+  },
+  "Assets/Scripts/Core/Economy/TacticalPurchases.cs": {
+    "mtime": 1794161086.571351,
+    "seen": 1794163132.076862,
+    "ast_hash": "abfeb4f289447630382d3ccdad74143e",
+    "semantic_hash": "abfeb4f289447630382d3ccdad74143e"
+  },
+  "Assets/Scripts/Core/Enemies/EnemyState.cs": {
+    "mtime": 1794152788.5988154,
+    "seen": 1794163132.0772414,
+    "ast_hash": "3e9551c3339c0bcdefd65639238c8595",
+    "semantic_hash": "3e9551c3339c0bcdefd65639238c8595"
+  },
+  "Assets/Scripts/Core/Guard.cs": {
+    "mtime": 1794152690.952297,
+    "seen": 1794163132.07754,
+    "ast_hash": "94ca74a11fe5db0ac47a928885cf8de4",
+    "semantic_hash": "94ca74a11fe5db0ac47a928885cf8de4"
+  },
+  "Assets/Scripts/Core/Health.cs": {
+    "mtime": 1794152691.4762883,
+    "seen": 1794163132.0775926,
+    "ast_hash": "a666d7a3dbbcd0396ef50276265bdcd4",
+    "semantic_hash": "a666d7a3dbbcd0396ef50276265bdcd4"
+  },
+  "Assets/Scripts/Core/Levels/LevelDefinition.cs": {
+    "mtime": 1794152789.2988043,
+    "seen": 1794163132.077621,
+    "ast_hash": "9b8ab82b886650ede5c297bd1328998d",
+    "semantic_hash": "9b8ab82b886650ede5c297bd1328998d"
+  },
+  "Assets/Scripts/Core/Levels/LevelProgression.cs": {
+    "mtime": 1794152789.6627986,
+    "seen": 1794163132.0776517,
+    "ast_hash": "6de95d61ede87d040bf75534d2882d82",
+    "semantic_hash": "6de95d61ede87d040bf75534d2882d82"
+  },
+  "Assets/Scripts/Core/Modules/ModuleRack.cs": {
+    "mtime": 1794152694.5282385,
+    "seen": 1794163132.0776818,
+    "ast_hash": "8da9b9ea9057263f0a16f5df083bc22d",
+    "semantic_hash": "8da9b9ea9057263f0a16f5df083bc22d"
+  },
+  "Assets/Scripts/Core/Platform/PlatformState.cs": {
+    "mtime": 1794152695.3122258,
+    "seen": 1794163132.0778024,
+    "ast_hash": "095407fa02b05c8158e5f4fb28335afe",
+    "semantic_hash": "095407fa02b05c8158e5f4fb28335afe"
+  },
+  "Assets/Scripts/Core/Simulation/EnemyAgent.cs": {
+    "mtime": 1794161848.0284843,
+    "seen": 1794163132.0778427,
+    "ast_hash": "18208dd4cf8227f032af69a0d1d51a3b",
+    "semantic_hash": "18208dd4cf8227f032af69a0d1d51a3b"
+  },
+  "Assets/Scripts/Core/Simulation/GameRun.cs": {
+    "mtime": 1794161201.5793324,
+    "seen": 1794163132.0778744,
+    "ast_hash": "71d055eb91a06bbed3023e5056735c24",
+    "semantic_hash": "71d055eb91a06bbed3023e5056735c24"
+  },
+  "Assets/Scripts/Core/Simulation/RouteMotion.cs": {
+    "mtime": 1794161087.2553313,
+    "seen": 1794163132.077904,
+    "ast_hash": "1bf1d0ca035ee5887046b91dc847bfc7",
+    "semantic_hash": "1bf1d0ca035ee5887046b91dc847bfc7"
+  },
+  "Assets/Scripts/Core/Simulation/RunCombat.cs": {
+    "mtime": 1794161088.3592997,
+    "seen": 1794163132.0779321,
+    "ast_hash": "d19e4acfb8983b99f32209354c5eeb0e",
+    "semantic_hash": "d19e4acfb8983b99f32209354c5eeb0e"
+  },
+  "Assets/Scripts/Core/Simulation/RunConfiguration.cs": {
+    "mtime": 1794161087.607321,
+    "seen": 1794163132.077962,
+    "ast_hash": "b1a29d89d9796ad7a88c6434a9e58ef9",
+    "semantic_hash": "b1a29d89d9796ad7a88c6434a9e58ef9"
+  },
+  "Assets/Scripts/Enemies/EnemyActor.cs": {
+    "mtime": 1794161303.855386,
+    "seen": 1794163132.0780659,
+    "ast_hash": "2e2a24dd8a0d45fe32bcfd76f564d8c9",
+    "semantic_hash": "2e2a24dd8a0d45fe32bcfd76f564d8c9"
+  },
+  "Assets/Scripts/Enemies/EnemySpawner.cs": {
+    "mtime": 1794161304.2313585,
+    "seen": 1794163132.0787778,
+    "ast_hash": "55e804c745602099c771e6df56200659",
+    "semantic_hash": "55e804c745602099c771e6df56200659"
+  },
+  "Assets/Scripts/Levels/GeneratedLevelRoot.cs": {
+    "mtime": 1794161304.607331,
+    "seen": 1794163132.078809,
+    "ast_hash": "6f433e2fb4d2b0703d8efaa74b55f0f6",
+    "semantic_hash": "6f433e2fb4d2b0703d8efaa74b55f0f6"
+  },
+  "Assets/Scripts/Levels/OutpostSession.cs": {
+    "mtime": 1794161303.1314387,
+    "seen": 1794163132.0788386,
+    "ast_hash": "b4cbd1c442aaf9d4fc994f3b3f9bdf2c",
+    "semantic_hash": "b4cbd1c442aaf9d4fc994f3b3f9bdf2c"
+  },
+  "Assets/Scripts/Levels/PrototypeSettings.cs": {
+    "mtime": 1794161302.7554662,
+    "seen": 1794163132.0788643,
+    "ast_hash": "bbff73d158084ab2adbf94ecc3ee778c",
+    "semantic_hash": "bbff73d158084ab2adbf94ecc3ee778c"
+  },
+  "Assets/Scripts/Platform/PlatformMotor.cs": {
+    "mtime": 1794161303.4914126,
+    "seen": 1794163132.078891,
+    "ast_hash": "0c630bb7e1c0e7da6ab0acbec70dc52d",
+    "semantic_hash": "0c630bb7e1c0e7da6ab0acbec70dc52d"
+  },
+  "Assets/Scripts/Presentation/CameraFollow.cs": {
+    "mtime": 1794161695.3517487,
+    "seen": 1794163132.0796723,
+    "ast_hash": "dfd04aea2da851273af3145fd5e55659",
+    "semantic_hash": "dfd04aea2da851273af3145fd5e55659"
+  },
+  "Assets/Scripts/Presentation/CombatFeedback.cs": {
+    "mtime": 1794161400.2618918,
+    "seen": 1794163132.079706,
+    "ast_hash": "6543d11f2dbc497385f1c23694ce3236",
+    "semantic_hash": "6543d11f2dbc497385f1c23694ce3236"
+  },
+  "Assets/Scripts/Presentation/HealthBarView.cs": {
+    "mtime": 1794161400.9858532,
+    "seen": 1794163132.0797956,
+    "ast_hash": "652c1b27940f7ff284891b4fab9c78b3",
+    "semantic_hash": "652c1b27940f7ff284891b4fab9c78b3"
+  },
+  "Assets/Scripts/Presentation/ShotTrace.cs": {
+    "mtime": 1794161399.8979113,
+    "seen": 1794163132.0798266,
+    "ast_hash": "6526cad237f01af389ecb11b1dbbc07f",
+    "semantic_hash": "6526cad237f01af389ecb11b1dbbc07f"
+  },
+  "Assets/Scripts/UI/PrototypeHud.cs": {
+    "mtime": 1794161401.7098148,
+    "seen": 1794163132.079854,
+    "ast_hash": "11c2e10a4b203dafa2d38e0df94ea6ff",
+    "semantic_hash": "11c2e10a4b203dafa2d38e0df94ea6ff"
+  },
+  "Assets/Tests/EditMode/EconomyTests.cs": {
+    "mtime": 1794152894.1543362,
+    "seen": 1794163132.0802915,
+    "ast_hash": "081ffed2be3adb8dafbe9e105d8ba25b",
+    "semantic_hash": "081ffed2be3adb8dafbe9e105d8ba25b"
+  },
+  "Assets/Tests/EditMode/HealthTests.cs": {
+    "mtime": 1794152893.2743616,
+    "seen": 1794163132.0803225,
+    "ast_hash": "715e6044ec51d4861b1554c7c83e78b9",
+    "semantic_hash": "715e6044ec51d4861b1554c7c83e78b9"
+  },
+  "Assets/Tests/EditMode/LevelTests.cs": {
+    "mtime": 1794153067.0994787,
+    "seen": 1794163132.0804226,
+    "ast_hash": "2f6dbc5147523a22c3da212ddc4d5097",
+    "semantic_hash": "2f6dbc5147523a22c3da212ddc4d5097"
+  },
+  "Assets/Tests/EditMode/ModuleTests.cs": {
+    "mtime": 1794152974.1674473,
+    "seen": 1794163132.0804505,
+    "ast_hash": "e3038b73824033364c8a6ddb0c7ff5b8",
+    "semantic_hash": "e3038b73824033364c8a6ddb0c7ff5b8"
+  },
+  "Assets/Tests/EditMode/SimulationTests.cs": {
+    "mtime": 1794161848.5084763,
+    "seen": 1794163132.080998,
+    "ast_hash": "28fbc10bb390319602d70034c1e71715",
+    "semantic_hash": "28fbc10bb390319602d70034c1e71715"
+  },
+  "Assets/Tests/EditMode/WeaponTests.cs": {
+    "mtime": 1794152973.6874607,
+    "seen": 1794163132.0810325,
+    "ast_hash": "0d0d303ebe616d3b08ffb39e00ebac50",
+    "semantic_hash": "0d0d303ebe616d3b08ffb39e00ebac50"
+  },
+  "Assets/Tests/Editor/SceneBuilderTests.cs": {
+    "mtime": 1794166350.713875,
+    "seen": 1794166500.6843657,
+    "ast_hash": "69d4f6eafc03a6790ab88289e6ce1047",
+    "semantic_hash": ""
+  },
+  "Assets/Tests/PlayMode/GameplayIntegrationTests.cs": {
+    "mtime": 1794161696.1997278,
+    "seen": 1794163132.0813756,
+    "ast_hash": "86188c9f2f6ce773a8a469d97140395b",
+    "semantic_hash": "86188c9f2f6ce773a8a469d97140395b"
+  },
+  "Packages/manifest.json": {
+    "mtime": 1794161402.0657957,
+    "seen": 1794163132.0814064,
+    "ast_hash": "7432a0df23179d0da7e2aede9302eb8a",
+    "semantic_hash": "7432a0df23179d0da7e2aede9302eb8a"
+  },
+  "Tests/LastOutpost.Core.Tests.csproj": {
+    "mtime": 1794152972.5674918,
+    "seen": 1794163132.0814312,
+    "ast_hash": "371da6046ab50c65185b354e04267a97",
+    "semantic_hash": "371da6046ab50c65185b354e04267a97"
+  },
+  "Tests/LastOutpost.Core.csproj": {
+    "mtime": 1794152972.1755028,
+    "seen": 1794163132.0814543,
+    "ast_hash": "49945d8c5adb000b54018bd2194223d1",
+    "semantic_hash": "49945d8c5adb000b54018bd2194223d1"
+  },
+  "Tools/UnitySyntaxCheck/Program.cs": {
+    "mtime": 1794161777.2498941,
+    "seen": 1794163132.0814755,
+    "ast_hash": "c04c7f8b9f4c16640b9f39911aade0e9",
+    "semantic_hash": "c04c7f8b9f4c16640b9f39911aade0e9"
+  },
+  "Tools/UnitySyntaxCheck/UnitySyntaxCheck.csproj": {
+    "mtime": 1794161776.8819015,
+    "seen": 1794163132.0815046,
+    "ast_hash": "2a8dd53907acbfb3875c21169c6bcff6",
+    "semantic_hash": "2a8dd53907acbfb3875c21169c6bcff6"
+  },
+  "Tools/validate_project.py": {
+    "mtime": 1794161777.9818783,
+    "seen": 1794163132.0815303,
+    "ast_hash": "819969503c091ac576ebecf5b2b0b538",
+    "semantic_hash": "819969503c091ac576ebecf5b2b0b538"
+  },
+  "global.json": {
+    "mtime": 1794152891.7024064,
+    "seen": 1794163132.081574,
+    "ast_hash": "7fc0285df57274e7d303c018ce5c1432",
+    "semantic_hash": "7fc0285df57274e7d303c018ce5c1432",
+    "ast_empty": true
+  },
+  "Tools/Graphify/setup.py": {
+    "mtime": 1794163734.2010767,
+    "seen": 1794163737.5844681,
+    "ast_hash": "edee0e1511921c577fa64b9330a7497d",
+    "semantic_hash": ""
+  },
+  "Tools/Graphify/update.py": {
+    "mtime": 1794163867.9261487,
+    "seen": 1794163910.5939221,
+    "ast_hash": "5fc31bbcc6f243454716275faf45f4a1",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1794164400.725703,
+    "seen": 1794164855.369754,
+    "ast_hash": "4660027f304e2c55ced20d17eeaf9539",
+    "semantic_hash": ""
+  },
+  "CHANGELOG.md": {
+    "mtime": 1794171508.400865,
+    "seen": 1794171533.3098993,
+    "ast_hash": "406dbb27b996169f8cda48168f5e7f6a",
+    "semantic_hash": ""
+  },
+  "Documentation/ARCHITECTURE.md": {
+    "mtime": 1794162228.382425,
+    "seen": 1794163737.584478,
+    "ast_hash": "bf0db853bd41f595e7bb192ee16477f9",
+    "semantic_hash": ""
+  },
+  "Documentation/REPOSITORY_HANDOFF.md": {
+    "mtime": 1794162691.1873577,
+    "seen": 1794163737.584479,
+    "ast_hash": "4656bcb52fa5ccba442d4bf7e39ae5e0",
+    "semantic_hash": ""
+  },
+  "Documentation/TASK002_INTEGRATION.md": {
+    "mtime": 1794162135.4392617,
+    "seen": 1794163737.5844798,
+    "ast_hash": "d4097a5f6f8eebf64ba8969ebbdaf6c9",
+    "semantic_hash": ""
+  },
+  "Documentation/UNITY_CHECKLIST.md": {
+    "mtime": 1794171509.1088498,
+    "seen": 1794171533.3099077,
+    "ast_hash": "c062cb01f03da6b3c15ca582d9f76135",
+    "semantic_hash": ""
+  },
+  "Documentation/VERIFICATION.md": {
+    "mtime": 1794166754.0785728,
+    "seen": 1794166787.0316062,
+    "ast_hash": "1679af6036b1bc07cfa71ce18348fd4d",
+    "semantic_hash": ""
+  },
+  "Documentation/VERIFICATION_TASK001.md": {
+    "mtime": 1794162135.440468,
+    "seen": 1794163737.5844822,
+    "ast_hash": "7f1f63cae96959c6f70e2ff423740b49",
+    "semantic_hash": ""
+  },
+  "ProjectSettings/ProjectVersion.txt": {
+    "mtime": 1794153068.5513778,
+    "seen": 1794163737.5844831,
+    "ast_hash": "039c338053dd906595c53332006c6f13",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1794171508.0288732,
+    "seen": 1794171533.3099146,
+    "ast_hash": "67940573720be715becdd6238d0a7da0",
+    "semantic_hash": ""
+  },
+  "Tools/Graphify/requirements-lock.txt": {
+    "mtime": 1794163734.7930613,
+    "seen": 1794163737.5844848,
+    "ast_hash": "622dbf835ee0b62305e5342d6f29c383",
+    "semantic_hash": ""
+  },
+  "Tools/Graphify/requirements.txt": {
+    "mtime": 1794163129.263854,
+    "seen": 1794163737.5844855,
+    "ast_hash": "8474ed14c63aa8ff3725851613160f87",
+    "semantic_hash": ""
+  },
+  "VERSION.md": {
+    "mtime": 1794171509.508841,
+    "seen": 1794171533.309919,
+    "ast_hash": "4a17e0d0cd4c421384bea96a5e6a7904",
+    "semantic_hash": ""
+  },
+  ".github/workflows/graphify.yml": {
+    "mtime": 1794166455.5426145,
+    "seen": 1794166500.6842818,
+    "ast_hash": "33a9213c033ca7c0e398b3af5aa08ced",
+    "semantic_hash": ""
+  },
+  "Tools/Graphify/tests/test_workflow.py": {
+    "mtime": 1794163965.7163358,
+    "seen": 1794164125.4408991,
+    "ast_hash": "eee52e0833da1fe6972f5ac6d6c6cda8",
+    "semantic_hash": ""
+  },
+  "Tools/Graphify/UPSTREAM_LICENSE.txt": {
+    "mtime": 1794163907.6181345,
+    "seen": 1794163910.5939398,
+    "ast_hash": "3b83ef96387f14655fc854ddc3c6bd57",
+    "semantic_hash": ""
+  },
+  "Documentation/GRAPHIFY.md": {
+    "mtime": 1794166615.6630461,
+    "seen": 1794166787.0315979,
+    "ast_hash": "ee7cbc28d8d1907812dfc8a4db95ce8c",
+    "semantic_hash": ""
+  },
+  "Tools/tests/test_validate_assemblies.py": {
+    "mtime": 1794166783.4097624,
+    "seen": 1794166787.031587,
+    "ast_hash": "9bacdf0537e6a5803d45c3dd7d6d9e48",
+    "semantic_hash": ""
+  },
+  "Tools/validate_assemblies.py": {
+    "mtime": 1794166783.0337658,
+    "seen": 1794166787.031589,
+    "ast_hash": "1ba866bab998556243a76743b06d2058",
+    "semantic_hash": ""
+  },
+  "Documentation/UNITY_FIRST_LAUNCH.md": {
+    "mtime": 1794171508.7608573,
+    "seen": 1794171533.309909,
+    "ast_hash": "1738489d82ae92cca0e56215bdcdd4fd",
+    "semantic_hash": ""
+  },
+  "Documentation/UNITY_READINESS_REPORT.md": {
+    "mtime": 1794166752.202628,
+    "seen": 1794166787.031605,
+    "ast_hash": "57b446f9a97ef61b5c16c2bc0512af22",
+    "semantic_hash": ""
+  },
+  ".github/workflows/unity-verification.yml": {
+    "mtime": 1794171507.2969143,
+    "seen": 1794171533.3098319,
+    "ast_hash": "e4e62968ec1ba3642a1fb50aecb065ea",
+    "semantic_hash": ""
+  },
+  "Tools/UnityCi/verify.py": {
+    "mtime": 1794171382.2706783,
+    "seen": 1794171386.4744837,
+    "ast_hash": "88694e9db9e7fe58274d3e2ea2c01179",
+    "semantic_hash": ""
+  },
+  "Tools/tests/test_unity_ci.py": {
+    "mtime": 1794171382.6585927,
+    "seen": 1794171386.4744873,
+    "ast_hash": "9496af419251afcd4f4fde264a47cc1b",
+    "semantic_hash": ""
+  },
+  "Documentation/CLOUD_UNITY_VERIFICATION.md": {
+    "mtime": 1794171507.6728916,
+    "seen": 1794171533.3099027,
+    "ast_hash": "a24bed385febe62b61d247ae5064fdf3",
+    "semantic_hash": ""
+  }
+}

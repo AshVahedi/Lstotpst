@@ -1,5 +1,69 @@
 # Changelog
 
+## Unreleased — Task 004 cloud verification configuration
+
+- Verified the unmerged PR stack and based Task 004 on the Task 003 integration
+  head; kept gameplay version 0.1.0 and all Unity/gameplay source unchanged.
+- Verified exact 6000.3.0f1 Linux/Android GameCI image availability; pinned images,
+  actions and CLI. Added activation preflight, sequential EditMode/generation/
+  PlayMode stages, optional gated ARM64/IL2CPP development APK and evidence uploads.
+- Reused the existing batch generator and rollback; added 17 independently tested
+  evidence/licensing/configuration checks. All 128 independent tests pass.
+- Documented secret setup, storage/time/cost assumptions, CI-only Android API 35
+  workaround for SDK bootstrap, artifact retention and remaining device checks.
+- Unity compilation/tests, generated assets/package lock and APK remain unexecuted;
+  classification CLOUD VERIFICATION BLOCKED until licensed CI execution succeeds.
+- Observed the real PR workflow fail activation preflight and upload infrastructure
+  JSON; downstream Unity/Android jobs were skipped. Both independent CI workflows
+  passed on push and PR; recorded run/artifact links and the required secret setup.
+
+## Unreleased — Task 003 readiness audit (version retained at 0.1.0)
+
+- Verified Tasks 001–002/Graphify ancestry and open, unmerged PRs #1–2; based the
+  dedicated audit branch on `development/graphify-workflow` without merging them.
+- Audited eight assembly definitions, initialization, generator wiring, hitscan
+  combat/purchases/outcomes and portrait Android settings; documented unverified
+  package resolution, generated assets, Unity APIs/tests and APK/device gates.
+- Added generator scene-replacement rollback for failed/thrown saves and two
+  authored Unity Editor regression cases; Unity execution remains unavailable.
+- Added independent assembly/GUID/platform/cycle validation, 22 mutation tests,
+  CI evidence artifact and `.asmref` graph-workflow triggers.
+- Reran 82 gameplay and 7 Graphify tests: 111 independent tests passed including
+  the new 22. All 38 asset C# sources parse; this is not Unity compilation.
+- Refreshed Graphify artifacts; added exact first-launch/Android instructions and
+  readiness report. Verdict: READY WITH KNOWN LIMITATIONS. No gameplay features added.
+
+## Unreleased — Graphify development workflow
+
+- Added pinned graphifyy 0.9.104 in a development-only Python environment, official
+  project-scoped Codex skill/registration and native incremental Git hook setup.
+- Generated and committed the queryable JSON, interactive HTML and architecture
+  report with portable native update state; excluded Unity outputs and tool caches.
+- Added a read-only, code-only GitHub Actions graph/artifact workflow and seven real
+  Python integration tests for builds, freshness, edits, deletions and exclusions.
+- Documented query-first Codex usage, inferred/static graph limits, unsupported
+  assembly definitions, CDN visualization dependency and no-op Codex Desktop hook.
+- Kept gameplay source, Unity packages and game version unchanged.
+
+## Unreleased — Task 002 integration (version retained at 0.1.0)
+
+- Added a plain C# run coordinator composing the existing rules, configurable
+  automatic route motion, deterministic spawn positions, approach/attack logic,
+  ordered combat, once-only rewards and terminal notifications, and run commands.
+- Added Unity session, settings, platform transform, enemy actor/spawner adapters,
+  visual-only hit tracers, camera follow, actor health bars, and minimal IMGUI
+  start/HUD/purchases/victory/defeat views.
+- Added an idempotent Editor generator for one Level 1 scene, four prefabs,
+  placeholder art, settings, and build-scene registration. Generation is pending.
+- Preserved all original 58 tests; added 24 independent simulation integration
+  tests (82 passing total), 17 authored PlayMode tests and 2 Editor generator tests.
+- Added SDK-bundled Roslyn syntax-only validation and assembly/UI-boundary checks
+  to the real .NET CI workflow. Added only built-in IMGUI/Image Conversion modules.
+- Fixed contact-range rounding at nonzero route positions so enemies reach attack
+  range reliably; kept basic fallback active when advanced modules/ammo are absent.
+- Unity compilation, generator execution, Unity tests, manual play and Android
+  packaging remain unverified; no 0.2.0 release claim is made.
+
 ## 0.1.0 — 2026-11-08
 
 - Established a Unity 6.3 LTS project scaffold with portrait Android intent,

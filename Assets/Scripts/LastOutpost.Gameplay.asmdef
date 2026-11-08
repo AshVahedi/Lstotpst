@@ -1,0 +1,6 @@
+{
+  "name": "LastOutpost.Gameplay",
+  "rootNamespace": "LastOutpost.Gameplay",
+  "references": ["LastOutpost.Core"],
+  "autoReferenced": true
+}
