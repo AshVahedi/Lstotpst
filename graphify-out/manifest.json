@@ -289,15 +289,15 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1794164058.898762,
-    "seen": 1794164125.4409065,
-    "ast_hash": "2a1a46e0fe4d98ae166c7b51a9f08fae",
+    "mtime": 1794164400.725703,
+    "seen": 1794164855.369754,
+    "ast_hash": "4660027f304e2c55ced20d17eeaf9539",
     "semantic_hash": ""
   },
   "CHANGELOG.md": {
-    "mtime": 1794162018.684418,
-    "seen": 1794163737.5844772,
-    "ast_hash": "be3d04442f7fe332dfbae0f45fe0838c",
+    "mtime": 1794164313.4448097,
+    "seen": 1794164855.369756,
+    "ast_hash": "ddfb3dfd7fc439046c69d5c175e2958d",
     "semantic_hash": ""
   },
   "Documentation/ARCHITECTURE.md": {
@@ -343,9 +343,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1794162018.6835406,
-    "seen": 1794163737.584484,
-    "ast_hash": "764fc2bc752e26d2b2f4dc86972811e7",
+    "mtime": 1794164313.3915808,
+    "seen": 1794164855.3697689,
+    "ast_hash": "3f034551a25d8a9342ab6dab9aae9fa0",
     "semantic_hash": ""
   },
   "Tools/Graphify/requirements-lock.txt": {
@@ -382,6 +382,12 @@
     "mtime": 1794163907.6181345,
     "seen": 1794163910.5939398,
     "ast_hash": "3b83ef96387f14655fc854ddc3c6bd57",
+    "semantic_hash": ""
+  },
+  "Documentation/GRAPHIFY.md": {
+    "mtime": 1794164807.6556134,
+    "seen": 1794164855.3697593,
+    "ast_hash": "dd9718ab3e85de72c3cd9bca27924258",
     "semantic_hash": ""
   }
 }
