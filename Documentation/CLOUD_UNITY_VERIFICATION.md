@@ -2,6 +2,11 @@
 
 Date: **2026-11-08**. Gameplay version remains **0.1.0**.
 
+Historical Task 004 record. Task 005 adds progression tests and raises the current
+workflow's expected EditMode minimum to **204**; see
+[PERMANENT_PROGRESSION.md](PERMANENT_PROGRESSION.md) for current test counts.
+No manual Unity activation retry was requested during Task 005.
+
 ## A. Environment
 
 The Task 004 branch is `development/task-004-cloud-unity-verification`, based on

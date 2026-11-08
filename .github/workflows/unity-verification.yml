@@ -97,7 +97,7 @@ jobs:
           artifactsPath: TestResults/unity/editmode
           githubToken: ''
       - name: Require executed EditMode results
-        run: python3 Tools/UnityCi/verify.py tests --xml TestResults/unity/editmode/editmode-results.xml --minimum 86 --output TestResults/unity/editmode-summary.json
+        run: python3 Tools/UnityCi/verify.py tests --xml TestResults/unity/editmode/editmode-results.xml --minimum 204 --output TestResults/unity/editmode-summary.json
       - name: Generate Level 1 through the existing Editor entry point
         uses: game-ci/unity-builder@eb1b9fba120c6e62c9fb7a7a81d6c107ce004c45 # v6.0.0
         env:

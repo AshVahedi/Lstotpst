@@ -169,12 +169,12 @@ queries and the Markdown report work offline. No Pages deployment was introduced
 `.graphifyignore` and existing `.gitignore` exclude Unity Library/Temp/Build(s),
 bin/obj, Logs, UserSettings, captures, recordings, test outputs, generated scene
 outputs, virtualenvs, tool registrations/caches and graph output itself. Serialized
-Unity assets and binaries are excluded. All current **39 C# files** are represented
-(38 Unity asset sources and the standalone syntax-check program); included Python,
+Unity assets and binaries are excluded. All current **45 C# files** are represented
+(44 Unity asset sources and the standalone syntax-check program); included Python,
 workflow, dependency-project and JSON configuration code is also mapped.
 
 The report explicitly lists unsupported inputs. In this tree, `.asmdef` (8 files)
-and `.props` plus dotfiles/placeholders are unclassified. No edges were fabricated
+and `.props`, linker XML and dotfiles/placeholders are unclassified. No edges were fabricated
 to make unsupported inputs appear covered. Code-only mode skips Markdown/media;
 the graph does not claim semantic indexing of technical documentation.
 

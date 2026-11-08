@@ -6,10 +6,15 @@ namespace LastOutpost.Core
         public int Current { get; private set; }
         public bool IsDead => Current == 0;
         public int Missing => Maximum - Current;
+        /// <summary>Fraction [0,1] removed from incoming damage; remaining damage rounds up.</summary>
+        public decimal DamageReduction { get; }
 
-        public Health(int maximum)
+        public Health(int maximum, decimal damageReduction = 0m)
         {
             Maximum = Guard.Positive(maximum, nameof(maximum));
+            if (damageReduction < 0m || damageReduction > 1m)
+                throw new System.ArgumentOutOfRangeException(nameof(damageReduction));
+            DamageReduction = damageReduction;
             Current = maximum;
         }
 
@@ -17,7 +22,8 @@ namespace LastOutpost.Core
         public int TakeDamage(int damage)
         {
             Guard.NonNegative(damage, nameof(damage));
-            int applied = System.Math.Min(Current, damage);
+            int reduced = (int)System.Math.Ceiling(damage * (1m - DamageReduction));
+            int applied = System.Math.Min(Current, reduced);
             Current -= applied;
             return applied;
         }

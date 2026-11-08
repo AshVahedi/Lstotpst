@@ -21,6 +21,7 @@ namespace LastOutpost.Core.Simulation
         private readonly TacticalPurchases purchases;
         private double travelRemaining;
         public RunConfiguration Configuration { get; }
+        public string RunId { get; }
         public PlatformState Platform { get; }
         public LevelProgression Level { get; }
         public RouteMotion Route { get; }
@@ -33,8 +34,10 @@ namespace LastOutpost.Core.Simulation
         public event Action<int, bool> EncounterStarted;
         public event Action<RunStatus> Finished;
 
-        public GameRun(RunConfiguration configuration)
+        public GameRun(RunConfiguration configuration, string runId = null)
         {
+            RunId = runId ?? Guid.NewGuid().ToString("N");
+            if (!IsValidRunId(RunId)) throw new ArgumentException("Run IDs must be nonempty lowercase GUIDs in N format.", nameof(runId));
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             Platform = configuration.CreatePlatform();
             Level = new LevelProgression(configuration.Level, Platform.Health);
@@ -44,6 +47,9 @@ namespace LastOutpost.Core.Simulation
             purchases = new TacticalPurchases(Platform, configuration.Purchases, configuration.Special);
             Enemies = new ReadOnlyCollection<EnemyAgent>(enemies);
         }
+
+        public static bool IsValidRunId(string value) => value != null && value.Length == 32 &&
+            Guid.TryParseExact(value, "N", out Guid id) && id != Guid.Empty && id.ToString("N") == value;
 
         public bool Start()
         {
