@@ -13,6 +13,9 @@
   workaround for SDK bootstrap, artifact retention and remaining device checks.
 - Unity compilation/tests, generated assets/package lock and APK remain unexecuted;
   classification CLOUD VERIFICATION BLOCKED until licensed CI execution succeeds.
+- Observed the real PR workflow fail activation preflight and upload infrastructure
+  JSON; downstream Unity/Android jobs were skipped. Both independent CI workflows
+  passed on push and PR; recorded run/artifact links and the required secret setup.
 
 ## Unreleased — Task 003 readiness audit (version retained at 0.1.0)
 

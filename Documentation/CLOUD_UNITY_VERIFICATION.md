@@ -59,7 +59,8 @@ preflight actually failed with `CLOUD VERIFICATION BLOCKED`: no Unity activation
 configuration is bound to this cloud environment. Repository secret-name listing
 returned **403 Resource not accessible by integration**; that does not prove
 repository secrets are absent. The workflow's own preflight determines whether
-secrets are available to that run. The observed GitHub run will be recorded below.
+secrets are available to that run. The first actual GitHub run confirmed no
+complete supported activation configuration was available; see the evidence below.
 
 ### Storage, time and cost
 
@@ -253,9 +254,46 @@ source or balance changed. Existing workflows continue to run independent tests.
 
 ### Observed GitHub execution
 
-Pending the first Task 004 PR run at initial configuration commit. This section
-will be updated with the observed run, blockers and artifact names; configured
-steps are not counted as executed Unity operations.
+At implementation commit **`8192262581fbf520085fceda1ad4968acbc1038a`**, the
+[Unity PR run 42522941291](https://github.com/AshVahedi/Lstotpst/actions/runs/42522941291)
+actually executed on Linux / runner image `ubuntu24`:
+
+| Job | Observed status | Meaning |
+| --- | --- | --- |
+| Unity activation preflight | **Failed**, exit 1 | Available secrets do not provide a complete supported activation configuration |
+| Unity compilation, tests and generation | **Skipped** | Unity was never launched; no compilation/test/generation result |
+| Android ARM64 development APK | **Skipped** | Prerequisites blocked; no build attempted |
+
+The job log and uploaded JSON record `status: blocked`,
+`classification: CLOUD VERIFICATION BLOCKED`, `unity_editor_executed: false`,
+and a request to configure Unity activation through GitHub Actions secrets.
+This is an infrastructure failure, not a C# compiler or NUnit failure. No further
+activation workaround was attempted. Secret names could not be listed through
+the integration; the preflight reports availability to this workflow, not all
+repository/environment secret scopes.
+
+Actual artifact (uploaded successfully; seven-day retention):
+
+[`unity-infrastructure-8192262581fbf520085fceda1ad4968acbc1038a`](https://github.com/AshVahedi/Lstotpst/actions/runs/42522941291/artifacts/13633772528),
+artifact ID **13633772528**, **455-byte ZIP** containing `preflight.json`.
+No Editor evidence, generated-project, Android or APK artifact exists for this
+run, because those jobs never executed. The complete preflight log remains in
+the run's job logs. Repository license values were neither read nor published.
+
+The independent workflows passed on both push and PR at the same implementation
+commit: [Core/static PR 42522941238](https://github.com/AshVahedi/Lstotpst/actions/runs/42522941238)
+and [Graphify PR 42522941261](https://github.com/AshVahedi/Lstotpst/actions/runs/42522941261).
+Downloaded push-job logs independently confirm **82 gameplay passes**, **39
+validator/helper passes**, **seven Graphify passes**, eight assemblies/zero errors,
+and 38 C# syntax parses/zero errors. Graph freshness passed at **868 nodes / 2,321
+relationships**, including all 39 C# inputs. These green checks do not turn the
+blocked Unity workflow green. Documentation-only follow-ups do not rerun the
+path-filtered Unity job or change the tested implementation.
+
+[PR #4](https://github.com/AshVahedi/Lstotpst/pull/4) targets the Task 003 branch
+and remains unmerged. To unblock it, an administrator must configure the supported
+Unity secrets directly in repository Actions settings, then **Re-run all jobs**
+on this Unity run. Do not paste credentials into the PR or chat.
 
 ## I. Verification classification
 

@@ -94,7 +94,10 @@ documents the exact available Unity images, licensing setup and dedicated
 `unity-verification.yml` workflow. **CLOUD VERIFICATION BLOCKED**: no actual Unity
 execution is claimed. Required steps fail on absent activation or missing results;
 Android is optional and gated on all Editor stages. Configure secrets only in
-GitHub Settings. No gameplay code, balance or version changed.
+GitHub Settings. The [actual Unity CI run](https://github.com/AshVahedi/Lstotpst/actions/runs/42522941291)
+failed activation preflight and published infrastructure evidence; Editor and
+Android jobs were skipped before Unity execution. Independent core/Graphify CI
+passed. No gameplay code, balance or version changed.
 
 **21 additional Unity-specific tests are authored and unexecuted:** 17 PlayMode
 and 4 Editor generator cases. The shared 82 have also not run inside Unity.
