@@ -1,0 +1,248 @@
+name: Unity cloud verification
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_android:
+        description: Build a development APK after all Editor stages pass
+        type: boolean
+        default: false
+  pull_request:
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+      - 'Tools/UnityCi/**'
+      - 'Tools/validate_assemblies.py'
+      - '.github/workflows/unity-verification.yml'
+
+permissions:
+  contents: read
+
+# Serializes Unity seats across this workflow; a newer run does not kill a seat
+# before GameCI has returned it. Cancel obsolete queued runs in the Actions UI.
+concurrency:
+  group: last-outpost-unity-seat
+  cancel-in-progress: false
+
+env:
+  OUTPOST_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  UNITY_VERSION: 6000.3.0f1
+  GAME_CI_CLI_VERSION: v0.1.72
+  EDITOR_IMAGE: unityci/editor@sha256:54aaff42fb294bc2f6e206d2f96930b2dfe50dfb2656cccf014523b39b026c91
+  ANDROID_IMAGE: unityci/editor@sha256:34801f9cfeaa674b39db9984dd433ae25347d62d7ed6ed547acb48dfa89f291c
+
+jobs:
+  infrastructure:
+    name: Unity activation preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: ${{ env.OUTPOST_SOURCE_SHA }}
+          persist-credentials: false
+      - name: Check activation configuration without exposing values
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_LICENSE_SERVER: ${{ secrets.UNITY_LICENSE_SERVER }}
+        run: python3 Tools/UnityCi/verify.py preflight --output TestResults/unity/preflight.json
+      - name: Publish infrastructure evidence even when blocked
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: unity-infrastructure-${{ env.OUTPOST_SOURCE_SHA }}
+          path: TestResults/unity/preflight.json
+          retention-days: 7
+          if-no-files-found: error
+
+  editor:
+    name: Unity compilation, tests and generation
+    needs: infrastructure
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: ${{ env.OUTPOST_SOURCE_SHA }}
+          persist-credentials: false
+      - name: Record available runner storage
+        id: runner
+        run: |
+          printf 'owner=%s:%s\n' "$(id -u)" "$(id -g)" >> "$GITHUB_OUTPUT"
+          df -h .
+      - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: Library
+          key: unity-editor-${{ runner.os }}-6000.3.0f1-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: unity-editor-${{ runner.os }}-6000.3.0f1-
+      - name: Compile and run Unity EditMode tests
+        uses: game-ci/unity-test-runner@32e57712352b500e17974b245a6dce9e11a73213 # v4.4.0
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          cliVersion: ${{ env.GAME_CI_CLI_VERSION }}
+          customImage: ${{ env.EDITOR_IMAGE }}
+          unityLicensingServer: ${{ secrets.UNITY_LICENSE_SERVER }}
+          testMode: editmode
+          coverageEnabled: false
+          chownFilesTo: ${{ steps.runner.outputs.owner }}
+          artifactsPath: TestResults/unity/editmode
+          githubToken: ''
+      - name: Require executed EditMode results
+        run: python3 Tools/UnityCi/verify.py tests --xml TestResults/unity/editmode/editmode-results.xml --minimum 86 --output TestResults/unity/editmode-summary.json
+      - name: Generate Level 1 through the existing Editor entry point
+        uses: game-ci/unity-builder@eb1b9fba120c6e62c9fb7a7a81d6c107ce004c45 # v6.0.0
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          cliVersion: ${{ env.GAME_CI_CLI_VERSION }}
+          customImage: ${{ env.EDITOR_IMAGE }}
+          unityLicensingServer: ${{ secrets.UNITY_LICENSE_SERVER }}
+          targetPlatform: StandaloneLinux64
+          buildMethod: LastOutpost.Editor.PrototypeSceneBuilder.GenerateBatch
+          versioning: Custom
+          version: 0.1.0
+          allowDirtyBuild: true # Unity import/test/generation outputs are expected.
+          chownFilesTo: ${{ steps.runner.outputs.owner }}
+      - name: Validate and archive Unity-generated assets and settings
+        run: python3 Tools/UnityCi/verify.py generated --archive TestResults/unity/generated-project.zip --output TestResults/unity/generation-summary.json
+      - name: Run Unity PlayMode tests
+        uses: game-ci/unity-test-runner@32e57712352b500e17974b245a6dce9e11a73213 # v4.4.0
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          cliVersion: ${{ env.GAME_CI_CLI_VERSION }}
+          customImage: ${{ env.EDITOR_IMAGE }}
+          unityLicensingServer: ${{ secrets.UNITY_LICENSE_SERVER }}
+          testMode: playmode
+          coverageEnabled: false
+          chownFilesTo: ${{ steps.runner.outputs.owner }}
+          artifactsPath: TestResults/unity/playmode
+          githubToken: ''
+      - name: Require executed PlayMode results
+        run: python3 Tools/UnityCi/verify.py tests --xml TestResults/unity/playmode/playmode-results.xml --minimum 17 --output TestResults/unity/playmode-summary.json
+      - name: Publish generated project only after required stages pass
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: unity-generated-project-${{ env.OUTPOST_SOURCE_SHA }}
+          path: TestResults/unity/generated-project.zip
+          retention-days: 7
+          if-no-files-found: error
+      - name: Preserve test, generation and import evidence on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: unity-editor-evidence-${{ env.OUTPOST_SOURCE_SHA }}
+          path: |
+            TestResults/unity/editmode/
+            TestResults/unity/playmode/
+            TestResults/unity/*-summary.json
+            Packages/packages-lock.json
+            Logs/*.log
+          retention-days: 7
+          if-no-files-found: warn
+
+  android:
+    name: Android ARM64 development APK
+    needs: [infrastructure, editor]
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.build_android) || vars.UNITY_BUILD_ANDROID == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: ${{ env.OUTPOST_SOURCE_SHA }}
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: unity-generated-project-${{ env.OUTPOST_SOURCE_SHA }}
+          path: TestResults/unity
+      - name: Restore verified generated project from this run
+        run: unzip -o TestResults/unity/generated-project.zip
+      - name: Free the redundant host Android SDK on this disposable runner
+        id: runner
+        run: |
+          printf 'owner=%s:%s\n' "$(id -u)" "$(id -g)" >> "$GITHUB_OUTPUT"
+          sudo rm -rf /usr/local/lib/android
+          df -h .
+      - name: Validate Android settings and pin the CI-only target SDK
+        run: python3 Tools/UnityCi/verify.py android --output TestResults/unity/android-config.json
+      - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: Library
+          key: unity-android-${{ runner.os }}-6000.3.0f1-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: unity-android-${{ runner.os }}-6000.3.0f1-
+      - name: Build a development APK with the generated scene
+        uses: game-ci/unity-builder@eb1b9fba120c6e62c9fb7a7a81d6c107ce004c45 # v6.0.0
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          cliVersion: ${{ env.GAME_CI_CLI_VERSION }}
+          customImage: ${{ env.ANDROID_IMAGE }}
+          unityLicensingServer: ${{ secrets.UNITY_LICENSE_SERVER }}
+          targetPlatform: Android
+          buildName: LastOutpost-dev
+          buildsPath: Builds
+          versioning: Custom
+          version: 0.1.0
+          androidVersionCode: 1
+          androidTargetSdkVersion: AndroidApiLevel35
+          androidExportType: androidPackage
+          customParameters: -Development
+          allowDirtyBuild: true
+          chownFilesTo: ${{ steps.runner.outputs.owner }}
+      - name: Record APK provenance and checksum
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          apk = Path('Builds/Android/LastOutpost-dev.apk')
+          if not apk.is_file() or apk.stat().st_size == 0:
+              raise SystemExit('Unity did not produce a nonempty APK')
+          evidence = json.loads(Path('TestResults/unity/android-config.json').read_text())
+          evidence.update(unity_version='6000.3.0f1', source_commit=os.environ['OUTPOST_SOURCE_SHA'],
+                          apk=str(apk), sha256=hashlib.sha256(apk.read_bytes()).hexdigest(),
+                          scene='Assets/LastOutpostGenerated/Scenes/IndustrialWasteland.unity',
+                          device_tested=False)
+          Path('TestResults/unity/apk-manifest.json').write_text(json.dumps(evidence, indent=2) + '\n')
+          PY
+      - name: Publish development APK and provenance
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: last-outpost-android-dev-${{ env.OUTPOST_SOURCE_SHA }}
+          path: |
+            Builds/Android/LastOutpost-dev.apk
+            TestResults/unity/apk-manifest.json
+          retention-days: 7
+          if-no-files-found: error
+      - name: Preserve Android diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: unity-android-evidence-${{ env.OUTPOST_SOURCE_SHA }}
+          path: |
+            TestResults/unity/android-config.json
+            Logs/*.log
+            Builds/**/*.log
+          retention-days: 7
+          if-no-files-found: warn

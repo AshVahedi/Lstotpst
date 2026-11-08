@@ -7,6 +7,8 @@ The environment has .NET, but no Unity Editor installation was found.
 
 - [ ] Check out `development/task-003-unity-readiness-audit` or its reviewed successor.
       PRs #1–2 were unmerged at audit time; see [exact setup](UNITY_FIRST_LAUNCH.md).
+      Task 004's successor includes [cloud CI setup](CLOUD_UNITY_VERIFICATION.md);
+      PR #3 also remained unmerged at its start. CI configuration is not execution.
 - [ ] Install Unity 6000.3.0f1 through Hub; add Android Build Support, matching
       SDK/NDK Tools and OpenJDK when preparing device builds.
 - [ ] Open the existing project root and wait for complete import/package resolution.

@@ -12,7 +12,7 @@ validated playable build or Android APK. No Unity Editor is installed here.
 
 ## Run the prototype locally
 
-1. Check out `development/task-003-unity-readiness-audit` from
+1. Check out `development/task-004-cloud-unity-verification` from
    [AshVahedi/Lstotpst](https://github.com/AshVahedi/Lstotpst).
 2. Open this repository root using **Unity 6.3 LTS, 6000.3.0f1**. Allow package
    resolution/import and inspect the Console for compiler/import errors.
@@ -87,6 +87,17 @@ and tactical ammunition purchases. This is not a scene test.
 Task 003 reran **111 independent tests: 82 gameplay, 7 Graphify and 22 assembly
 validator tests, all passed; 0 failed/skipped**. The assembly audit checks cycles,
 GUID/name references, platform restrictions and runtime/Editor/test boundaries.
+
+Task 004 reran those tests and added 17 CI evidence-gate tests: **128 independent
+passes, 0 failures/skips**. The [cloud verification report](Documentation/CLOUD_UNITY_VERIFICATION.md)
+documents the exact available Unity images, licensing setup and dedicated
+`unity-verification.yml` workflow. **CLOUD VERIFICATION BLOCKED**: no actual Unity
+execution is claimed. Required steps fail on absent activation or missing results;
+Android is optional and gated on all Editor stages. Configure secrets only in
+GitHub Settings. The [actual Unity CI run](https://github.com/AshVahedi/Lstotpst/actions/runs/42522941291)
+failed activation preflight and published infrastructure evidence; Editor and
+Android jobs were skipped before Unity execution. Independent core/Graphify CI
+passed. No gameplay code, balance or version changed.
 
 **21 additional Unity-specific tests are authored and unexecuted:** 17 PlayMode
 and 4 Editor generator cases. The shared 82 have also not run inside Unity.
