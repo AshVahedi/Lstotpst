@@ -278,7 +278,8 @@ Actual artifact (uploaded successfully; seven-day retention):
 artifact ID **13633772528**, **455-byte ZIP** containing `preflight.json`.
 No Editor evidence, generated-project, Android or APK artifact exists for this
 run, because those jobs never executed. The complete preflight log remains in
-the run's job logs. Repository license values were neither read nor published.
+the run's job logs. Credential values were not retrieved through the API, printed
+by the helper, or included in the artifact; only their presence was inspected.
 
 The independent workflows passed on both push and PR at the same implementation
 commit: [Core/static PR 42522941238](https://github.com/AshVahedi/Lstotpst/actions/runs/42522941238)
@@ -287,8 +288,13 @@ Downloaded push-job logs independently confirm **82 gameplay passes**, **39
 validator/helper passes**, **seven Graphify passes**, eight assemblies/zero errors,
 and 38 C# syntax parses/zero errors. Graph freshness passed at **868 nodes / 2,321
 relationships**, including all 39 C# inputs. These green checks do not turn the
-blocked Unity workflow green. Documentation-only follow-ups do not rerun the
-path-filtered Unity job or change the tested implementation.
+blocked Unity workflow green. GitHub evaluates PR path filters against the whole
+PR diff: synchronizing a documentation follow-up in this source/configuration PR
+can rerun Unity preflight and Graphify. This actually occurred at documentation
+commit `84dbcb88f69db1c6a0423e5acaee204c6a28ee52`: independent checks again passed,
+and [Unity run 42523162085](https://github.com/AshVahedi/Lstotpst/actions/runs/42523162085)
+failed preflight before Unity. A separate PR changing only documentation does
+not match the Unity path filter. Follow-ups do not change the tested implementation.
 
 [PR #4](https://github.com/AshVahedi/Lstotpst/pull/4) targets the Task 003 branch
 and remains unmerged. To unblock it, an administrator must configure the supported
