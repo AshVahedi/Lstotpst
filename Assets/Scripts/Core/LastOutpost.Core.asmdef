@@ -1,0 +1,7 @@
+{
+  "name": "LastOutpost.Core",
+  "rootNamespace": "LastOutpost.Core",
+  "references": [],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

@@ -1,0 +1,8 @@
+{
+  "name": "LastOutpost.Core.EditModeTests",
+  "rootNamespace": "LastOutpost.Tests",
+  "references": ["LastOutpost.Core"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false
+}
