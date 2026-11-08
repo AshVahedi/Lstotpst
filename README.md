@@ -109,14 +109,13 @@ permanent Credits, a shop, and persistence are not implemented.
 
 ## Development status
 
-The repository is [AshVahedi/Lstotpst](https://github.com/AshVahedi/Lstotpst),
-with default branch `main`. Its initially empty local checkout now contains this
-foundation. Both the connected GitHub app and normal Git push rejected
-publication with HTTP 403; the remote repository still has no project commit.
-The tested foundation is committed locally, and a Git bundle preserves its history.
-The original staging tree was integrated without overwriting existing project
-files or initializing a nested repository. See
-[repository handoff](Documentation/REPOSITORY_HANDOFF.md) for setup and publication details.
+The foundation is published to the default `main` branch of
+[AshVahedi/Lstotpst](https://github.com/AshVahedi/Lstotpst). GitHub authorization
+resolved the initial publication blocker. The original staging tree was integrated
+without overwriting existing project files or initializing a nested repository.
+Use the GitHub repository for continued development. See
+[repository handoff](Documentation/REPOSITORY_HANDOFF.md) for setup details and
+[verification](Documentation/VERIFICATION.md) for actual local and CI results.
 
 Recommended next task: in a Unity-capable environment, implement one playable
 scene with independent route movement, spawn adapters, automatic combat,

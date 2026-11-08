@@ -16,3 +16,5 @@
 - Unity scene integration deferred because no Unity Editor is available.
 - Integrated the foundation into the supplied repository's initially empty `main`
   checkout after GitHub access became available.
+- Published the tested foundation to GitHub `main` after repository authorization
+  was updated; preserved the original foundation commit without force-pushing.

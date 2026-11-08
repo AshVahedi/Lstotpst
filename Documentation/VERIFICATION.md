@@ -46,13 +46,26 @@ and contains a real `dotnet test` step.
 These results must be read alongside the test results; neither check invokes
 Unity or establishes that the workflow has run on GitHub.
 
+## GitHub publication
+
+After the user updated repository authorization, normal Git push succeeded to
+`main`. GitHub's API confirmed foundation commit
+`25155c90530e48647c14205300673a59dfae9a98` on the remote branch. The push triggered
+[Core gameplay tests run 42504886370](https://github.com/AshVahedi/Lstotpst/actions/runs/42504886370).
+**Completed successfully.** The actual job log reports **58 passed, 0 failed,
+0 skipped** in the .NET 8 test host. The metadata/architecture validator also
+passed, and the `core-test-results` TRX artifact was uploaded successfully
+(artifact ID `13627525162`). This confirms real GitHub-hosted test execution in
+addition to the earlier local run. No force-push was used.
+
+The documentation follow-up changes no core source, test source, packages, or
+workflow logic. Subsequent push runs are visible on the repository Actions tab;
+the linked result above specifically validates the foundation commit.
+
 ## Authored but not executed here
 
 - **Unity EditMode execution:** the same 58 test cases are available through the
   Editor-only test assembly; no Unity Test Runner was available.
-- **GitHub Actions:** real restore/test/metadata validation workflow is present,
-  but both app publication and normal Git push returned HTTP 403. The remote
-  repository remains empty; no Actions execution occurred.
 
 ## Not implemented or not verified
 
@@ -64,11 +77,6 @@ Unity or establishes that the workflow has run on GitHub.
   touch test, or physical-device gameplay was performed.
 - No gameplay balance claim is made. Enemy movement speeds and combat defaults
   are initial configurable values for the next milestone.
-- GitHub read access was restored and source integrated into the actual,
-  initially empty `main` checkout; all tests passed again there. App write access
-  remains rejected with `403: Resource not accessible by integration`. Normal
-  Git push also returned HTTP 403 with permission denied. The foundation is
-  committed locally and preserved in a Git bundle; it has not been published.
 
 Follow [the Unity checklist](UNITY_CHECKLIST.md) for the next validation step and
 [the repository handoff](REPOSITORY_HANDOFF.md) for continued version control.
