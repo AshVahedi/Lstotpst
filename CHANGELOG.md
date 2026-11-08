@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased — Task 004 cloud verification configuration
+
+- Verified the unmerged PR stack and based Task 004 on the Task 003 integration
+  head; kept gameplay version 0.1.0 and all Unity/gameplay source unchanged.
+- Verified exact 6000.3.0f1 Linux/Android GameCI image availability; pinned images,
+  actions and CLI. Added activation preflight, sequential EditMode/generation/
+  PlayMode stages, optional gated ARM64/IL2CPP development APK and evidence uploads.
+- Reused the existing batch generator and rollback; added 17 independently tested
+  evidence/licensing/configuration checks. All 128 independent tests pass.
+- Documented secret setup, storage/time/cost assumptions, CI-only Android API 35
+  workaround for SDK bootstrap, artifact retention and remaining device checks.
+- Unity compilation/tests, generated assets/package lock and APK remain unexecuted;
+  classification CLOUD VERIFICATION BLOCKED until licensed CI execution succeeds.
+
 ## Unreleased — Task 003 readiness audit (version retained at 0.1.0)
 
 - Verified Tasks 001–002/Graphify ancestry and open, unmerged PRs #1–2; based the

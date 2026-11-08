@@ -2,21 +2,24 @@
 
 Task 003, 2026-11-08. **These are pending execution steps, not a record of a
 successful Unity import or build.** See [the audit](UNITY_READINESS_REPORT.md).
+Task 004 adds [cloud verification configuration and licensing instructions](CLOUD_UNITY_VERIFICATION.md);
+no cloud Unity operation is claimed as successful.
 
 ## 1. Get the integrated source
 
 ```sh
 git clone https://github.com/AshVahedi/Lstotpst.git
 cd Lstotpst
-git switch development/task-003-unity-readiness-audit
+git switch development/task-004-cloud-unity-verification
 git status
 ```
 
-At audit time PRs #1 and #2 are open and unmerged. `main` does not contain the
+At Task 004 inspection PRs #1, #2 and #3 are open and unmerged. `main` does not contain the
 full integration. The audit branch starts from `development/graphify-workflow`
 (`51443e57142b02247a10550f21754955f7a65858`), which contains Tasks 001–002 and Graphify.
 After review/merge, use the branch that includes this audit; do not assume `main`
 has it. Keep existing local edits and do not reset/force-push over them.
+Task 004 starts from the Task 003 head `64e7475a591a1fab9d89572c931c03b16cf5727f`.
 
 Optional independent checks require .NET SDK 8.0.4xx and Python 3.12:
 
