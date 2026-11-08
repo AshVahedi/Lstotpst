@@ -23,6 +23,8 @@ jobs:
         run: dotnet test Tests/LastOutpost.Core.Tests.csproj --no-restore --configuration Release --logger "trx;LogFileName=core-tests.trx" --results-directory TestResults
       - name: Validate Unity metadata and architecture boundaries
         run: python3 Tools/validate_project.py
+      - name: Parse Unity C# syntax without API binding
+        run: dotnet run --project Tools/UnitySyntaxCheck/UnitySyntaxCheck.csproj --configuration Release -- .
       - name: Preserve actual test results
         if: always()
         uses: actions/upload-artifact@v4

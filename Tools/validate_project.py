@@ -60,12 +60,42 @@ def main():
     manifest = json.loads((ROOT / "Packages/manifest.json").read_text())
     if "com.unity.test-framework" not in manifest["dependencies"]:
         errors.append("Unity Test Framework dependency is missing")
+    assemblies = {}
+    for path in assets.rglob("*.asmdef"):
+        definition = json.loads(path.read_text())
+        if definition["name"] in assemblies:
+            errors.append(f"Duplicate assembly name: {definition['name']}")
+        assemblies[definition["name"]] = definition
+    for name, definition in assemblies.items():
+        for reference in definition.get("references", []):
+            if reference not in assemblies:
+                errors.append(f"Unknown assembly reference {name} -> {reference}")
+    expected_dependencies = {
+        "LastOutpost.Gameplay": {"LastOutpost.Core"},
+        "LastOutpost.Presentation": {"LastOutpost.Core", "LastOutpost.Gameplay"},
+        "LastOutpost.UI": {"LastOutpost.Core", "LastOutpost.Gameplay"},
+    }
+    for name, references in expected_dependencies.items():
+        if set(assemblies.get(name, {}).get("references", [])) != references:
+            errors.append(f"Incorrect layer dependencies: {name}")
+    for name in ("LastOutpost.Editor", "LastOutpost.EditorTests"):
+        if assemblies.get(name, {}).get("includePlatforms") != ["Editor"]:
+            errors.append(f"Editor assembly must be Editor-only: {name}")
+    for source in (assets / "Scripts").rglob("*.cs"):
+        if re.search(r"\bUnityEditor\b", source.read_text()):
+            errors.append(f"Editor dependency in runtime source: {source}")
+    for source in (assets / "Scripts/UI").rglob("*.cs"):
+        if re.search(r"\.(TrySpend|Collect|TakeDamage|Heal|TryConsume)\s*\(", source.read_text()):
+            errors.append(f"UI bypasses the command/transaction boundary: {source}")
+    for name in ("LastOutpost.PlayModeTests", "LastOutpost.EditorTests"):
+        if "TestAssemblies" not in assemblies.get(name, {}).get("optionalUnityReferences", []):
+            errors.append(f"Unity test assembly not marked for test inclusion: {name}")
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
     print(f"PASS: {asset_count} Unity assets/folders have unique metadata; "
           f"{len(core_sources)} core source files have no Unity dependencies; "
-          f"{len(tests)} shared NUnit fixtures found.")
+          f"{len(tests)} shared NUnit fixtures; {len(assemblies)} assembly boundaries checked.")
     return 0
 
 

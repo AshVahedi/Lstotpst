@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased — Task 002 integration (version retained at 0.1.0)
+
+- Added a plain C# run coordinator composing the existing rules, configurable
+  automatic route motion, deterministic spawn positions, approach/attack logic,
+  ordered combat, once-only rewards and terminal notifications, and run commands.
+- Added Unity session, settings, platform transform, enemy actor/spawner adapters,
+  visual-only hit tracers, camera follow, actor health bars, and minimal IMGUI
+  start/HUD/purchases/victory/defeat views.
+- Added an idempotent Editor generator for one Level 1 scene, four prefabs,
+  placeholder art, settings, and build-scene registration. Generation is pending.
+- Preserved all original 58 tests; added 24 independent simulation integration
+  tests (82 passing total), 17 authored PlayMode tests and 2 Editor generator tests.
+- Added SDK-bundled Roslyn syntax-only validation and assembly/UI-boundary checks
+  to the real .NET CI workflow. Added only built-in IMGUI/Image Conversion modules.
+- Fixed contact-range rounding at nonzero route positions so enemies reach attack
+  range reliably; kept basic fallback active when advanced modules/ammo are absent.
+- Unity compilation, generator execution, Unity tests, manual play and Android
+  packaging remain unverified; no 0.2.0 release claim is made.
+
 ## 0.1.0 — 2026-11-08
 
 - Established a Unity 6.3 LTS project scaffold with portrait Android intent,

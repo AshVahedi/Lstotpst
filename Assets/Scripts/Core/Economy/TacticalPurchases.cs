@@ -5,7 +5,7 @@ using LastOutpost.Core.Platform;
 
 namespace LastOutpost.Core.Economy
 {
-    public enum PurchaseResult { Succeeded, InsufficientEnergy, NoEffect, PlatformDestroyed, CoolingDown }
+    public enum PurchaseResult { Succeeded, InsufficientEnergy, NoEffect, PlatformDestroyed, CoolingDown, RunNotActive }
 
     public sealed class TacticalPurchaseConfig
     {

@@ -1,0 +1,7 @@
+{
+  "name": "LastOutpost.PlayModeTests",
+  "rootNamespace": "LastOutpost.Tests.PlayMode",
+  "references": ["LastOutpost.Core", "LastOutpost.Gameplay", "LastOutpost.Presentation", "LastOutpost.UI"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false
+}

@@ -1,0 +1,8 @@
+{
+  "name": "LastOutpost.EditorTests",
+  "rootNamespace": "LastOutpost.Tests.Editor",
+  "references": ["LastOutpost.Core", "LastOutpost.Gameplay", "LastOutpost.Presentation", "LastOutpost.UI", "LastOutpost.Editor"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false
+}
