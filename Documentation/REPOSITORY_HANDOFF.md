@@ -2,17 +2,19 @@
 
 Canonical repository: [AshVahedi/Lstotpst](https://github.com/AshVahedi/Lstotpst).
 Default branch: **main**. Task 001's tested 0.1.0 foundation is published there.
-Task 002 is isolated on **development/task-002-unity-integration** in
-[draft PR #1](https://github.com/AshVahedi/Lstotpst/pull/1) for review. Its real
-.NET/static CI passes; Unity compilation/generation/tests remain pending, and
-it is not merged to main.
+The completed Tasks 001–004 and Graphify are consolidated without rewritten commits
+on **development/integrated-foundation** in [PR #5](https://github.com/AshVahedi/Lstotpst/pull/5).
+Task 005's **development/task-005-permanent-progression** is based on that verified
+head and has a separate PR targeting it. PRs #1–4 remain open/unmerged. See
+[ancestry and integration order](REPOSITORY_CONSOLIDATION.md). No PR/main change
+was merged automatically. Unity compilation/generation/tests remain pending.
 
 ## Continue development
 
 ```sh
 git clone https://github.com/AshVahedi/Lstotpst.git
 cd Lstotpst
-git switch development/task-002-unity-integration
+git switch development/task-005-permanent-progression
 dotnet restore Tests/LastOutpost.Core.Tests.csproj
 dotnet test Tests/LastOutpost.Core.Tests.csproj --no-restore --configuration Release
 python3 Tools/validate_project.py
@@ -54,7 +56,7 @@ authoritative source for continued development.
 
 ## Task 002 handoff
 
-Use the development branch/draft pull request for source review. No automatic
+Historical Task 002 handoff: use its development branch/draft pull request for source review. No automatic
 merge or force-push is used. Generate and test the scene in Unity before merging
 or promoting to 0.2.0; see [Task 002 integration](TASK002_INTEGRATION.md).
 The original source archive/bundle does not contain these development changes.

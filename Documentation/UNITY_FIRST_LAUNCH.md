@@ -10,7 +10,7 @@ no cloud Unity operation is claimed as successful.
 ```sh
 git clone https://github.com/AshVahedi/Lstotpst.git
 cd Lstotpst
-git switch development/task-004-cloud-unity-verification
+git switch development/task-005-permanent-progression
 git status
 ```
 
@@ -20,6 +20,10 @@ full integration. The audit branch starts from `development/graphify-workflow`
 After review/merge, use the branch that includes this audit; do not assume `main`
 has it. Keep existing local edits and do not reset/force-push over them.
 Task 004 starts from the Task 003 head `64e7475a591a1fab9d89572c931c03b16cf5727f`.
+Task 005 uses the verified `development/integrated-foundation` at Task 004's
+`c6440ba…` head. See [consolidation](REPOSITORY_CONSOLIDATION.md) and
+[progression integration requirements](PERMANENT_PROGRESSION.md). The generator
+still creates the legacy prototype; permanent progression is not wired to its UI.
 
 Optional independent checks require .NET SDK 8.0.4xx and Python 3.12:
 
@@ -131,7 +135,7 @@ does not validate this scene.
 
 Outside Play Mode, choose **Window → General → Test Runner**:
 
-1. **EditMode → Run All**: expected **86 cases**, comprising 82 shared core cases
+1. **EditMode → Run All**: expected **204 cases**, comprising 200 shared core cases
    and four Editor generator cases (two existing and two save-failure cases).
 2. **PlayMode → Run All**: expected **17 integration cases**.
 3. Export/save actual XML results and Editor logs. Inspect any discrepancy in

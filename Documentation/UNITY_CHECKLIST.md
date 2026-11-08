@@ -25,9 +25,9 @@ The environment has .NET, but no Unity Editor installation was found.
 
 ## Actual Unity tests
 
-- [ ] Run shared core/simulation **EditMode** cases (82 authored cases).
+- [ ] Run shared core/simulation/progression **EditMode** cases (200 authored cases).
 - [ ] Run **Editor generator tests** (4 cases, including failed/thrown save rollback),
-      which create/clean their own output. EditMode total should be 86.
+      which create/clean their own output. EditMode total should be 204.
 - [ ] Run **PlayMode** integration tests (17 cases). These use real Unity objects,
       controlled session stepping, destruction frames and HUD command entry points.
 - [ ] Preserve the real Unity XML/log files. Investigate failures rather than

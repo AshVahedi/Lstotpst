@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased — Task 005 permanent progression (version retained at 0.1.0)
+
+- Published the clean Tasks 001–004/Graphify ancestry as `development/integrated-foundation`
+  in review PR #5, without merging/closing earlier PRs or changing main. Independently
+  verified its 128-test baseline in an isolated worktree.
+- Added permanent Credits, configurable 500-Credit Level 1 victory rewards, durable
+  unique run registration/outcome deduplication, completion/unlock metadata and a
+  Unity-neutral run lifecycle boundary; kept Energy separate and transient.
+- Added four permanent upgrades, exact rational ceiling prices, validated catalogs,
+  fixed run-start stats, capped armor, deterministic weapon scaling and ammo capacity.
+- Added versioned framework-JSON persistence, memory/file compare-and-swap stores,
+  atomic replacement, pending-write handling and explicit recovery/error states.
+- Preserved all 82 original gameplay tests and added 118 progression/persistence
+  cases: 200 NUnit passes plus 46 Python cases, 246 independent passes total.
+- Updated graph artifacts, architecture, integration/recovery documentation, linker
+  preservation and future Unity EditMode minimum. No graphical shop/scenes were added.
+- Unity/Android compilation, serialization/AOT and actual session wiring remain
+  unverified; no manual Unity activation retry was requested by Task 005.
+
 ## Unreleased — Task 004 cloud verification configuration
 
 - Verified the unmerged PR stack and based Task 004 on the Task 003 integration

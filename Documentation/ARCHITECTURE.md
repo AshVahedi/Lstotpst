@@ -6,6 +6,9 @@ Task 001 established the engine-independent foundation. Task 002 adds a run
 coordinator, Unity adapters, presentation/UI and reproducible Editor generation;
 see [its integration contract](TASK002_INTEGRATION.md). Unity compilation and scene
 execution remain unverified, so version stays 0.1.0 pending the 0.2.0 gate.
+Task 005 adds independently tested permanent progression and a Unity-neutral run
+boundary; see [PERMANENT_PROGRESSION.md](PERMANENT_PROGRESSION.md). The verified
+base/review sequence is in [REPOSITORY_CONSOLIDATION.md](REPOSITORY_CONSOLIDATION.md).
 The official .NET 8.0.427 SDK under `/tmp/last-outpost-dotnet` validates core rules
 targeting .NET Standard 2.1; .NET 8 is the test host, not the Android runtime.
 
@@ -26,8 +29,10 @@ No Android SDK, NDK, JDK, signing configuration, or scene build entry is bundled
 
 1. **Core rules:** `Assets/Scripts/Core/`, assembly `LastOutpost.Core` with
    `noEngineReferences: true`. No Unity types, frame timing, rendering, UI, file
-   I/O, or external game libraries. Immutable configuration is separate from
-   mutable per-run state. The .NET build consumes these same source files.
+   I/O in business rules, or external game libraries. The plain .NET
+   `FileProgressionStore` is the isolated I/O adapter behind `IProgressionStore`.
+   Immutable configuration is separate from mutable per-run/profile state.
+   The .NET build consumes these same source files.
 2. **Unity gameplay:** `Levels` owns OutpostSession/PrototypeSettings,
    `Platform` owns PlatformMotor, and `Enemies` owns actor/spawner adapters.
    The Gameplay assembly references only Core. FixedUpdate advances GameRun,
@@ -38,20 +43,22 @@ No Android SDK, NDK, JDK, signing configuration, or scene build entry is bundled
    The Editor-only generator creates original placeholder art, prefabs and a scene.
 
 Core subfolders cover Combat, Economy, Enemies, Modules, Platform, Levels, and
-Configuration, plus Simulation for Task 002 composition. This keeps every pure
+Configuration, Simulation for Task 002 composition, and Progression for Task 005.
+This keeps every engine-independent rule and its .NET storage adapters
 rule inside one engine-free assembly without per-subsystem assembly plumbing.
 No singleton is required.
 
 ## Health, ammunition, and economy contracts
 
-- All counts and damage are integer units. Damage clamps at zero, healing at
+- All counts and damage are integer units. Optional armor applies decimal
+  `ceil(incoming × (1 - reduction))` before damage clamps at zero, healing at
   maximum, and healing cannot revive. Invalid negative values throw explicitly.
 - An ammunition capacity of `null` has no configured upper bound (still limited
   by `int.MaxValue`). Zero capacity is valid. Refills clamp; consumption either
   succeeds entirely or changes nothing.
 - `ResourceWallet` addresses balances by `ResourceType`; only `Energy` exists.
-  Adding a future tactical type extends that enum. Permanent Credits must stay
-  in a separate future progression system. Integer overflow rejects collection
+  Adding a future tactical type extends that enum. Permanent Credits stay in the
+  separate Progression profile. Integer overflow rejects collection
   before mutation rather than wrapping balances negative.
 - `TacticalPurchases` validates effects and eligibility, then spends and applies
   the effect synchronously with no callbacks between the two. It is atomic in
@@ -137,14 +144,34 @@ Victory requires the final boss dead and platform alive. Terminal results are
 latched; the caller must freeze gameplay at that point. Starting another level
 creates fresh state, rather than resetting timers or mutating an old roster.
 
-## Permanent progression seam
+## Permanent progression
 
-`IPlatformStatsProvider` supplies validated starting health, ammo capacity, and
-module slots through `PlatformStats`. `PrototypeContent` implements the baseline
-provider. A future permanent upgrade service can implement that interface.
-No persistent currency, save format, upgrade purchase logic, or shop is present.
-Weapon damage/armor/special progression should extend this starting-stat model
-when their requirements are specified, rather than mixing them into Energy.
+`PermanentStatsProvider` implements the existing `IPlatformStatsProvider` seam and
+creates fixed health/ammo/armor plus basic/advanced weapon configurations from an
+immutable progression snapshot. Base configuration is not mutated; existing runs
+do not observe later profile purchases. PrototypeContent/legacy Unity defaults
+remain available independently. Progression's configured ammo base is 100.
+
+`ProgressionService` owns validated Credits/levels and durable run registrations.
+Only registered, actually victorious GameRun state can commit a reward. A whole
+profile copy contains balance, levels, outcome ledger, completion/unlock metadata
+and revision; compare-and-swap persistence precedes publication. Storage conflicts
+or uncertain outcomes require explicit reconciliation rather than blind retries.
+The service never touches tactical ResourceWallet. Exact rational prices use only
+framework decimal/BigInteger types, with one final ceiling to integer Credits.
+
+`IProgressionStore` separates these rules from memory/file storage;
+`IProgressionCodec` isolates versioned JSON. File writes flush a sibling pending
+file then atomically replace, with no delete-and-copy fallback. Loaded malformed,
+inconsistent or unsupported schemas are reported/preserved. The codec is the
+future migration dispatch point; no legacy migrations were invented. Linker
+preservation prepares reflection DTOs for IL2CPP, which remains unverified.
+
+Dependency direction is Progression → Simulation/Platform/Combat and storage
+interfaces, never Core → Unity. `ProgressionRunSession` connects the terminal
+event to reward processing without making presentation authoritative. The existing
+OutpostSession has not adopted that run yet; a future Unity adapter must bind the
+same registered instance. No shop or scene changes are part of this task.
 
 ## Testing and dependencies
 
@@ -156,8 +183,8 @@ output directories to prevent restore collisions. Build warnings fail CI.
 
 CI runs actual tests and the static metadata/core-boundary validator. TRX upload
 runs even after failure and errors if no result file exists; it does not hide a
-test failure. Unity jobs are deliberately absent until an editor/license-backed
-runner can execute them. Package locks and Unity migration output are deferred
+test failure. A dedicated Unity workflow exists, with the known activation gate
+still blocked; it was not manually retried during Task 005. Package locks and Unity migration output are deferred
 until an actual editor import rather than fabricating a resolved dependency graph.
 
 ## Task 002 validation boundaries
@@ -173,3 +200,13 @@ The Editor generator owns Assets/LastOutpostGenerated and roots explicitly marke
 GeneratedLevelRoot. It reuses paths/GUIDs, preserves saved settings and unrelated
 roots, and registers one build scene. No serialized scenes/prefabs were generated
 or validated here. Follow [the checklist](UNITY_CHECKLIST.md) in a licensed Editor.
+
+## Task 005 validation boundaries
+
+The original 82 C# cases remain unchanged. Two new shared fixtures add 118 cases
+for progression (74) and persistence (44), producing 200 NUnit passes. With the
+existing 39 Python validator/helper and seven Graphify cases, 246 independent
+cases pass. Static validation checks 81 assets/folders, 22 Core sources, eight
+shared fixtures and eight assemblies; syntax parsing covers 44 asset C# files.
+These are .NET/static results, not Unity API compilation. Expected Unity tests
+are now 204 EditMode (200 shared + four Editor) and 17 PlayMode, all unexecuted.

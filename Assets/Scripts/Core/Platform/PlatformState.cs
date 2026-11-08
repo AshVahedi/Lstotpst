@@ -5,7 +5,7 @@ using LastOutpost.Core.Modules;
 
 namespace LastOutpost.Core.Platform
 {
-    /// <summary>Future permanent upgrades can supply starting stats through this seam.</summary>
+    /// <summary>Supplies an immutable run-start stat snapshot, including optional permanent upgrades.</summary>
     public interface IPlatformStatsProvider
     {
         PlatformStats GetStartingStats();
@@ -16,12 +16,16 @@ namespace LastOutpost.Core.Platform
         public int MaximumHealth { get; }
         public int AmmunitionCapacity { get; }
         public int ModuleSlots { get; }
+        public decimal DamageReduction { get; }
 
-        public PlatformStats(int maximumHealth, int ammunitionCapacity, int moduleSlots)
+        public PlatformStats(int maximumHealth, int ammunitionCapacity, int moduleSlots, decimal damageReduction = 0m)
         {
             MaximumHealth = Guard.Positive(maximumHealth, nameof(maximumHealth));
             AmmunitionCapacity = Guard.NonNegative(ammunitionCapacity, nameof(ammunitionCapacity));
             ModuleSlots = Guard.NonNegative(moduleSlots, nameof(moduleSlots));
+            if (damageReduction < 0m || damageReduction > 1m)
+                throw new ArgumentOutOfRangeException(nameof(damageReduction));
+            DamageReduction = damageReduction;
         }
     }
 
@@ -35,7 +39,7 @@ namespace LastOutpost.Core.Platform
         public PlatformState(PlatformStats stats, int initialAmmunition = 0)
         {
             if (stats == null) throw new ArgumentNullException(nameof(stats));
-            Health = new Health(stats.MaximumHealth);
+            Health = new Health(stats.MaximumHealth, stats.DamageReduction);
             AdvancedAmmunition = new Ammunition(initialAmmunition, stats.AmmunitionCapacity);
             Modules = new ModuleRack(stats.ModuleSlots);
         }

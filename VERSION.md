@@ -1,6 +1,7 @@
 # Version
 
-**0.1.0** — core foundation plus Task 002 integration source awaiting Unity validation.
+**0.1.0** — foundation, Unity integration source and independently tested permanent
+progression; Unity/Android validation and progression session wiring are pending.
 
 Task 002 adds runtime adapters, settings, automatic route/combat orchestration,
 spawning, placeholder presentation, minimal UI, and reproducible Editor generation.
@@ -17,3 +18,10 @@ Task 004 prepares licensed cloud Unity verification, with **128 independent
 passes** and **CLOUD VERIFICATION BLOCKED** until activation/execution succeeds.
 No Unity/gameplay code, balance or gameplay version was changed. See
 Documentation/CLOUD_UNITY_VERIFICATION.md for current evidence and setup.
+
+Task 005 retains 0.1.0 under the existing Unity verification gate. It adds separate
+Credits, four permanent upgrades, durable run rewards, versioned JSON/memory/file
+persistence and a Unity-neutral session boundary. **246 independent tests pass**
+(200 NUnit + 39 Python validators/helpers + seven Graphify). The 200 shared tests
+and 21 additional Unity-only cases have not executed in Unity. See
+Documentation/PERMANENT_PROGRESSION.md and REPOSITORY_CONSOLIDATION.md.

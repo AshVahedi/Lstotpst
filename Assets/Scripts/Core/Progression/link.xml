@@ -1,0 +1,10 @@
+<linker>
+  <!-- DataContractJsonSerializer discovers these members through reflection.
+       Keep them for IL2CPP; actual Android AOT execution still requires Unity. -->
+  <assembly fullname="LastOutpost.Core">
+    <type fullname="LastOutpost.Core.Progression.ProgressionData" preserve="all" />
+    <type fullname="LastOutpost.Core.Progression.UpgradeLevelsData" preserve="all" />
+    <type fullname="LastOutpost.Core.Progression.RunRecordData" preserve="all" />
+    <type fullname="LastOutpost.Core.Progression.JsonProgressionCodec*" preserve="all" />
+  </assembly>
+</linker>
