@@ -1,122 +1,123 @@
 # Last Outpost
 
-Version **0.1.0** — tested core foundation for an original portrait Android
-combat survival game built with Unity 2D and C#.
+Original Unity 2D combat survival prototype for portrait Android. A modular
+armored platform advances automatically through **Industrial Wasteland**, fights
+three deterministic waves and a final boss, and spends tactical Energy on
+missiles, repairs, and a special strike. The basic gun never needs ammunition.
 
-A modular armored vehicle will advance automatically through hostile territory.
-Its basic gun always has unlimited ammunition. Energy earned from enemies buys
-missiles, emergency repairs, and a special strike during a level. The initial
-level is **Industrial Wasteland**: Basic wave, Fast wave, Mixed wave, then boss.
+**Current version: 0.1.0. Task 002 integration source is implemented; Unity
+compilation, generated scenes, and gameplay remain unverified.** The version is
+retained until the Editor validation gate for 0.2.0 is met. There is no claim of a
+validated playable build or Android APK. No Unity Editor is installed here.
 
-**This version implements the core foundation planned for Milestones 1–2;
-it is not yet a playable Unity prototype.**
-No scenes, movement controllers, visuals, UI, or APK
-are included. No Unity Editor is installed in the development environment, so
-Unity integration is deliberately deferred under the task's milestone gate.
+## Run the prototype locally
 
-## Setup
+1. Check out `development/task-002-unity-integration` from
+   [AshVahedi/Lstotpst](https://github.com/AshVahedi/Lstotpst).
+2. Open this repository root using **Unity 6.3 LTS, 6000.3.0f1**. Allow package
+   resolution/import and inspect the Console for compiler/import errors.
+3. Choose **Last Outpost → Generate Level 1 Prototype**. This creates the settings,
+   placeholder art, four prefabs, camera, HUD, and scene, registers it in Build
+   Settings, and opens `Assets/LastOutpostGenerated/Scenes/IndustrialWasteland.unity`.
+4. Set Game View to **540 × 960** (9:16 portrait), enter Play Mode, and press
+   **START RUN**. Movement, targeting, and combat are automatic; use the three
+   purchase buttons to spend earned Energy. Victory/defeat offers **RUN AGAIN**.
+5. Run all EditMode and PlayMode tests in **Window → General → Test Runner**.
+   Complete [the Unity checklist](Documentation/UNITY_CHECKLIST.md) before
+   considering this a verified playable milestone.
 
-- Intended editor: **Unity 6.3 LTS, 6000.3.0f1**. Install with Unity Hub and the
-  Android Build Support, SDK/NDK Tools, and OpenJDK modules.
-- Unity dependency: **Unity Test Framework 1.4.5**. Its registry metadata declares
-  Unity 2019.4 as its minimum; Unity resolves its transitive dependencies on import.
-  No asset-store assets or third-party gameplay libraries are required.
-- Independent test runner: **.NET SDK 8.0.4xx**; `global.json` allows the latest
-  patch in that feature band. The core itself targets **.NET Standard 2.1** and
-  uses C# 8 or earlier syntax. .NET 8 is only a test host, not an Android runtime.
-- Android intent: portrait, minimum API 26, ARM64, IL2CPP; target API automatic
-  for the installed Unity toolchain. Inspect these settings in Unity before builds.
-  `com.lastoutpost.prototype` is a development application identifier.
+The generator is designed to be repeatable: stable output paths/GUIDs, one owned
+scene root, no duplicate build entries, and preserved settings tuning/unrelated
+scene roots. Its two idempotence tests require Unity and **have not run here**.
+Rerunning regenerates the owned placeholder prefabs/root; do not put manual art
+edits there. The menu asks to save modified scenes first. See
+[setup details](Documentation/TASK002_INTEGRATION.md) for batch commands and ownership.
 
-Open this directory through Unity Hub. Allow package resolution and asset import,
-then use **Window → General → Test Runner → EditMode → Run All**. The project
-contains no startup scene yet; see [the Unity checklist](Documentation/UNITY_CHECKLIST.md).
-The first import may fill in additional ProjectSettings defaults and create
-`Packages/packages-lock.json`; review and commit those through the real checkout.
+**No hand-authored `.unity` or `.prefab` files are supplied as if validated.**
+Generation must actually run in Unity. Review and commit generated assets, `.meta`
+files, imported ProjectSettings, and `Packages/packages-lock.json` after validation.
 
-## Test without Unity
+## Configuration and play rules
+
+Tune `Assets/LastOutpostGenerated/Configuration/PrototypeSettings.asset` in the
+Inspector. Settings construct existing validated core configuration; edits apply
+when a fresh run is created, including **RUN AGAIN**. Speeds/ranges use world
+units, timing uses seconds, and health/damage/Energy/ammunition use integer units.
+
+| Purchase | Initial Energy | Effect |
+| --- | ---: | --- |
+| Missiles | 30 | Up to 20 ammunition, capacity 60 |
+| Repair | 50 | Up to 25 health, maximum 100 |
+| Special strike | 80 | 120 damage to the closest live target within 10 units |
+
+Costs, effects, enemy stats, wave counts, weapon intervals/ranges, spawn offsets,
+travel speed/delay, and ordinary encounter slowdown are configurable. Boss and
+terminal movement always stop. There are exactly three ordinary waves and one
+boss. Full health/ammo, insufficient funds, or an invalid special target causes
+no charge. Partial refills/repairs cost the full listed price. Death cannot revive.
+
+Combat uses **immediate-hit damage with a visual tracer**, not physical projectiles.
+The core applies damage once; tracer lifetime/destruction cannot cause damage.
+Enemy detection uses the authoritative one-dimensional route roster and range,
+without physics queries or collision callbacks. Only living enemies attack.
+
+## Tests supported here
 
 ```sh
 dotnet restore Tests/LastOutpost.Core.Tests.csproj
 dotnet test Tests/LastOutpost.Core.Tests.csproj --no-restore --configuration Release --logger "trx;LogFileName=core-tests.trx" --results-directory TestResults
 python3 Tools/validate_project.py
+dotnet run --project Tools/UnitySyntaxCheck/UnitySyntaxCheck.csproj --configuration Release -- .
 ```
 
-The .NET project compiles the **same core and NUnit sources** used by Unity; it
-does not copy rules into a separate implementation or use Unity API stubs.
-GitHub Actions runs these commands for pushes and pull requests and uploads the
-actual TRX results. It does not claim Unity or Android validation.
-See [verification results and limitations](Documentation/VERIFICATION.md).
+**82 NUnit tests passed, 0 failed, 0 skipped**: the original 58 plus 24 simulation
+integration cases. They compile the actual pure C# source to .NET Standard 2.1
+and execute in .NET 8, including a complete deterministic run with enemy attacks
+and tactical ammunition purchases. This is not a scene test.
 
-## Layout
+**19 additional Unity-specific tests are authored and unexecuted:** 17 PlayMode
+and 2 Editor generator tests. The shared 82 have also not run inside Unity.
+Metadata/layer validation passes. All 38 asset C# sources parse without syntax
+errors, using Roslyn from the installed SDK. Syntax parsing performs **no Unity
+API/type binding or Editor compilation**, and uses no Unity stubs.
+GitHub Actions executes the supported .NET/static checks and preserves actual TRX
+results. There is no pretend Unity-success job. See [verification](Documentation/VERIFICATION.md).
+
+## Architecture and layout
 
 ```text
 Assets/
   Scripts/
-    Core/                 Plain C# assembly; health, economy, combat, enemies,
-                          modules, platform stats, level progression, defaults
-    Combat/ Enemies/      Reserved Unity gameplay adapters
-    Platform/ Progression/ Levels/
-    UI/                   Reserved presentation layer
-  Tests/EditMode/         Shared NUnit core tests and Unity test assembly
-  Tests/PlayMode/         Reserved for future Unity integration tests
-  Scenes/ Prefabs/ ScriptableObjects/ Art/ Audio/  Reserved integration folders
-Packages/                 Unity package manifest
-ProjectSettings/          Intended editor, 2D defaults, portrait Android settings
-Tests/                    Independent .NET Standard library/.NET 8 test projects
-Tools/                    Static project/metadata validation
-Documentation/            Decisions, verification, integration checklist
-.github/workflows/        Real .NET core test workflow
+    Core/Simulation/       GameRun, route, agents, combat coordination (plain C#)
+    Core/...               Task 001 health, economy, weapons, modules, level rules
+    Levels/                OutpostSession, serialized settings, generated-root marker
+    Platform/              PlatformMotor transform adapter
+    Enemies/               EnemyActor and EnemySpawner
+    Presentation/          Tracers, camera follow, health bars
+    UI/                    Start/HUD/purchases/victory/defeat via IMGUI
+  Editor/                  Reproducible scene/prefab/settings generator
+  Tests/EditMode/          Shared NUnit core/simulation tests
+  Tests/PlayMode/          Actual Unity object/lifecycle/HUD tests (unexecuted)
+  Tests/Editor/            Generator idempotence tests (unexecuted)
+  LastOutpostGenerated/    Produced by Unity only; absent until generation runs
+Packages/ ProjectSettings/ Unity toolchain and portrait Android intent
+Tests/                     Independent .NET library and NUnit runner
+Tools/                     Metadata/architecture validator and C# syntax-only tool
+Documentation/             Architecture, integration contract, verification, checklist
+.github/workflows/         Executed .NET/static CI, no unlicensed Unity runner
 ```
 
-All rule implementations live under `Assets/Scripts/Core/` so one Unity assembly
-can explicitly disable engine references. The sibling script folders are reserved
-for adapters, not additional copies of those rules. All asset and folder `.meta`
-files have stable identifiers.
+Dependencies: existing Unity Test Framework **1.4.5**, plus explicit built-in Unity
+**IMGUI** and **Image Conversion** modules **1.0.0** for the HUD/editor PNG generation.
+No asset-store assets, gameplay libraries, or extra NuGet packages were added.
+The syntax tool uses the compiler already bundled in .NET SDK **8.0.4xx**.
+Android intent remains portrait, API 26 minimum, ARM64/IL2CPP. Install Unity's
+Android Build Support with matching SDK/NDK/OpenJDK before attempting a build.
 
-## Core use
+See [architecture](Documentation/ARCHITECTURE.md),
+[Task 002 integration](Documentation/TASK002_INTEGRATION.md), and
+[repository handoff](Documentation/REPOSITORY_HANDOFF.md).
 
-```csharp
-var content = new LastOutpost.Core.Configuration.PrototypeContent();
-var platform = content.CreatePlatform();
-var level = new LastOutpost.Core.Levels.LevelProgression(content.LevelOne, platform.Health);
-var gun = new LastOutpost.Core.Combat.Weapon(content.BasicGun);
-var missiles = new LastOutpost.Core.Combat.Weapon(content.MissileLauncher, platform.AdvancedAmmunition);
-var purchases = new LastOutpost.Core.Economy.TacticalPurchases(platform, content.Purchases, content.SpecialAttack);
-level.TryBeginNextEncounter();
-```
-
-An eventual Unity adapter supplies target distance snapshots and elapsed level
-time, calls weapon rules, collects defeated enemies' drops, then calls
-`level.Refresh()` **after all combat for the tick**. Start the next encounter only
-when travel logic requests it. Render impacts and resource feedback after the
-corresponding rule succeeds. Freeze combat after a terminal level result.
-
-## Gameplay defaults
-
-| Purchase | Energy | Effect |
-| --- | ---: | --- |
-| Ammunition | 30 | Add up to 20 missiles, capacity 60 |
-| Emergency repair | 50 | Restore up to 25 health, maximum 100 |
-| Special strike | 80 | 120 damage to the closest live target within 10 units |
-
-All values are constructor configuration; initial defaults are in
-`PrototypeContent`. Full health, full ammunition, or no special target rejects a
-purchase without charging. Partial refills/repairs cost the listed full price.
-Destroyed platforms cannot purchase or revive. Special cooldown is supported
-and defaults to zero. Tactical Energy is reset with a new platform/run; future
-permanent Credits, a shop, and persistence are not implemented.
-
-## Development status
-
-The foundation is published to the default `main` branch of
-[AshVahedi/Lstotpst](https://github.com/AshVahedi/Lstotpst). GitHub authorization
-resolved the initial publication blocker. The original staging tree was integrated
-without overwriting existing project files or initializing a nested repository.
-Use the GitHub repository for continued development. See
-[repository handoff](Documentation/REPOSITORY_HANDOFF.md) for setup details and
-[verification](Documentation/VERIFICATION.md) for actual local and CI results.
-
-Recommended next task: in a Unity-capable environment, implement one playable
-scene with independent route movement, spawn adapters, automatic combat,
-placeholder side-view graphics, minimal HUD/screens, and PlayMode tests.
+Next task: validate import, generator, all Unity tests, portrait gameplay and
+Android development build in a Unity-capable environment; fix observed issues,
+commit generated assets, and promote to 0.2.0 only after that validation.

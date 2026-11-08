@@ -1,82 +1,85 @@
-# Verification record — 0.1.0
+# Verification record — Task 002 integration
 
-## Executed successfully in this task
+Version retained at **0.1.0** until Unity verification. This record distinguishes
+executed .NET/static checks from authored Unity tests and manual requirements.
+The historical Task 001 evidence is preserved in [its record](VERIFICATION_TASK001.md).
 
-- **58 NUnit tests passed, 0 failed, 0 skipped** using the official .NET SDK
-  **8.0.427** on Debian 13, Linux x64.
-- The core compiled in Release to **.NET Standard 2.1** with warnings treated
-  as errors. The shared tests compiled and ran in a **.NET 8** test host.
-- Test result file: `TestResults/core-tests.trx` (generated local artifact, ignored
-  by Git). GitHub Actions will upload its own real TRX on each future run.
+## Executed in this environment
 
-Executed commands (SDK installed under `/tmp`, not included in the project):
+- Baseline: all **58 original NUnit cases passed** before implementation, with
+  0 failures and 0 skipped (`TestResults/task-002-baseline.trx`).
+- Expanded final core/simulation suite: **82 passed, 0 failed, 0 skipped** using
+  .NET SDK **8.0.427** on Linux x64, Release configuration, warnings as errors.
+  Core compiles against **.NET Standard 2.1**, tests execute in **.NET 8**.
+  Actual output: `TestResults/task-002-core.trx` (generated/ignored).
+- Static validator: **passed** for 73 Unity assets/folders with unique metadata,
+  18 engine-independent core source files, 6 shared NUnit fixtures and 8 assembly
+  boundaries. UI does not directly mutate health, ammunition or resource balances.
+- SDK Roslyn C# syntax parser: **38 asset sources, 0 syntax errors**.
+  This performs no Unity API/type binding, Editor compilation or scene execution.
+  No engine stubs or additional NuGet dependencies were used.
+
+| Shared fixture | Executed cases |
+| --- | ---: |
+| HealthTests | 5 |
+| EconomyTests | 17 |
+| WeaponTests | 16 |
+| ModuleTests | 6 |
+| LevelTests | 14 |
+| SimulationTests (new) | 24 |
+| Total | **82** |
+
+The 24 new cases cover movement modes/frame partitioning, start/travel gating,
+spawn positions/notifications, closest automatic fire/interval/range, enemy
+approach/attacks/contact rounding, ammo/module fallback, once-only rewards,
+wave travel timing, boss stop, victory/defeat/simultaneous death, terminal freeze,
+UI command boundary/atomic purchases, restart and a full deterministic run with
+real enemy attack rules and tactical ammo purchases. They do not render a scene.
+The first expanded run exposed two first-shot test-fixture timing assumptions;
+the fixture now stops exactly at the travel boundary before observing combat.
+
+Commands (SDK executable located under /tmp in this environment):
 
 ```sh
-dotnet restore Tests/LastOutpost.Core.Tests.csproj --disable-parallel
-dotnet test Tests/LastOutpost.Core.Tests.csproj --no-restore --configuration Release --logger "trx;LogFileName=core-tests.trx" --results-directory TestResults
+dotnet test Tests/LastOutpost.Core.Tests.csproj --no-restore --configuration Release --logger "trx;LogFileName=task-002-core.trx" --results-directory TestResults
+python3 Tools/validate_project.py
+dotnet run --project Tools/UnitySyntaxCheck/UnitySyntaxCheck.csproj --configuration Release -- .
 ```
 
-The sandbox could not initialize .NET's `NuGet-Migrations` named mutex. Restore
-and tests ran through the supported escalated command mechanism, with temporary
-`DOTNET_CLI_HOME` and `NUGET_PACKAGES` directories. Dependencies were restored from
-their actual registries. No test stubs or replacement test runner were used.
+The existing sandbox mutex restriction requires the supported escalated execution
+mechanism for .NET commands here. Dependencies use the real restored packages.
 
-| Fixture | Executed tests | Coverage |
+## Authored, not executed in Unity
+
+| Unity-only fixture | Cases authored | Status |
 | --- | ---: | --- |
-| HealthTests | 5 | Damage, zero/death, clamped healing, invalid inputs, overflow-safe bounds |
-| EconomyTests | 17 | Collection/spending, all purchases, failed-state preservation, caps, cooldown, duplicate rewards, overflow |
-| WeaponTests | 16 | Unlimited fallback, missile consumption, intervals, range, closest/tie targeting, invalid input, multi-round ammo |
-| ModuleTests | 6 | Attach/detach, capacity, duplicate/null/out-of-range rejection, initial modules |
-| LevelTests | 14 | Wave order/gating, boss/victory, defeat/simultaneous death, config immutability, headless replay |
+| GameplayIntegrationTests (PlayMode) | 17 | **Unexecuted** |
+| SceneBuilderTests (Editor/EditMode) | 2 | **Unexecuted** |
+| Additional Unity-specific total | **19** | **Unexecuted** |
 
-The headless replay test exercises core weapon damage, roster progression,
-resource rewards, and ammo purchases through boss defeat twice and compares
-deterministic outcomes. It supplies synthetic distances and no enemy movement;
-it does **not** demonstrate a playable or balanced level.
+The shared 82 cases have also not run inside Unity; they are .NET passes only.
+There are **101 authored cases across all assemblies**, not 101 executed passes.
+No Unity tests were marked skipped to fabricate a green result.
 
-## Static project validation
+PlayMode cases exercise actual objects, pose synchronization, spawning/destruction,
+automatic shots, tracer single-damage contract, ammo fallback, rewards/waves/boss,
+outcome events, HUD commands, restart/subscriptions, pause and settings.
+Editor cases exercise repeat generation, stable GUIDs/tuning, unrelated-root
+preservation and build-entry idempotence. Source presence proves none of those
+Unity lifecycle/serialization behaviors have worked yet.
 
-`python3 Tools/validate_project.py` checks unique asset/folder metadata, orphaned
-metadata, core source dependency boundaries, and test assembly/package presence.
-**Passed:** 43 Unity assets/folders have unique metadata; 13 core source files
-have no Unity dependencies; 5 shared NUnit fixtures found. The test assembly is
-Editor-only and references the real core. Workflow YAML also parsed successfully
-and contains a real `dotnet test` step.
+## Unity/Android and CI limits
 
-These results must be read alongside the test results; neither check invokes
-Unity or establishes that the workflow has run on GitHub.
+No Unity Editor binary was found on PATH or in expected installation locations.
+No Editor asset import/package resolution, Unity API compilation, scene generation,
+prefab serialization, PlayMode execution, graphical playthrough, APK generation or
+physical-device testing occurred. The generator is source ready for a real Editor;
+no generated scene/prefab is committed as if validated. Version stays 0.1.0.
 
-## GitHub publication
+The existing GitHub Actions workflow now runs .NET tests, static boundaries and
+syntax-only parsing and uploads actual TRX results. Task 002's remote run must be
+observed after branch publication; prior Task 001 green runs do not verify these
+changes. The final task response reports the observed branch/PR/CI outcome.
+No pretend Unity workflow is provided without an Editor/license-backed runner.
 
-After the user updated repository authorization, normal Git push succeeded to
-`main`. GitHub's API confirmed foundation commit
-`25155c90530e48647c14205300673a59dfae9a98` on the remote branch. The push triggered
-[Core gameplay tests run 42504886370](https://github.com/AshVahedi/Lstotpst/actions/runs/42504886370).
-**Completed successfully.** The actual job log reports **58 passed, 0 failed,
-0 skipped** in the .NET 8 test host. The metadata/architecture validator also
-passed, and the `core-test-results` TRX artifact was uploaded successfully
-(artifact ID `13627525162`). This confirms real GitHub-hosted test execution in
-addition to the earlier local run. No force-push was used.
-
-The documentation follow-up changes no core source, test source, packages, or
-workflow logic. Subsequent push runs are visible on the repository Actions tab;
-the linked result above specifically validates the foundation commit.
-
-## Authored but not executed here
-
-- **Unity EditMode execution:** the same 58 test cases are available through the
-  Editor-only test assembly; no Unity Test Runner was available.
-
-## Not implemented or not verified
-
-- No Unity Editor installation was found; no Unity asset import, package
-  resolution, player compilation, scene execution, or PlayMode testing occurred.
-- No scenes, route movement, spawning transforms, projectile visuals, physics,
-  input, UI/screens, graphics, or audio are implemented.
-- No Android SDK/NDK validation, APK generation, installation, performance test,
-  touch test, or physical-device gameplay was performed.
-- No gameplay balance claim is made. Enemy movement speeds and combat defaults
-  are initial configurable values for the next milestone.
-
-Follow [the Unity checklist](UNITY_CHECKLIST.md) for the next validation step and
-[the repository handoff](REPOSITORY_HANDOFF.md) for continued version control.
+Follow [the Unity checklist](UNITY_CHECKLIST.md) before promoting to 0.2.0.

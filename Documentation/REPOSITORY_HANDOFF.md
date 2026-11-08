@@ -1,16 +1,20 @@
 # Repository handoff
 
 Canonical repository: [AshVahedi/Lstotpst](https://github.com/AshVahedi/Lstotpst).
-Default branch: **main**. The tested 0.1.0 foundation is published there.
+Default branch: **main**. Task 001's tested 0.1.0 foundation is published there.
+Task 002 is isolated on **development/task-002-unity-integration** for review;
+Unity compilation/generation/tests remain pending, and it is not merged to main.
 
 ## Continue development
 
 ```sh
 git clone https://github.com/AshVahedi/Lstotpst.git
 cd Lstotpst
+git switch development/task-002-unity-integration
 dotnet restore Tests/LastOutpost.Core.Tests.csproj
 dotnet test Tests/LastOutpost.Core.Tests.csproj --no-restore --configuration Release
 python3 Tools/validate_project.py
+dotnet run --project Tools/UnitySyntaxCheck/UnitySyntaxCheck.csproj --configuration Release -- .
 git rev-parse HEAD
 ```
 
@@ -45,3 +49,10 @@ triggered the real Core gameplay tests workflow. See [verification](VERIFICATION
 The earlier source archive and complete Git bundle preserve the initial handoff;
 they are no longer needed to access the project. GitHub's `main` branch is the
 authoritative source for continued development.
+
+## Task 002 handoff
+
+Use the development branch/draft pull request for source review. No automatic
+merge or force-push is used. Generate and test the scene in Unity before merging
+or promoting to 0.2.0; see [Task 002 integration](TASK002_INTEGRATION.md).
+The original source archive/bundle does not contain these development changes.

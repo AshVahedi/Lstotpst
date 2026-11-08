@@ -1,7 +1,9 @@
 # Version
 
-**0.1.0** — initial core foundation, Milestones 1–2.
+**0.1.0** — core foundation plus Task 002 integration source awaiting Unity validation.
 
-Core logic and independent tests implemented. Unity gameplay integration,
-playable scenes, presentation, and Android packaging remain pending.
-Unity compilation and execution have not been performed.
+Task 002 adds runtime adapters, settings, automatic route/combat orchestration,
+spawning, placeholder presentation, minimal UI, and reproducible Editor generation.
+82 independent NUnit tests pass; 19 additional Unity-specific tests are authored
+but unexecuted. Unity compilation, generated scenes/prefabs, and APK/device testing
+have not run. Retain 0.1.0 until those integration gates justify 0.2.0.
