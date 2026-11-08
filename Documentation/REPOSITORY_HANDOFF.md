@@ -2,8 +2,10 @@
 
 Canonical repository: [AshVahedi/Lstotpst](https://github.com/AshVahedi/Lstotpst).
 Default branch: **main**. Task 001's tested 0.1.0 foundation is published there.
-Task 002 is isolated on **development/task-002-unity-integration** for review;
-Unity compilation/generation/tests remain pending, and it is not merged to main.
+Task 002 is isolated on **development/task-002-unity-integration** in
+[draft PR #1](https://github.com/AshVahedi/Lstotpst/pull/1) for review. Its real
+.NET/static CI passes; Unity compilation/generation/tests remain pending, and
+it is not merged to main.
 
 ## Continue development
 

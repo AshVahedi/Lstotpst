@@ -76,10 +76,17 @@ prefab serialization, PlayMode execution, graphical playthrough, APK generation 
 physical-device testing occurred. The generator is source ready for a real Editor;
 no generated scene/prefab is committed as if validated. Version stays 0.1.0.
 
-The existing GitHub Actions workflow now runs .NET tests, static boundaries and
-syntax-only parsing and uploads actual TRX results. Task 002's remote run must be
-observed after branch publication; prior Task 001 green runs do not verify these
-changes. The final task response reports the observed branch/PR/CI outcome.
+The real GitHub-hosted [Task 002 PR run 42510293367](https://github.com/AshVahedi/Lstotpst/actions/runs/42510293367)
+**completed successfully** at source commit `b01d06de3126d632933f9485d11b70bd6da38e7b`.
+The downloaded job log confirms **82 passed, 0 failed, 0 skipped**, successful
+metadata/layer validation and **38 C# sources parsed, 0 syntax errors**. The
+`core-test-results` TRX artifact was uploaded (ID `13629380896`). The matching
+push run also succeeded. This is actual Task 002 execution, not a prior baseline.
+
+[Draft PR #1](https://github.com/AshVahedi/Lstotpst/pull/1) targets `main` from
+`development/task-002-unity-integration`; it is not merged. The documentation-only
+follow-up records this evidence without changing source/tests/workflow. The final
+task response reports the final branch head and any follow-up CI status.
 No pretend Unity workflow is provided without an Editor/license-backed runner.
 
 Follow [the Unity checklist](UNITY_CHECKLIST.md) before promoting to 0.2.0.
