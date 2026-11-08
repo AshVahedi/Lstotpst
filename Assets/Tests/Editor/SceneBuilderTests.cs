@@ -2,6 +2,8 @@ using System.Linq;
 using System.IO;
 using LastOutpost.Editor;
 using LastOutpost.Gameplay;
+using LastOutpost.Presentation;
+using LastOutpost.UI;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -38,7 +40,7 @@ namespace LastOutpost.Tests.Editor
         }
 
         [Test]
-        public void RegenerationPreservesSettingsGuidsAndUnrelatedRootsWithoutDuplicates()
+        public void RegenerationPreservesSerializedReferencesSettingsGuidsAndUnrelatedRoots()
         {
             string scenePath = PrototypeSceneBuilder.Generate(TestRoot, false);
             string prefabGuid = AssetDatabase.AssetPathToGUID(TestRoot + "/Prefabs/Basic.prefab");
@@ -59,6 +61,25 @@ namespace LastOutpost.Tests.Editor
             Assert.That(AssetDatabase.AssetPathToGUID(TestRoot + "/Prefabs/Basic.prefab"), Is.EqualTo(prefabGuid));
             Assert.That(AssetDatabase.AssetPathToGUID(scenePath), Is.EqualTo(sceneGuid));
             Assert.That(settings.ammunitionCost, Is.EqualTo(31));
+            // A live hierarchy alone cannot prove scene references were serialized correctly.
+            EditorSceneManager.CloseScene(scene, true);
+            scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Additive);
+            GameObject loadedRoot = scene.GetRootGameObjects().Single(g => g.GetComponent<GeneratedLevelRoot>() != null);
+            Assert.That(scene.GetRootGameObjects().Any(g => g.name == "Preserve this unrelated root"), Is.True);
+            AssertReferences(loadedRoot.GetComponent<OutpostSession>(), "settings");
+            AssertReferences(loadedRoot.GetComponent<PlatformMotor>(), "session", "vehicle");
+            AssertReferences(loadedRoot.GetComponent<EnemySpawner>(), "session", "basicPrefab", "fastPrefab", "bossPrefab", "actorRoot");
+            AssertReferences(loadedRoot.GetComponent<CombatFeedback>(), "session", "tracerMaterial", "effectRoot");
+            AssertReferences(loadedRoot.GetComponent<PrototypeHud>(), "session");
+            AssertReferences(loadedRoot.GetComponentInChildren<CameraFollow>(), "platform");
+            AssertReferences(loadedRoot.GetComponentInChildren<HealthBarView>(), "session", "fill");
+            Assert.That(new SerializedObject(loadedRoot.GetComponent<OutpostSession>()).FindProperty("settings").objectReferenceValue,
+                Is.SameAs(settings));
+            foreach (SpriteRenderer renderer in loadedRoot.GetComponentsInChildren<SpriteRenderer>())
+            {
+                Assert.That(renderer.sprite, Is.Not.Null);
+                Assert.That(renderer.sharedMaterial, Is.Not.Null);
+            }
         }
 
         [Test]
@@ -69,6 +90,18 @@ namespace LastOutpost.Tests.Editor
             Assert.That(EditorBuildSettings.scenes.Count(s => s.path == scenePath && s.enabled), Is.EqualTo(1));
             foreach (EditorBuildSettingsScene existing in originalBuildScenes)
                 Assert.That(EditorBuildSettings.scenes.Any(s => s.path == existing.path && s.enabled == existing.enabled), Is.True);
+        }
+
+        private static void AssertReferences(UnityEngine.Object component, params string[] fields)
+        {
+            Assert.That(component, Is.Not.Null);
+            var serialized = new SerializedObject(component);
+            foreach (string field in fields)
+            {
+                SerializedProperty property = serialized.FindProperty(field);
+                Assert.That(property, Is.Not.Null, component.name + "." + field + " is not serialized");
+                Assert.That(property.objectReferenceValue, Is.Not.Null, component.name + "." + field + " lost its scene/asset reference");
+            }
         }
     }
 }
