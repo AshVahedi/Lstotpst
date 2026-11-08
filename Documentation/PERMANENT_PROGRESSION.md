@@ -288,9 +288,12 @@ activation workflow was manually retried during Task 005.
   retain deduplication evidence instead of dropping old paid IDs. No save format
   migration, combat resume, production recovery UI or complete shop exists yet.
 
-The refreshed Graphify snapshot has **1,140 nodes / 3,189 relationships**, 61 code
-inputs and all 45 C# files. ProgressionService is a new 47-edge hub alongside
-GameRun (50). Its import-cycle report is empty; the separate eight-assembly
+The refreshed Graphify snapshot covers **61 code inputs and all 45 C# files**.
+ProgressionService and GameRun are highly connected hubs; the generated report
+records the current node/edge counts and source-commit provenance. Native Git
+hooks refresh the map after source commits; the portable snapshot follows in an
+ordinary data/documentation commit, validated by actual source hashes. Its
+import-cycle report is empty; the separate eight-assembly
 validator also finds no cycles. Mapped Core-to-Unity-adapter references remain
 empty. Progression composes the existing simulation rather than adding a reverse
 dependency from simulation to a Unity service. Graph links are source evidence
