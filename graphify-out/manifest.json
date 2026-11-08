@@ -1,15 +1,15 @@
 {
   ".github/workflows/core-tests.yml": {
-    "mtime": 1794161777.6098864,
-    "seen": 1794163132.0765948,
-    "ast_hash": "1dc270738e07f28416d97a481d28f67e",
-    "semantic_hash": "1dc270738e07f28416d97a481d28f67e"
+    "mtime": 1794166455.162639,
+    "seen": 1794166500.6842732,
+    "ast_hash": "184167ef958a62df9ea71abfde0e53f8",
+    "semantic_hash": ""
   },
   "Assets/Editor/PrototypeSceneBuilder.cs": {
-    "mtime": 1794161541.1001227,
-    "seen": 1794163132.0766668,
-    "ast_hash": "32c09f0f931136604d111b0cb5c9686a",
-    "semantic_hash": "32c09f0f931136604d111b0cb5c9686a"
+    "mtime": 1794166782.6177766,
+    "seen": 1794166787.0314376,
+    "ast_hash": "07697b57d330767f35380b95cef7af0a",
+    "semantic_hash": ""
   },
   "Assets/Scripts/Core/Combat/Ammunition.cs": {
     "mtime": 1794152693.024263,
@@ -222,10 +222,10 @@
     "semantic_hash": "0d0d303ebe616d3b08ffb39e00ebac50"
   },
   "Assets/Tests/Editor/SceneBuilderTests.cs": {
-    "mtime": 1794162589.0177648,
-    "seen": 1794163132.0810702,
-    "ast_hash": "135b7937a97b5a51148542945f10e9ed",
-    "semantic_hash": "135b7937a97b5a51148542945f10e9ed"
+    "mtime": 1794166350.713875,
+    "seen": 1794166500.6843657,
+    "ast_hash": "69d4f6eafc03a6790ab88289e6ce1047",
+    "semantic_hash": ""
   },
   "Assets/Tests/PlayMode/GameplayIntegrationTests.cs": {
     "mtime": 1794161696.1997278,
@@ -295,9 +295,9 @@
     "semantic_hash": ""
   },
   "CHANGELOG.md": {
-    "mtime": 1794164313.4448097,
-    "seen": 1794164855.369756,
-    "ast_hash": "ddfb3dfd7fc439046c69d5c175e2958d",
+    "mtime": 1794166752.9746053,
+    "seen": 1794166787.0315952,
+    "ast_hash": "e6c66ba2bab8484ed781a75b1d555a0b",
     "semantic_hash": ""
   },
   "Documentation/ARCHITECTURE.md": {
@@ -319,15 +319,15 @@
     "semantic_hash": ""
   },
   "Documentation/UNITY_CHECKLIST.md": {
-    "mtime": 1794162135.439925,
-    "seen": 1794163737.5844805,
-    "ast_hash": "031adf4e9574d75e84feddd23df6db2e",
+    "mtime": 1794166753.7105837,
+    "seen": 1794166787.0316014,
+    "ast_hash": "22aaa44094b10856cebe56a14e8da45d",
     "semantic_hash": ""
   },
   "Documentation/VERIFICATION.md": {
-    "mtime": 1794162691.186487,
-    "seen": 1794163737.5844815,
-    "ast_hash": "6c294c5813c3e6a248a12615b3e479c1",
+    "mtime": 1794166754.0785728,
+    "seen": 1794166787.0316062,
+    "ast_hash": "1679af6036b1bc07cfa71ce18348fd4d",
     "semantic_hash": ""
   },
   "Documentation/VERIFICATION_TASK001.md": {
@@ -343,9 +343,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1794164313.3915808,
-    "seen": 1794164855.3697689,
-    "ast_hash": "3f034551a25d8a9342ab6dab9aae9fa0",
+    "mtime": 1794166752.5866168,
+    "seen": 1794166787.0316095,
+    "ast_hash": "0864b01e98e09738123baa176ebfd177",
     "semantic_hash": ""
   },
   "Tools/Graphify/requirements-lock.txt": {
@@ -361,15 +361,15 @@
     "semantic_hash": ""
   },
   "VERSION.md": {
-    "mtime": 1794162018.6840608,
-    "seen": 1794163737.5844865,
-    "ast_hash": "95d5d04aedf6c9970e8cd242d4fd5e5c",
+    "mtime": 1794166753.3425944,
+    "seen": 1794166787.031614,
+    "ast_hash": "33f1e7a865fad94cfb5b469828ec27aa",
     "semantic_hash": ""
   },
   ".github/workflows/graphify.yml": {
-    "mtime": 1794163869.050126,
-    "seen": 1794163910.5938654,
-    "ast_hash": "055ccba647c99fde2f2678f7105e6715",
+    "mtime": 1794166455.5426145,
+    "seen": 1794166500.6842818,
+    "ast_hash": "33a9213c033ca7c0e398b3af5aa08ced",
     "semantic_hash": ""
   },
   "Tools/Graphify/tests/test_workflow.py": {
@@ -385,9 +385,33 @@
     "semantic_hash": ""
   },
   "Documentation/GRAPHIFY.md": {
-    "mtime": 1794164807.6556134,
-    "seen": 1794164855.3697593,
-    "ast_hash": "dd9718ab3e85de72c3cd9bca27924258",
+    "mtime": 1794166615.6630461,
+    "seen": 1794166787.0315979,
+    "ast_hash": "ee7cbc28d8d1907812dfc8a4db95ce8c",
+    "semantic_hash": ""
+  },
+  "Tools/tests/test_validate_assemblies.py": {
+    "mtime": 1794166783.4097624,
+    "seen": 1794166787.031587,
+    "ast_hash": "9bacdf0537e6a5803d45c3dd7d6d9e48",
+    "semantic_hash": ""
+  },
+  "Tools/validate_assemblies.py": {
+    "mtime": 1794166783.0337658,
+    "seen": 1794166787.031589,
+    "ast_hash": "1ba866bab998556243a76743b06d2058",
+    "semantic_hash": ""
+  },
+  "Documentation/UNITY_FIRST_LAUNCH.md": {
+    "mtime": 1794166616.0670292,
+    "seen": 1794166787.0316036,
+    "ast_hash": "b6105b9138d399531c3c28e940c83d90",
+    "semantic_hash": ""
+  },
+  "Documentation/UNITY_READINESS_REPORT.md": {
+    "mtime": 1794166752.202628,
+    "seen": 1794166787.031605,
+    "ast_hash": "57b446f9a97ef61b5c16c2bc0512af22",
     "semantic_hash": ""
   }
 }

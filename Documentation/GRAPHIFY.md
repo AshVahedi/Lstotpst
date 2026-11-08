@@ -71,10 +71,10 @@ python Tools/Graphify/update.py --check
 graphify explain "GameRun.Tick()"
 graphify query "TacticalPurchases" --depth 1 --budget 1500
 graphify affected "TacticalPurchases" --depth 2
-graphify path "PrototypeHud" "TacticalPurchases" --undirected
+graphify path "Assets/Scripts/UI/PrototypeHud.cs::PrototypeHud" "Assets/Scripts/Core/Economy/TacticalPurchases.cs::TacticalPurchases" --undirected
 ```
 
-The last command was executed successfully on this repository and returned:
+The qualified last command was rerun during Task 003 and returned:
 
 ```text
 PrototypeHud -> OutpostSession -> GameRun -> TacticalPurchases

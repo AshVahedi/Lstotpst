@@ -1,5 +1,8 @@
 # Verification record — Task 002 integration
 
+Historical Task 002 record. For fresh Task 003 results (**111 independent passes**,
+21 additional Unity-only cases unexecuted), see [the readiness audit](UNITY_READINESS_REPORT.md).
+
 Version retained at **0.1.0** until Unity verification. This record distinguishes
 executed .NET/static checks from authored Unity tests and manual requirements.
 The historical Task 001 evidence is preserved in [its record](VERIFICATION_TASK001.md).
