@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased — Graphify development workflow
+
+- Added pinned graphifyy 0.9.104 in a development-only Python environment, official
+  project-scoped Codex skill/registration and native incremental Git hook setup.
+- Generated and committed the queryable JSON, interactive HTML and architecture
+  report with portable native update state; excluded Unity outputs and tool caches.
+- Added a read-only, code-only GitHub Actions graph/artifact workflow and seven real
+  Python integration tests for builds, freshness, edits, deletions and exclusions.
+- Documented query-first Codex usage, inferred/static graph limits, unsupported
+  assembly definitions, CDN visualization dependency and no-op Codex Desktop hook.
+- Kept gameplay source, Unity packages and game version unchanged.
+
 ## Unreleased — Task 002 integration (version retained at 0.1.0)
 
 - Added a plain C# run coordinator composing the existing rules, configurable

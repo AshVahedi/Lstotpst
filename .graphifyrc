@@ -1,0 +1,4 @@
+# Supported project settings for graphifyy 0.9.104.
+query_budget=2000
+query_depth=2
+viz_node_limit=5000
