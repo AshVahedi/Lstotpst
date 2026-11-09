@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Collections.Generic;
+using LastOutpost.Core.Modules;
 using LastOutpost.Core.Levels;
 using LastOutpost.Core.Simulation;
 
@@ -11,7 +13,7 @@ namespace LastOutpost.Core.Progression
         Succeeded, InvalidUpgrade, MaximumLevel, InsufficientCredits, Overflow,
         PersistenceFailed, PersistenceUncertain, Conflict, ReloadRequired, UnknownLevel, LevelLocked,
         InvalidRun, RunNotFinished, AlreadyProcessed, InvalidRunConfiguration,
-        NotInitialized, Busy, NotBetweenRuns, ConfirmationRequired, RecoveryNotSupported
+        NotInitialized, Busy, NotBetweenRuns, ConfirmationRequired, RecoveryNotSupported, InvalidLoadout
     }
 
     public interface IRunIdGenerator { string Create(); }
@@ -29,6 +31,7 @@ namespace LastOutpost.Core.Progression
         private readonly IRunIdGenerator ids;
         private ProgressionData data;
         private string persisted;
+        private readonly HashSet<GameRun> liveRuns = new HashSet<GameRun>();
         public ProgressionConfiguration Configuration { get; }
         public bool RequiresReload { get; private set; }
         public ProgressionSnapshot Snapshot { get { lock (gate) return new ProgressionSnapshot(data); } }
@@ -52,7 +55,7 @@ namespace LastOutpost.Core.Progression
                 try
                 {
                     string loaded = store.Read();
-                    ProgressionData next = loaded == null ? new ProgressionData() : codec.Decode(loaded, Configuration);
+                    ProgressionData next = loaded == null ? ProgressionData.CreateInitial(Configuration) : codec.Decode(loaded, Configuration);
                     next.Validate(Configuration);
                     data = next;
                     persisted = loaded;
@@ -107,6 +110,37 @@ namespace LastOutpost.Core.Progression
             }
         }
 
+        public LoadoutResult ValidateLoadout()
+        { lock (gate) return LoadoutRules.Validate(Configuration.Equipment, data.Equipment); }
+
+        public LoadoutResult Equip(string slotId, string equipmentId) => ChangeLoadout(LoadoutOperation.Equip, slotId, equipmentId);
+        public LoadoutResult Replace(string slotId, string equipmentId) => ChangeLoadout(LoadoutOperation.Replace, slotId, equipmentId);
+        public LoadoutResult Unequip(string slotId) => ChangeLoadout(LoadoutOperation.Unequip, slotId, null);
+        public LoadoutResult RestoreDefaultLoadout() => ChangeLoadout(LoadoutOperation.RestoreDefaults, null, null);
+
+        public LoadoutResult ChangeLoadout(LoadoutOperation operation, string slotId, string equipmentId)
+        {
+            lock (gate)
+            {
+                if (RequiresReload) return LoadoutResult.RecoveryRequired;
+                if (liveRuns.Count != 0) return LoadoutResult.RunActive;
+                var result = LoadoutRules.Change(Configuration.Equipment, new LoadoutSnapshot(data.Equipment), operation, slotId, equipmentId, out var equipment);
+                if (result != LoadoutResult.Succeeded) return result;
+                var candidate = data.Copy(); candidate.Equipment = equipment;
+                switch (Commit(candidate))
+                {
+                    case ProgressionResult.Succeeded: return LoadoutResult.Succeeded;
+                    case ProgressionResult.Conflict: return LoadoutResult.Conflict;
+                    case ProgressionResult.PersistenceFailed: return LoadoutResult.PersistenceFailed;
+                    case ProgressionResult.PersistenceUncertain: return LoadoutResult.PersistenceUncertain;
+                    case ProgressionResult.Overflow: return LoadoutResult.Overflow;
+                    default: return LoadoutResult.RecoveryRequired;
+                }
+            }
+        }
+
+        internal void ReleaseRun(GameRun run) { lock (gate) liveRuns.Remove(run); }
+
         /// <summary>Persists the unique run registration before returning a usable gameplay session.</summary>
         public ProgressionResult CreateRun(RunConfiguration template, out ProgressionRunSession session)
         {
@@ -115,6 +149,7 @@ namespace LastOutpost.Core.Progression
                 session = null;
                 if (RequiresReload) return ProgressionResult.ReloadRequired;
                 if (template == null) return ProgressionResult.InvalidRunConfiguration;
+                if (LoadoutRules.Validate(Configuration.Equipment, data.Equipment) != LoadoutResult.Succeeded) return ProgressionResult.InvalidLoadout;
                 LevelRewardDefinition reward = Configuration.GetReward(template.Level.Id);
                 if (reward == null) return ProgressionResult.UnknownLevel;
                 if (reward.LevelNumber > data.HighestUnlockedLevel) return ProgressionResult.LevelLocked;
@@ -123,8 +158,7 @@ namespace LastOutpost.Core.Progression
                 GameRun run;
                 try
                 {
-                    var stats = new PermanentStatsProvider(Configuration, new ProgressionSnapshot(data));
-                    run = new GameRun(stats.ApplyTo(template), id);
+                    run = new GameRun(LoadoutRunBuilder.Build(Configuration, new ProgressionSnapshot(data), template), id);
                 }
                 catch (OverflowException) { return ProgressionResult.Overflow; }
                 catch (ArgumentException) { return ProgressionResult.InvalidRunConfiguration; }
@@ -132,7 +166,8 @@ namespace LastOutpost.Core.Progression
                 candidate.Runs.Add(new RunRecordData { RunId = id, LevelId = reward.LevelId,
                     LevelNumber = reward.LevelNumber, VictoryCredits = reward.VictoryCredits });
                 ProgressionResult result = Commit(candidate);
-                if (result == ProgressionResult.Succeeded) session = new ProgressionRunSession(this, run);
+                if (result == ProgressionResult.Succeeded)
+                { liveRuns.Add(run); session = new ProgressionRunSession(this, run); }
                 return result;
             }
         }
@@ -144,7 +179,7 @@ namespace LastOutpost.Core.Progression
                 if (RequiresReload) return ProgressionResult.ReloadRequired;
                 int index = Find(run);
                 if (index < 0) return ProgressionResult.InvalidRun;
-                if (data.Runs[index].Outcome != SavedRunOutcome.Active) return ProgressionResult.AlreadyProcessed;
+                if (data.Runs[index].Outcome != SavedRunOutcome.Active) { liveRuns.Remove(run); return ProgressionResult.AlreadyProcessed; }
                 bool victory = run.Status == RunStatus.Victory && run.Level.State == LevelState.Victory && !run.Platform.Health.IsDead;
                 bool defeat = run.Status == RunStatus.Defeat && run.Platform.Health.IsDead;
                 if (!victory && !defeat) return ProgressionResult.RunNotFinished;
@@ -158,7 +193,9 @@ namespace LastOutpost.Core.Progression
                     candidate.HighestUnlockedLevel = Math.Max(candidate.HighestUnlockedLevel, record.LevelNumber + 1);
                     if (!candidate.CompletedLevelIds.Contains(record.LevelId)) candidate.CompletedLevelIds.Add(record.LevelId);
                 }
-                return Commit(candidate);
+                ProgressionResult result = Commit(candidate);
+                if (result == ProgressionResult.Succeeded) liveRuns.Remove(run);
+                return result;
             }
         }
 
@@ -169,12 +206,14 @@ namespace LastOutpost.Core.Progression
                 if (RequiresReload) return ProgressionResult.ReloadRequired;
                 int index = Find(run);
                 if (index < 0) return ProgressionResult.InvalidRun;
-                if (data.Runs[index].Outcome != SavedRunOutcome.Active) return ProgressionResult.AlreadyProcessed;
+                if (data.Runs[index].Outcome != SavedRunOutcome.Active) { liveRuns.Remove(run); return ProgressionResult.AlreadyProcessed; }
                 // A pending victory save must be retried, never converted to an abandoned run.
                 if (run.Status == RunStatus.Victory) return ProgressionResult.RunNotFinished;
                 ProgressionData candidate = data.Copy();
                 candidate.Runs[index].Outcome = SavedRunOutcome.Abandoned;
-                return Commit(candidate);
+                ProgressionResult result = Commit(candidate);
+                if (result == ProgressionResult.Succeeded) liveRuns.Remove(run);
+                return result;
             }
         }
 
@@ -248,6 +287,6 @@ namespace LastOutpost.Core.Progression
         public ProgressionResult RetryCompletion() => LastCompletionResult = progression.CompleteRun(Run);
         public ProgressionResult Abandon() => progression.AbandonRun(Run);
         // Dispose only disconnects callbacks. Call Abandon and inspect its result before leaving an active run.
-        public void Dispose() => Run.Finished -= OnFinished;
+        public void Dispose() { Run.Finished -= OnFinished; progression.ReleaseRun(Run); }
     }
 }

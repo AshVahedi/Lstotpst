@@ -5,6 +5,9 @@
     <type fullname="LastOutpost.Core.Progression.ProgressionData" preserve="all" />
     <type fullname="LastOutpost.Core.Progression.UpgradeLevelsData" preserve="all" />
     <type fullname="LastOutpost.Core.Progression.RunRecordData" preserve="all" />
+    <type fullname="LastOutpost.Core.Progression.LegacyProgressionData" preserve="all" />
+    <type fullname="LastOutpost.Core.Modules.EquipmentProfileData" preserve="all" />
+    <type fullname="LastOutpost.Core.Modules.EquipmentInstallationData" preserve="all" />
     <type fullname="LastOutpost.Core.Progression.JsonProgressionCodec*" preserve="all" />
   </assembly>
 </linker>

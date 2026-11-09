@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using LastOutpost.Core.Simulation;
+using LastOutpost.Core.Modules;
 
 namespace LastOutpost.Core.Progression
 {
@@ -69,7 +70,7 @@ namespace LastOutpost.Core.Progression
     [DataContract]
     public sealed class ProgressionData
     {
-        public const int CurrentSchema = 1;
+        public const int CurrentSchema = 2;
         [DataMember(Name = "schemaVersion", IsRequired = true)] public int SchemaVersion = CurrentSchema;
         [DataMember(Name = "revision", IsRequired = true)] public long Revision;
         [DataMember(Name = "credits", IsRequired = true)] public long Credits;
@@ -77,6 +78,10 @@ namespace LastOutpost.Core.Progression
         [DataMember(Name = "highestUnlockedLevel", IsRequired = true)] public int HighestUnlockedLevel = 1;
         [DataMember(Name = "completedLevelIds", IsRequired = true)] public List<string> CompletedLevelIds = new List<string>();
         [DataMember(Name = "runs", IsRequired = true)] public List<RunRecordData> Runs = new List<RunRecordData>();
+        [DataMember(Name = "equipment", IsRequired = true)] public EquipmentProfileData Equipment = EquipmentConfiguration.Prototype().CreateInitialProfile();
+
+        public static ProgressionData CreateInitial(ProgressionConfiguration config) => new ProgressionData {
+            Equipment = (config ?? throw new ArgumentNullException(nameof(config))).Equipment.CreateInitialProfile() };
 
         internal ProgressionData Copy()
         {
@@ -84,6 +89,7 @@ namespace LastOutpost.Core.Progression
             copy.UpgradeLevels = UpgradeLevels.Copy();
             copy.CompletedLevelIds = new List<string>(CompletedLevelIds);
             copy.Runs = Runs.ConvertAll(run => run.Copy());
+            copy.Equipment = Equipment.Copy();
             return copy;
         }
 
@@ -91,7 +97,8 @@ namespace LastOutpost.Core.Progression
         {
             if (SchemaVersion != CurrentSchema)
                 throw new ProgressionLoadException(ProgressionLoadError.UnsupportedSchema, "Unsupported progression schema; original save was preserved.");
-            if (Revision < 0 || Credits < 0 || UpgradeLevels == null || HighestUnlockedLevel < 1 || CompletedLevelIds == null || Runs == null)
+            if (Revision < 0 || Credits < 0 || UpgradeLevels == null || HighestUnlockedLevel < 1 || CompletedLevelIds == null || Runs == null ||
+                Equipment == null || !Equipment.IsStructurallyValid())
                 Invalid();
             foreach (UpgradeKind kind in Enum.GetValues(typeof(UpgradeKind)))
                 if (UpgradeLevels.Get(kind) < 0 || UpgradeLevels.Get(kind) > configuration.Get(kind).MaximumLevel) Invalid();
@@ -140,6 +147,7 @@ namespace LastOutpost.Core.Progression
         public IReadOnlyList<string> CompletedLevelIds { get; }
         public int RegisteredRuns { get; }
         public int RewardedRuns { get; }
+        public LoadoutSnapshot Loadout { get; }
         internal ProgressionSnapshot(ProgressionData data)
         {
             Credits = data.Credits;
@@ -149,6 +157,7 @@ namespace LastOutpost.Core.Progression
             CompletedLevelIds = new ReadOnlyCollection<string>(new List<string>(data.CompletedLevelIds));
             RegisteredRuns = data.Runs.Count;
             RewardedRuns = data.Runs.FindAll(run => run.Outcome == SavedRunOutcome.Victory).Count;
+            Loadout = new LoadoutSnapshot(data.Equipment);
         }
         public int Level(UpgradeKind kind) => levels.Get(kind);
     }
@@ -159,7 +168,7 @@ namespace LastOutpost.Core.Progression
         string Encode(ProgressionData data);
     }
 
-    /// <summary>Schema dispatch belongs here; no invented legacy migrations. Future schemas are rejected before DTO decoding.</summary>
+    /// <summary>Explicit v1-to-v2 migration; unknown schemas are rejected before DTO decoding.</summary>
     public sealed class JsonProgressionCodec : IProgressionCodec
     {
         public const int MaximumCharacters = 8 * 1024 * 1024;
@@ -231,12 +240,14 @@ namespace LastOutpost.Core.Progression
                 {
                     var header = (SchemaHeader)Serializer(typeof(SchemaHeader)).ReadObject(headerReader);
                     if (header == null) throw new SerializationException("Null schema header.");
-                    if (header.Version != ProgressionData.CurrentSchema)
+                    if (header.Version != 1 && header.Version != ProgressionData.CurrentSchema)
                         throw new ProgressionLoadException(ProgressionLoadError.UnsupportedSchema, "Unsupported save schema; original save preserved.");
                     // Bounded standard deserialization after the single-object boundary check.
                     using (var reader = Reader(bytes))
                     {
-                        var data = (ProgressionData)Serializer(typeof(ProgressionData)).ReadObject(reader);
+                        ProgressionData data = header.Version == 1
+                            ? ((LegacyProgressionData)Serializer(typeof(LegacyProgressionData)).ReadObject(reader))?.Migrate(configuration)
+                            : (ProgressionData)Serializer(typeof(ProgressionData)).ReadObject(reader);
                         if (data == null || reader.MoveToContent() != System.Xml.XmlNodeType.None)
                             throw new SerializationException("Expected one complete save document.");
                         data.Validate(configuration);

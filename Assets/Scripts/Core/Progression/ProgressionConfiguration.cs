@@ -4,6 +4,7 @@ using System.Numerics;
 using LastOutpost.Core.Combat;
 using LastOutpost.Core.Platform;
 using LastOutpost.Core.Simulation;
+using LastOutpost.Core.Modules;
 
 namespace LastOutpost.Core.Progression
 {
@@ -83,12 +84,14 @@ namespace LastOutpost.Core.Progression
         public PlatformStats BasePlatform { get; }
         public decimal BaseWeaponMultiplier { get; }
         public decimal MaximumDamageReduction { get; }
+        public EquipmentConfiguration Equipment { get; }
 
         public ProgressionConfiguration(PlatformStats basePlatform, IEnumerable<UpgradeDefinition> definitions,
             IEnumerable<LevelRewardDefinition> levelRewards, decimal maximumDamageReduction = 0.30m,
-            decimal baseWeaponMultiplier = 1m)
+            decimal baseWeaponMultiplier = 1m, EquipmentConfiguration equipment = null)
         {
             BasePlatform = basePlatform ?? throw new ArgumentNullException(nameof(basePlatform));
+            Equipment = equipment ?? EquipmentConfiguration.Prototype();
             if (definitions == null || levelRewards == null) throw new ArgumentNullException(nameof(definitions));
             if (maximumDamageReduction < basePlatform.DamageReduction || maximumDamageReduction > 1m || baseWeaponMultiplier < 1m)
                 throw new ArgumentOutOfRangeException(nameof(maximumDamageReduction));
@@ -173,13 +176,14 @@ namespace LastOutpost.Core.Progression
         public RunConfiguration ApplyTo(RunConfiguration template)
         {
             if (template == null) throw new ArgumentNullException(nameof(template));
-            return new RunConfiguration(stats, template.Level, Scale(template.BasicGun), Scale(template.MissileLauncher),
+            if (template.Equipment != null) throw new ArgumentException("Use the original template; equipment is already applied.", nameof(template));
+            return new RunConfiguration(stats, template.Level, Scale(template.BasicGun, WeaponMultiplier), Scale(template.MissileLauncher, WeaponMultiplier),
                 template.Purchases, template.Special, template.Route, template.Spawns,
                 Math.Min(template.InitialAmmunition, stats.AmmunitionCapacity));
         }
 
-        private WeaponConfig Scale(WeaponConfig weapon) => new WeaponConfig(weapon.Id,
-            checked((int)decimal.Round(weapon.Damage * WeaponMultiplier, 0, MidpointRounding.AwayFromZero)),
+        internal static WeaponConfig Scale(WeaponConfig weapon, decimal multiplier) => new WeaponConfig(weapon.Id,
+            checked((int)decimal.Round(weapon.Damage * multiplier, 0, MidpointRounding.AwayFromZero)),
             weapon.AttackIntervalSeconds, weapon.Range, weapon.AmmunitionPerShot, weapon.Targeting);
     }
 }

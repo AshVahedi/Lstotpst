@@ -79,6 +79,7 @@ namespace LastOutpost.Core.Progression
         public bool ConfirmingReset { get; }
         public string Message { get; }
         public IReadOnlyList<UpgradeMenuRow> Upgrades { get; }
+        public LoadoutMenuView Loadout { get; }
 
         internal ProgressionMenuView(ProgressionConfiguration config, ProgressionSnapshot profile,
             ProgressionScreen screen, bool busy, bool reloadRequired, bool confirmingReset, bool hasRun,
@@ -88,13 +89,15 @@ namespace LastOutpost.Core.Progression
             Credits = profile?.Credits; HighestUnlockedLevel = profile?.HighestUnlockedLevel;
             CreditsAreCurrent = profile != null && !reloadRequired;
             CommittedReward = receipt?.IsTerminal == true ? receipt.AwardedCredits : (long?)null;
-            bool between = screen == ProgressionScreen.Start || screen == ProgressionScreen.Upgrades;
-            CanStart = between && profile != null && !busy && !reloadRequired;
+            bool between = screen == ProgressionScreen.Start || screen == ProgressionScreen.Upgrades || screen == ProgressionScreen.Loadout;
+            bool canEdit = between && profile != null && !busy && !reloadRequired;
+            Loadout = new LoadoutMenuView(config.Equipment, profile?.Loadout, canEdit);
+            CanStart = canEdit && Loadout.Validation == Modules.LoadoutResult.Succeeded;
             CanReload = screen == ProgressionScreen.Recovery && !busy && !confirmingReset;
             CanRetrySave = CanReload && hasRun && !reloadRequired;
             var rows = new List<UpgradeMenuRow>(4);
             if (profile != null)
-                foreach (UpgradeKind kind in Enum.GetValues(typeof(UpgradeKind))) rows.Add(new UpgradeMenuRow(config, profile, kind, CanStart));
+                foreach (UpgradeKind kind in Enum.GetValues(typeof(UpgradeKind))) rows.Add(new UpgradeMenuRow(config, profile, kind, canEdit));
             Upgrades = new ReadOnlyCollection<UpgradeMenuRow>(rows);
         }
     }

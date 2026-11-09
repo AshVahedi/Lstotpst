@@ -45,11 +45,12 @@ namespace LastOutpost.Core.Enemies
         }
 
         /// <summary>Exactly-once reward per enemy instance, independent of collision/death callbacks.</summary>
-        public bool TryCollectDrop(ResourceWallet wallet)
+        public bool TryCollectDrop(ResourceWallet wallet, int energyBonus = 0)
         {
             if (wallet == null) throw new ArgumentNullException(nameof(wallet));
+            Guard.NonNegative(energyBonus, nameof(energyBonus));
             if (!Health.IsDead || DropCollected) return false;
-            wallet.Collect(ResourceType.Energy, Definition.EnergyDrop);
+            wallet.Collect(ResourceType.Energy, checked(Definition.EnergyDrop + energyBonus));
             // Mark only after a successful credit, so overflow cannot destroy a reward.
             DropCollected = true;
             return true;

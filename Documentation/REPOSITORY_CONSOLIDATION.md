@@ -67,3 +67,16 @@ verification reran 200 C# + 39 helper + seven Graphify cases (246 passes).
 Review the foundation PR #5, Task 005 PR #6, then Task 006 in dependency order.
 Earlier PRs remain open for the user's review; no default/protected branch was
 modified and no force-push, history rewrite or destructive consolidation was used.
+
+## Task 007 prerequisite — 2026-11-09
+
+PR #7 was inspected open/unmerged at Task 006 head
+`8e7cbd1197c6fde998e4fa5fdcbb91038c4d0838`. It contains the complete earlier
+Task 005/foundation ancestry. Both Core/Graphify push and PR workflows passed;
+Unity activation preflight failed and downstream jobs were skipped. All 274
+independent baseline cases were rerun before Task 007 edits.
+
+`development/task-007-modular-equipment` starts at that exact head and targets
+`development/task-006-unity-progression`. Earlier PRs remain open and were not
+merged/closed or cherry-picked. Review Task 007 after its prerequisite stack;
+no force-push, default branch change or history rewrite was used.

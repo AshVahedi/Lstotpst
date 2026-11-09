@@ -329,3 +329,10 @@ source-only progression integration raises the expected minimum to **232 EditMod
 (228 shared + four generator) and **23 PlayMode**. The workflow thresholds were
 updated accordingly; stages still require real executed XML results and the
 licensing gate is unchanged. Independent tests require no Unity activation.
+
+## Task 007 inventory update
+
+No Unity activation retry or execution was performed. The equipment source/tests
+raise future executed-result minimums to **289 EditMode** and **26 PlayMode**.
+The existing licensing gates, evidence requirements and optional Android build
+are preserved. Independent tests run without Unity activation.

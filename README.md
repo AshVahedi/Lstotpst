@@ -5,7 +5,7 @@ armored platform advances automatically through **Industrial Wasteland**, fights
 three deterministic waves and a final boss, and spends tactical Energy on
 missiles, repairs, and a special strike. The basic gun never needs ammunition.
 
-**Current version: 0.1.0. Task 006 progression/session/UI/recovery integration is
+**Current version: 0.1.0. Task 007 modular equipment and progression integration is
 implemented and independently tested.** Unity
 compilation, generated scenes, and gameplay remain unverified. The version is
 retained until the Editor validation gate for 0.2.0 is met. There is no claim of a
@@ -13,7 +13,7 @@ validated playable build or Android APK. No Unity Editor is installed here.
 
 ## Run the prototype locally
 
-1. Check out `development/task-006-unity-progression` from
+1. Check out `development/task-007-modular-equipment` from
    [AshVahedi/Lstotpst](https://github.com/AshVahedi/Lstotpst).
 2. Open this repository root using **Unity 6.3 LTS, 6000.3.0f1**. Allow package
    resolution/import and inspect the Console for compiler/import errors.
@@ -21,7 +21,7 @@ validated playable build or Android APK. No Unity Editor is installed here.
    placeholder art, four prefabs, camera, HUD, and scene, registers it in Build
    Settings, and opens `Assets/LastOutpostGenerated/Scenes/IndustrialWasteland.unity`.
 4. Set Game View to **540 × 960** (9:16 portrait), enter Play Mode, and press
-   **UPGRADES** to inspect permanent progression, then **START LEVEL 1**. Combat
+   **UPGRADES** and **LOADOUT** to configure the platform, then **START LEVEL 1**. Combat
    is automatic; three tactical buttons spend Energy. Results offer **BETWEEN-RUN MENU**.
 5. Run all EditMode and PlayMode tests in **Window → General → Test Runner**.
    Complete [the Unity checklist](Documentation/UNITY_CHECKLIST.md) before
@@ -32,7 +32,8 @@ and [Task 003 readiness audit](Documentation/UNITY_READINESS_REPORT.md).
 PRs #1–4 remain unmerged. The verified `development/integrated-foundation` contains
 all their ancestry; [PR #5](https://github.com/AshVahedi/Lstotpst/pull/5) proposes
 consolidating it into main. [PR #6](https://github.com/AshVahedi/Lstotpst/pull/6) adds Task 005 on that foundation.
-Task 006 branches from its complete `b3b835b…` head and targets the Task 005 branch. See
+[PR #7](https://github.com/AshVahedi/Lstotpst/pull/7) adds the verified Task 006 integration.
+Task 007 branches from its complete `8e7cbd1…` head and targets the Task 006 branch. See
 [ancestry and review order](Documentation/REPOSITORY_CONSOLIDATION.md).
 No Unity compilation, scene execution or APK build has run.
 
@@ -83,9 +84,9 @@ python3 Tools/validate_assemblies.py --json TestResults/unity-static-audit.json
 dotnet run --project Tools/UnitySyntaxCheck/UnitySyntaxCheck.csproj --configuration Release -- .
 ```
 
-**274 independent tests passed, 0 failed, 0 skipped**: 228 NUnit gameplay/progression
-cases, 39 Python validator/CI-helper tests and seven Graphify tests. The original
-246-case baseline was rerun first; Task 006 adds 28 integration/recovery cases.
+**331 independent tests passed, 0 failed, 0 skipped**: 285 NUnit gameplay/progression
+cases, 39 Python validator/CI-helper tests and seven Graphify tests. The complete
+274-case Task 006 baseline was rerun first; Task 007 adds 57 equipment cases.
 Core compiles to .NET Standard 2.1 and executes in .NET 8, including real temporary
 file save/recovery checks. This is not a Unity scene test.
 
@@ -97,12 +98,12 @@ Android is optional and gated on all Editor stages. Configure secrets only in
 GitHub Settings. The [actual Unity CI run](https://github.com/AshVahedi/Lstotpst/actions/runs/42522941291)
 failed activation preflight and published infrastructure evidence; Editor and
 Android jobs were skipped before Unity execution. Independent core/Graphify CI
-passed. Task 006 does not manually retry Unity licensing; independent tests need
+passed. Task 007 does not manually retry Unity licensing; independent tests need
 no Unity account. Earlier task evidence remains in its historical reports.
 
-**27 additional Unity-specific tests are authored and unexecuted:** 23 PlayMode
-and 4 Editor generator cases. The shared 228 have also not run inside Unity.
-Metadata/layer validation passes. All 50 asset C# sources parse without syntax
+**30 additional Unity-specific tests are authored and unexecuted:** 26 PlayMode
+and 4 Editor generator cases. The shared 285 have also not run inside Unity.
+Metadata/layer validation passes. All 58 asset C# sources parse without syntax
 errors, using Roslyn from the installed SDK. Syntax parsing performs **no Unity
 API/type binding or Editor compilation**, and uses no Unity stubs.
 GitHub Actions executes the supported .NET/static checks and preserves actual TRX
@@ -124,8 +125,22 @@ See [PERMANENT_PROGRESSION.md](Documentation/PERMANENT_PROGRESSION.md) for price
 effects, schema, recovery and integration examples. The Unity session now adopts the registered
 `ProgressionRunSession.Run` with a 100-round base and fixed run-start upgrades.
 A persistent host, thin between-run upgrade controls and explicit backed-up save
-recovery are implemented; Unity execution is still pending. See
+recovery are implemented. Schema-v2 adds owned equipment/loadout with read-only v1
+migration until the next successful atomic transaction; Unity execution is still pending. See
 [Unity progression integration](Documentation/UNITY_PROGRESSION_INTEGRATION.md).
+
+## Modular equipment
+
+The loadout panel configures stable, typed slots and owned equipment before a run.
+Defaults are Basic Cannon, Missile Launcher, Armor Plating (+2 percentage points
+armor within the existing cap) and Reactor Booster (+1 Energy per defeated enemy).
+The primary basic weapon remains mandatory; other modules can be removed. Layouts,
+capacity/duplicate limits and effects are configurable. Validation and persistence
+are atomic; active run statistics and installed modules use an immutable snapshot.
+
+See [MODULAR_EQUIPMENT.md](Documentation/MODULAR_EQUIPMENT.md) for the catalog,
+modifier order, unknown-ID preservation, schema-v1-to-v2 migration and Unity steps.
+The existing save filename remains `progression-v1.json`; the header selects schema.
 
 ## Architecture and layout
 
@@ -134,7 +149,8 @@ Assets/
   Scripts/
     Core/Simulation/       GameRun, route, agents, combat coordination (plain C#)
     Core/Progression/      Credits, upgrade catalog/snapshots, run ledger, JSON and stores
-    Core/...               Task 001 health, economy, weapons, modules, level rules
+    Core/Modules/          Typed equipment, slots, ownership/loadout rules and rack
+    Core/...               Task 001 health, economy, weapons and level rules
     Levels/                OutpostSession, persistent ProgressionHost, settings
     Platform/              PlatformMotor transform adapter
     Enemies/               EnemyActor and EnemySpawner

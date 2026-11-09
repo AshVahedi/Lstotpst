@@ -153,7 +153,7 @@ namespace LastOutpost.Tests
         {
             using (var flow = Open(Seed()))
             {
-                flow.StartRun(RunConfiguration.Prototype()); flow.Run.Platform.Health.TakeDamage(100);
+                flow.StartRun(RunConfiguration.Prototype()); flow.Run.Platform.Health.TakeDamage(int.MaxValue);
                 flow.Advance(0.1);
                 Assert.That(flow.Screen, Is.EqualTo(ProgressionScreen.Defeat));
                 Assert.That(flow.View.CommittedReward, Is.Zero); Assert.That(flow.View.Credits, Is.Zero);
