@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased — Task 006 Unity progression integration (0.1.0 retained)
+
+- Based the dedicated branch on Task 005 b3b835b; verified PRs #1–6 remain open
+  and dependent. No automatic merge, rewritten history or main changes.
+- Added a testable application progression coordinator, immutable upgrade/menu
+  views and a single persistent Unity host with safe scene-session rebinding.
+- Adopted the registered run, fixed upgrade snapshot and durable outcome receipts;
+  pending reward saves block unsafe transitions instead of appearing committed.
+- Added minimal between-run upgrades, saved-Credit results and explicit recovery:
+  reload/retry, confirmation-bound reset, raw-byte backups and atomic promotion.
+- Preserved schema-v1, catalog values, Energy transactions and existing tests.
+  Added 28 independent integration/recovery cases and six pending PlayMode cases.
+- Verified 274 independent passes (228 C# + 39 helpers + seven Graphify), static
+  assembly boundaries and syntax. Updated graph and scene-generator host wiring.
+- Unity compilation/generation, 27 additional Unity-only cases and Android/device
+  persistence remain unexecuted. No Unity activation retry or version increase.
+
 ## Unreleased — Task 005 permanent progression (version retained at 0.1.0)
 
 - Published the clean Tasks 001–004/Graphify ancestry as `development/integrated-foundation`

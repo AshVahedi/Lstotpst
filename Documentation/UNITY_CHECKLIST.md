@@ -5,7 +5,7 @@ The environment has .NET, but no Unity Editor installation was found.
 
 ## Import and generation
 
-- [ ] Check out `development/task-003-unity-readiness-audit` or its reviewed successor.
+- [ ] Check out `development/task-006-unity-progression` or its reviewed successor.
       PRs #1–2 were unmerged at audit time; see [exact setup](UNITY_FIRST_LAUNCH.md).
       Task 004's successor includes [cloud CI setup](CLOUD_UNITY_VERIFICATION.md);
       PR #3 also remained unmerged at its start. CI configuration is not execution.
@@ -25,10 +25,10 @@ The environment has .NET, but no Unity Editor installation was found.
 
 ## Actual Unity tests
 
-- [ ] Run shared core/simulation/progression **EditMode** cases (200 authored cases).
+- [ ] Run shared core/simulation/progression **EditMode** cases (228 authored cases).
 - [ ] Run **Editor generator tests** (4 cases, including failed/thrown save rollback),
-      which create/clean their own output. EditMode total should be 204.
-- [ ] Run **PlayMode** integration tests (17 cases). These use real Unity objects,
+      which create/clean their own output. EditMode total should be 232.
+- [ ] Run **PlayMode** integration tests (23 cases, six new progression adapter cases). These use real Unity objects,
       controlled session stepping, destruction frames and HUD command entry points.
 - [ ] Preserve the real Unity XML/log files. Investigate failures rather than
       counting .NET passes or syntax parsing as Unity passes.
@@ -44,7 +44,7 @@ mkdir -p TestResults
 ## Manual portrait gameplay
 
 - [ ] Open the generated IndustrialWasteland scene, set Game View to 540 × 960,
-      enter Play Mode and press START RUN. Confirm no simulation on the start screen.
+      enter Play Mode and inspect UPGRADES, then press START LEVEL 1. Confirm no simulation on the start screen.
 - [ ] Confirm automatic horizontal route movement, ordinary encounter slowdown,
       boss stop and terminal stop, independent of render frame rate.
 - [ ] Confirm Basic/Fast/boss shapes, health bars, approach and distinct attack timing.
@@ -57,6 +57,13 @@ mkdir -p TestResults
       travel delays, victory and defeat views and once-only finish notifications.
 - [ ] Restart from both outcomes; verify fresh health, Energy, ammo, timers,
       position, enemies and event subscriptions. Pause/resume the application.
+- [ ] Purchase each permanent upgrade, confirm run snapshots do not stack, and
+      verify ammo capacity/armor/scaling/health from the authoritative catalog.
+- [ ] Confirm saved victory earns 500 Credits once, defeat earns zero, returning
+      to menu/rebinding does not pay again, and relaunch preserves committed state.
+- [ ] With copied test saves, exercise corrupt/future/pending-only recovery, stale
+      writers, failed reward saves, explicit reset confirmation and preserved backups.
+- [ ] Replace/reload the scene; confirm one persistent host and one ticking driver.
 - [ ] Inspect HUD safe-area/readability and touch targets across portrait sizes.
 - [ ] Record a real playthrough. No graphical/gameplay quality or balance claim
       is supported by the current headless tests alone.
@@ -73,4 +80,4 @@ mkdir -p TestResults
       integration milestone is verified; keep unverified checks explicitly pending.
 
 Recommended next task is validation and fixes, not another level or feature set.
-Do not add monetization, multiplayer, permanent shops or unrelated project changes.
+Do not add monetization, multiplayer, additional shop features or unrelated changes.

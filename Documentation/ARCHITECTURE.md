@@ -46,7 +46,8 @@ Core subfolders cover Combat, Economy, Enemies, Modules, Platform, Levels, and
 Configuration, Simulation for Task 002 composition, and Progression for Task 005.
 This keeps every engine-independent rule and its .NET storage adapters
 rule inside one engine-free assembly without per-subsystem assembly plumbing.
-No singleton is required.
+Core requires no singleton. The Unity host uses a lifetime-only registry to reject
+duplicate profile owners; session simulation uses an explicit driver lease.
 
 ## Health, ammunition, and economy contracts
 
@@ -169,9 +170,13 @@ preservation prepares reflection DTOs for IL2CPP, which remains unverified.
 
 Dependency direction is Progression → Simulation/Platform/Combat and storage
 interfaces, never Core → Unity. `ProgressionRunSession` connects the terminal
-event to reward processing without making presentation authoritative. The existing
-OutpostSession has not adopted that run yet; a future Unity adapter must bind the
-same registered instance. No shop or scene changes are part of this task.
+event to reward processing without making presentation authoritative. Task 006 now binds the same registered
+run through `ProgressionController`, a plain application coordinator, and
+`ProgressionHost`, a persistent Unity path/lifetime adapter. The existing HUD
+uses immutable menu views and disposable subscriptions. Recovery extends the
+same store with a confirmation token and raw backups before atomic replacement;
+there is no second economy, serializer or runtime dependency. See
+[Unity progression integration](UNITY_PROGRESSION_INTEGRATION.md).
 
 ## Testing and dependencies
 
@@ -210,3 +215,17 @@ cases pass. Static validation checks 81 assets/folders, 22 Core sources, eight
 shared fixtures and eight assemblies; syntax parsing covers 44 asset C# files.
 These are .NET/static results, not Unity API compilation. Expected Unity tests
 are now 204 EditMode (200 shared + four Editor) and 17 PlayMode, all unexecuted.
+
+## Task 006 validation boundaries
+
+All 246 baseline independent cases were rerun. The 28 new session/UI/recovery
+cases bring the C# suite to 228; with 39 helper and seven Graphify cases, **274
+pass with no failures/skips**. Static checks cover 87 assets/folders, 24 Core
+sources, ten shared fixtures and eight acyclic assemblies. All 50 asset C# files
+parse without syntax errors. No Unity API binding or compilation has run.
+
+Unity's expected inventory is 232 EditMode (228 shared + four generator) and
+23 PlayMode; six progression PlayMode cases are new and unexecuted. Generator
+host references are checked in authored Editor tests, not by actual generation.
+Graphify remains AST-only evidence; assembly/lifecycle correctness is checked
+separately. No core-to-Unity dependency is introduced.

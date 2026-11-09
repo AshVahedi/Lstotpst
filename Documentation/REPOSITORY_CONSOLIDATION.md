@@ -53,3 +53,17 @@ history. If another branch changes meanwhile, fetch and recompute ancestry befor
 integration. No force-push, automatic PR merge/closure or nested Git repository
 was used. Source-triggered Unity preflight may still report the known missing
 activation configuration; independent gameplay/progression tests need no license.
+
+## Task 006 base verification — 2026-11-09
+
+GitHub inspection again found PRs #1–6 open and unmerged. PR #6 contains the complete
+Task 005 implementation on `development/task-005-permanent-progression` at
+`b3b835ba0a99c184049f2a09d11fbec9359cd1a7`, based on the integrated foundation.
+All Tasks 001–005 and Graphify are ancestors; no patch was reapplied or PR merged.
+The dedicated `development/task-006-unity-progression` branches from that exact
+head and targets the Task 005 branch, preserving stacked review. Baseline
+verification reran 200 C# + 39 helper + seven Graphify cases (246 passes).
+
+Review the foundation PR #5, Task 005 PR #6, then Task 006 in dependency order.
+Earlier PRs remain open for the user's review; no default/protected branch was
+modified and no force-push, history rewrite or destructive consolidation was used.

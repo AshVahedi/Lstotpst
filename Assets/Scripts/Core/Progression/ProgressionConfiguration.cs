@@ -122,6 +122,22 @@ namespace LastOutpost.Core.Progression
         public UpgradeDefinition Get(UpgradeKind kind) => upgrades.TryGetValue(kind, out UpgradeDefinition definition) ? definition : null;
         public LevelRewardDefinition GetReward(string id) => id != null && rewards.TryGetValue(id, out LevelRewardDefinition reward) ? reward : null;
 
+        /// <summary>Authoritative numeric effect for gameplay snapshots and menu previews.</summary>
+        public decimal EffectAt(UpgradeKind kind, int level)
+        {
+            UpgradeDefinition definition = Get(kind);
+            if (definition == null || level < 0 || level > definition.MaximumLevel) throw new ArgumentOutOfRangeException(nameof(level));
+            decimal increase = checked(level * definition.IncreasePerLevel);
+            switch (kind)
+            {
+                case UpgradeKind.MaximumHealth: return checked(BasePlatform.MaximumHealth + increase);
+                case UpgradeKind.Armor: return Math.Min(MaximumDamageReduction, checked(BasePlatform.DamageReduction + increase));
+                case UpgradeKind.WeaponDamage: return checked(BaseWeaponMultiplier + increase);
+                case UpgradeKind.AmmunitionCapacity: return checked(BasePlatform.AmmunitionCapacity + increase);
+                default: throw new ArgumentOutOfRangeException(nameof(kind));
+            }
+        }
+
         public static ProgressionConfiguration Prototype() => new ProgressionConfiguration(new PlatformStats(100, 100, 2),
             new[] {
                 new UpgradeDefinition(UpgradeKind.MaximumHealth, 200, 1.5m, 10m),
@@ -145,12 +161,11 @@ namespace LastOutpost.Core.Progression
             foreach (UpgradeKind kind in Enum.GetValues(typeof(UpgradeKind)))
                 if (profile.Level(kind) < 0 || profile.Level(kind) > config.Get(kind).MaximumLevel)
                     throw new ArgumentOutOfRangeException(nameof(profile), "Upgrade levels exceed this catalog.");
-            int hp = checked((int)(config.BasePlatform.MaximumHealth + profile.Level(UpgradeKind.MaximumHealth) * config.Get(UpgradeKind.MaximumHealth).IncreasePerLevel));
-            int ammo = checked((int)(config.BasePlatform.AmmunitionCapacity + profile.Level(UpgradeKind.AmmunitionCapacity) * config.Get(UpgradeKind.AmmunitionCapacity).IncreasePerLevel));
-            decimal armor = Math.Min(config.MaximumDamageReduction, config.BasePlatform.DamageReduction +
-                profile.Level(UpgradeKind.Armor) * config.Get(UpgradeKind.Armor).IncreasePerLevel);
+            int hp = checked((int)config.EffectAt(UpgradeKind.MaximumHealth, profile.Level(UpgradeKind.MaximumHealth)));
+            int ammo = checked((int)config.EffectAt(UpgradeKind.AmmunitionCapacity, profile.Level(UpgradeKind.AmmunitionCapacity)));
+            decimal armor = config.EffectAt(UpgradeKind.Armor, profile.Level(UpgradeKind.Armor));
             stats = new PlatformStats(hp, ammo, config.BasePlatform.ModuleSlots, armor);
-            WeaponMultiplier = checked(config.BaseWeaponMultiplier + profile.Level(UpgradeKind.WeaponDamage) * config.Get(UpgradeKind.WeaponDamage).IncreasePerLevel);
+            WeaponMultiplier = config.EffectAt(UpgradeKind.WeaponDamage, profile.Level(UpgradeKind.WeaponDamage));
         }
 
         public PlatformStats GetStartingStats() => stats;

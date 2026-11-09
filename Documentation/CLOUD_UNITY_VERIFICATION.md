@@ -321,3 +321,11 @@ safe areas/aspect ratios, rendering, pause/resume, performance, memory and both
 gameplay outcomes to validate. Follow [UNITY_FIRST_LAUNCH.md](UNITY_FIRST_LAUNCH.md)
 and [UNITY_CHECKLIST.md](UNITY_CHECKLIST.md). Keep version 0.1.0 until evidence
 justifies a separate milestone decision.
+
+## Task 006 test inventory update
+
+No activation retry or actual Unity execution was performed for Task 006. Its
+source-only progression integration raises the expected minimum to **232 EditMode**
+(228 shared + four generator) and **23 PlayMode**. The workflow thresholds were
+updated accordingly; stages still require real executed XML results and the
+licensing gate is unchanged. Independent tests require no Unity activation.

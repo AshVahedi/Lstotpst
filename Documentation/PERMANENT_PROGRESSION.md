@@ -1,8 +1,10 @@
 # Permanent progression — Task 005
 
 Game version remains **0.1.0**. These rules and storage adapters execute in the
-independent C# tests; the existing Unity scene/session has **not** been connected
-to them. No graphical shop, new level, premium currency or save server is added.
+independent C# tests. Task 006 now connects the Unity session and minimal upgrade/
+recovery controls in source; actual Unity execution remains pending. See
+[Unity integration](UNITY_PROGRESSION_INTEGRATION.md). No new level, premium
+currency or save server is added.
 
 ## Economies and public entry points
 
@@ -131,9 +133,9 @@ and basic/missile damage=12/45.
 `PermanentStatsProvider` snapshots a profile through `IPlatformStatsProvider` and
 constructs a **new** `RunConfiguration`; it never mutates the base template.
 Configured progression base stats are authoritative, while the template supplies
-level, weapons, route, spawns and tactical rules. The legacy prototype/Unity
-settings remain at 60 ammo capacity until explicitly using this boundary; the
-progression path uses the requested 100-round base. Existing initial ammo clamps
+level, weapons, route, spawns and tactical rules. Raw legacy template settings
+still declare 60 ammo capacity; Task 006 now explicitly adopts the progression
+boundary and its authoritative 100-round base in Unity. Existing initial ammo clamps
 to the resulting capacity. Purchases made after a run was initialized affect
 subsequent runs only; armor and both weapons stay consistent for its whole life.
 The service permits profile transactions during a run, but Unity should expose
@@ -224,8 +226,8 @@ coordinates cooperating instances/processes; it is retained to avoid inode races
 
 For pending-only recovery, first back up files, inspect/validate the candidate,
 and explicitly choose recovery or a fresh profile; do not automatically promote
-an uncommitted purchase or delete evidence. The current API does not implement a
-recovery UI. On unsupported filesystems/runtimes, atomic promotion throws and
+an uncommitted purchase or delete evidence. Task 006 adds explicit confirmed backup/reset and recovery controls; see the
+[integration guide](UNITY_PROGRESSION_INTEGRATION.md). On unsupported filesystems/runtimes, atomic promotion throws and
 writes fail closed; implement another store only if it honors the same contract.
 Linux/.NET tests exercise actual file replacement and injected interruption
 before promotion, not a real power cut. File flush plus atomic namespace change
@@ -233,28 +235,17 @@ is not a promise of power-loss durability on all devices; directory metadata
 fsync is not supplied. Android/Mono/IL2CPP file locking/replacement still require
 target validation.
 
-## Unity integration still required
+## Unity integration boundary
 
-Unity should create one progression service from a path beneath
-`Application.persistentDataPath`, catch typed load errors, and disable permanent
-transactions instead of resetting an invalid save. That path resolution belongs
-outside Core. A boundary sketch for a future Unity adapter:
-
-```csharp
-var store = new FileProgressionStore(Path.Combine(Application.persistentDataPath, "progression-v1.json"));
-var progression = new ProgressionService(ProgressionConfiguration.Prototype(), store);
-ProgressionResult result = progression.CreateRun(settings.Build(), out ProgressionRunSession session);
-// Only on Succeeded: bind the existing Unity views to session.Run, then Start it.
-// Keep session until completion/recovery or a successfully persisted Abandon.
-```
-
-The current `OutpostSession.ResetRun` constructs its own `GameRun`; a future
-adapter must adopt **session.Run** and preserve its run-created/rebind behavior,
-not start a second unregistered simulation. Keep purchases behind service commands,
-refresh Credits/levels/prices from Snapshot, and show progression failures without
-assuming a reward was saved. UI must inspect results; a victory animation is not
-the transaction. No Unity MonoBehaviour or scene was changed to pretend this is
-already connected.
+Task 006 supplies `ProgressionHost` at `Application.persistentDataPath`,
+`ProgressionController` over the existing service/session, and thin IMGUI
+between-run/recovery controls. `OutpostSession` adopts the registered run and
+uses a run-start snapshot; it no longer constructs an unregistered alternative.
+Receipts distinguish saved victory from duplicate/abandoned outcomes. Recovery
+blocks Start/purchases and retains the current failed outcome for explicit retry.
+The optional recovery store backs up raw files and binds reset confirmation to
+unchanged storage. These adapters are authored, not verified in Unity. See
+[full lifecycle and remaining checks](UNITY_PROGRESSION_INTEGRATION.md).
 
 Unity's Inspector does not serialize `decimal` directly. A future settings adapter
 should parse invariant-culture decimal strings or use an exact integer-ratio
@@ -302,6 +293,7 @@ assembly definitions remain among 26 unsupported graph inputs and were inspected
 separately.
 
 See [REPOSITORY_CONSOLIDATION.md](REPOSITORY_CONSOLIDATION.md) for ancestry and
-review order. Recommended next work is the small Unity progression/session
-adapter and a recovery/status UI, with independently testable command boundaries;
-actual Editor/Android validation remains a separate required gate when available.
+review order. The figures in this Task 005 report are historical. Task 006 reruns
+all baseline cases and adds 28: **274 total passes**. Unity's current expected
+inventory is **232 EditMode + 23 PlayMode**, all pending Unity execution. Next work
+is actual Editor/Android verification of the now-authored lifecycle integration.

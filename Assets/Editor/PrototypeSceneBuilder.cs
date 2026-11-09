@@ -174,8 +174,9 @@ namespace LastOutpost.Editor
                     if (candidate.GetComponent<GeneratedLevelRoot>() != null) oldRoots.Add(candidate);
                 generated = new GameObject("Last Outpost Prototype");
                 generated.AddComponent<GeneratedLevelRoot>();
+                ProgressionHost progression = Child("Permanent progression", generated.transform).gameObject.AddComponent<ProgressionHost>();
                 OutpostSession session = generated.AddComponent<OutpostSession>();
-                session.Configure(settings);
+                session.Configure(settings, progression);
                 GameObject platform = (GameObject)PrefabUtility.InstantiatePrefab(platformPrefab, scene);
                 platform.transform.SetParent(generated.transform, false);
                 generated.AddComponent<PlatformMotor>().Configure(session, platform.transform, Vector3.zero);

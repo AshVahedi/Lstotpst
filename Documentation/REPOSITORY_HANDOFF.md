@@ -7,14 +7,17 @@ on **development/integrated-foundation** in [PR #5](https://github.com/AshVahedi
 Task 005's **development/task-005-permanent-progression** is based on that verified
 head and has a separate PR targeting it. PRs #1–4 remain open/unmerged. See
 [ancestry and integration order](REPOSITORY_CONSOLIDATION.md). No PR/main change
-was merged automatically. Unity compilation/generation/tests remain pending.
+was merged automatically. Task 006 is stacked on Task 005 `b3b835b…`, targeting
+`development/task-005-permanent-progression`. See the
+[progression integration guide](UNITY_PROGRESSION_INTEGRATION.md). Unity
+compilation/generation/tests remain pending.
 
 ## Continue development
 
 ```sh
 git clone https://github.com/AshVahedi/Lstotpst.git
 cd Lstotpst
-git switch development/task-005-permanent-progression
+git switch development/task-006-unity-progression
 dotnet restore Tests/LastOutpost.Core.Tests.csproj
 dotnet test Tests/LastOutpost.Core.Tests.csproj --no-restore --configuration Release
 python3 Tools/validate_project.py
