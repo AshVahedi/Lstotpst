@@ -3,10 +3,11 @@ using System.IO;
 using System.Runtime.Serialization;
 
 using LastOutpost.Core.Simulation;
+using LastOutpost.Core.Modules;
 
 namespace LastOutpost.Core.Progression
 {
-    public enum ProgressionScreen { Loading, Start, Upgrades, Playing, Victory, Defeat, Recovery, Closed }
+    public enum ProgressionScreen { Loading, Start, Upgrades, Playing, Victory, Defeat, Recovery, Closed, Loadout }
 
     /// <summary>
     /// Application-lifetime coordinator, independent of scene/UI lifetimes. Call on the gameplay
@@ -101,8 +102,43 @@ namespace LastOutpost.Core.Progression
             return true;
         }
 
+        public bool ShowLoadout(bool visible)
+        {
+            if (!CanUseMenu) return false;
+            Screen = visible ? ProgressionScreen.Loadout : ProgressionScreen.Start;
+            Refresh(); return true;
+        }
+
+        public LoadoutResult ChangeLoadout(LoadoutOperation operation, string slotId = null, string equipmentId = null)
+        {
+            if (!CanUseMenu) return busy || publishing ? LoadoutResult.Busy :
+                Screen == ProgressionScreen.Playing ? LoadoutResult.RunActive :
+                Screen == ProgressionScreen.Recovery ? LoadoutResult.RecoveryRequired : LoadoutResult.NotInitialized;
+            if (!Enter()) return LoadoutResult.Busy;
+            try
+            {
+                var result = service.ChangeLoadout(operation, slotId, equipmentId);
+                if (result == LoadoutResult.PersistenceFailed || result == LoadoutResult.PersistenceUncertain ||
+                    result == LoadoutResult.Conflict || result == LoadoutResult.RecoveryRequired || result == LoadoutResult.Overflow)
+                {
+                    switch (result)
+                    {
+                        case LoadoutResult.Conflict: LastResult = ProgressionResult.Conflict; break;
+                        case LoadoutResult.PersistenceUncertain: LastResult = ProgressionResult.PersistenceUncertain; break;
+                        case LoadoutResult.RecoveryRequired: LastResult = ProgressionResult.ReloadRequired; break;
+                        case LoadoutResult.Overflow: LastResult = ProgressionResult.Overflow; break;
+                        default: LastResult = ProgressionResult.PersistenceFailed; break;
+                    }
+                    Recover("Loadout was not confirmed. Reload before editing or starting; the operation will not be repeated automatically.");
+                }
+                else Message = result == LoadoutResult.Succeeded ? "Loadout saved. Applies to the next run." : "Loadout unchanged: " + result;
+                return result;
+            }
+            finally { Leave(); }
+        }
+
         private bool CanUseMenu => !disposed && !busy && !publishing && service != null && !service.RequiresReload &&
-            (Screen == ProgressionScreen.Start || Screen == ProgressionScreen.Upgrades);
+            (Screen == ProgressionScreen.Start || Screen == ProgressionScreen.Upgrades || Screen == ProgressionScreen.Loadout);
 
         public ProgressionResult BuyUpgrade(UpgradeKind kind)
         {
@@ -182,7 +218,7 @@ namespace LastOutpost.Core.Progression
             {
                 if (session == null)
                 {
-                    if (Screen != ProgressionScreen.Start && Screen != ProgressionScreen.Upgrades) return ProgressionResult.NotInitialized;
+                    if (Screen != ProgressionScreen.Start && Screen != ProgressionScreen.Upgrades && Screen != ProgressionScreen.Loadout) return ProgressionResult.NotInitialized;
                     Screen = ProgressionScreen.Start;
                     return ProgressionResult.Succeeded;
                 }
@@ -240,7 +276,7 @@ namespace LastOutpost.Core.Progression
             if (!Enter()) return ProgressionResult.Busy;
             try
             {
-                string replacement = codec.Encode(new ProgressionData());
+                string replacement = codec.Encode(ProgressionData.CreateInitial(configuration));
                 string backup = null;
                 confirmedResetPending = true;
                 try

@@ -160,7 +160,7 @@ namespace LastOutpost.Tests.PlayMode
             yield return null;
             Assert.That(actor == null, Is.True);
             session.StepSimulation(0.01f);
-            Assert.That(session.Run.Platform.Resources.GetBalance(ResourceType.Energy), Is.EqualTo(12));
+            Assert.That(session.Run.Platform.Resources.GetBalance(ResourceType.Energy), Is.EqualTo(13));
         }
 
         [Test]
@@ -217,7 +217,7 @@ namespace LastOutpost.Tests.PlayMode
             StartEncounter();
             int defeats = 0;
             session.Finished += result => { Assert.That(result, Is.EqualTo(RunStatus.Defeat)); defeats++; };
-            session.Run.Platform.Health.TakeDamage(100);
+            session.Run.Platform.Health.TakeDamage(int.MaxValue);
             session.StepSimulation(0.1f);
             session.StepSimulation(100);
             Assert.That(defeats, Is.EqualTo(1));
@@ -255,7 +255,7 @@ namespace LastOutpost.Tests.PlayMode
             session.Run.Platform.Resources.Collect(ResourceType.Energy, 1);
             Assert.That(hud.ActivateSpecial(), Is.EqualTo(PurchaseResult.Succeeded));
             Assert.That(session.Run.Enemies[0].State.Health.IsDead, Is.True);
-            Assert.That(session.Run.Platform.Resources.GetBalance(ResourceType.Energy), Is.EqualTo(12));
+            Assert.That(session.Run.Platform.Resources.GetBalance(ResourceType.Energy), Is.EqualTo(13));
             Assert.That(spawner.ActiveCount, Is.EqualTo(2));
         }
 
@@ -278,10 +278,10 @@ namespace LastOutpost.Tests.PlayMode
             Assert.That(spawner.ActiveCount, Is.EqualTo(3));
             int finishes = 0;
             session.Finished += _ => finishes++;
-            oldRun.Platform.Health.TakeDamage(100);
+            oldRun.Platform.Health.TakeDamage(int.MaxValue);
             oldRun.Tick(0.1);
             Assert.That(finishes, Is.Zero);
-            session.Run.Platform.Health.TakeDamage(100);
+            session.Run.Platform.Health.TakeDamage(int.MaxValue);
             session.StepSimulation(0.1f);
             Assert.That(finishes, Is.EqualTo(1));
         }

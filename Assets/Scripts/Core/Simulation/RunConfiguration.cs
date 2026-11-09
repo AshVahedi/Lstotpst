@@ -32,10 +32,11 @@ namespace LastOutpost.Core.Simulation
         public RouteConfig Route { get; }
         public SpawnConfig Spawns { get; }
         public int InitialAmmunition { get; }
+        public RunLoadout Equipment { get; }
 
         public RunConfiguration(PlatformStats platform, LevelDefinition level, WeaponConfig basicGun,
             WeaponConfig missileLauncher, TacticalPurchaseConfig purchases, SpecialAttackConfig special,
-            RouteConfig route, SpawnConfig spawns, int initialAmmunition = 0)
+            RouteConfig route, SpawnConfig spawns, int initialAmmunition = 0, RunLoadout equipment = null)
         {
             Platform = platform ?? throw new ArgumentNullException(nameof(platform));
             Level = level ?? throw new ArgumentNullException(nameof(level));
@@ -46,17 +47,25 @@ namespace LastOutpost.Core.Simulation
             Route = route ?? throw new ArgumentNullException(nameof(route));
             Spawns = spawns ?? throw new ArgumentNullException(nameof(spawns));
             InitialAmmunition = Guard.NonNegative(initialAmmunition, nameof(initialAmmunition));
+            Equipment = equipment;
             if (basicGun.AmmunitionPerShot != 0) throw new ArgumentException("The basic fallback must have unlimited ammunition.", nameof(basicGun));
             if (missileLauncher.AmmunitionPerShot == 0) throw new ArgumentException("The advanced weapon must consume ammunition.", nameof(missileLauncher));
-            if (platform.ModuleSlots < 2) throw new ArgumentException("Prototype requires two module slots.", nameof(platform));
+            if (equipment == null && platform.ModuleSlots < 2) throw new ArgumentException("Legacy prototype requires two module slots.", nameof(platform));
             if (initialAmmunition > platform.AmmunitionCapacity) throw new ArgumentOutOfRangeException(nameof(initialAmmunition));
         }
 
         public PlatformState CreatePlatform()
         {
             var platform = new PlatformState(Platform, InitialAmmunition);
-            platform.Modules.TryAttach(0, new ModuleDefinition("basic-gun", ModuleKind.BasicGun));
-            platform.Modules.TryAttach(1, new ModuleDefinition("missile-launcher", ModuleKind.MissileLauncher));
+            if (Equipment == null)
+            {
+                platform.Modules.TryAttach(0, new ModuleDefinition("basic-gun", ModuleKind.BasicGun));
+                platform.Modules.TryAttach(1, new ModuleDefinition("missile-launcher", ModuleKind.MissileLauncher));
+            }
+            else foreach (var item in Equipment.Installations)
+                if (!platform.Modules.TryAttach(item.SlotIndex, new ModuleDefinition(item.SlotId, item.Definition.Mechanism)))
+                    throw new InvalidOperationException("Validated run equipment could not be attached.");
+            if (Equipment != null) platform.Modules.Freeze();
             return platform;
         }
 

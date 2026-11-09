@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased — Task 007 modular equipment (0.1.0 retained)
+
+- Verified Task 006 PR #7/head 8e7cbd1 and reran its 274-case baseline before
+  branching; preserved the dependent PR stack without merging or rewriting history.
+- Added typed equipment/catalog/slots, separate ownership/installation, atomic
+  loadout edits, compatibility/required/duplicate/capacity checks and defaults.
+- Reused basic/missile combat and the module rack; added +2 percentage point
+  Armor Plating within the existing armor cap and +1 Energy-per-defeat Reactor
+  Booster. Existing upgrade values, Credits and tactical prices are unchanged.
+- Applied base/permanent/equipment modifiers before final rounding/clamping into
+  immutable run snapshots; frozen installed racks and preserved unlimited basic fire.
+- Added schema-v2 ownership/loadout persistence, explicit read-only v1 migration,
+  unknown-ID retention, existing CAS/atomic recovery and IL2CPP DTO preservation.
+- Added minimal thin loadout controls and three pending Unity PlayMode cases.
+  All 331 independent tests pass (285 C# + 39 helpers + seven Graphify); 57 cases
+  are new. Existing schema/death fixtures were adapted without dropping cases.
+- Updated graph, static checks, documentation and future Unity test thresholds.
+  Unity compilation/generation/tests and Android/device behavior remain unverified.
+
 ## Unreleased — Task 006 Unity progression integration (0.1.0 retained)
 
 - Based the dedicated branch on Task 005 b3b835b; verified PRs #1–6 remain open

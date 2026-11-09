@@ -10,7 +10,7 @@ no cloud Unity operation is claimed as successful.
 ```sh
 git clone https://github.com/AshVahedi/Lstotpst.git
 cd Lstotpst
-git switch development/task-006-unity-progression
+git switch development/task-007-modular-equipment
 git status
 ```
 
@@ -85,6 +85,11 @@ Expected outputs below `Assets/LastOutpostGenerated/`:
 | `Prefabs` | `Platform.prefab`, `Basic.prefab`, `Fast.prefab`, `Boss.prefab` |
 | `Scenes` | `IndustrialWasteland.unity` |
 
+Task 007 starts from the verified Task 006 head `8e7cbd1…` (PR #7, unmerged).
+Its schema-v2 loadout/migration and LOADOUT controls reuse the same generated
+references; see [the equipment guide](MODULAR_EQUIPMENT.md). Keep existing saves
+at `progression-v1.json`; do not rename/delete them to resolve a migration error.
+
 The scene has one `GeneratedLevelRoot`, session/settings/progression-host references, platform/motor,
 enemy view root/spawner with three prefab references, feedback root/material,
 HUD, orthographic camera following the platform and placeholder scenery.
@@ -115,7 +120,7 @@ Create `TestResults` first if needed. On PowerShell invoke the executable with
 ## 5. Play and inspect the Console
 
 Open the generated scene if it is not already active. Set Game View to
-**540 × 960** / 9:16 portrait. Enter Play Mode, inspect **UPGRADES**, then press **START LEVEL 1**, and check:
+**540 × 960** / 9:16 portrait. Enter Play Mode, inspect **UPGRADES** and **LOADOUT**, then press **START LEVEL 1**, and check:
 
 - Automatic horizontal travel; slowdown during ordinary encounters; stop for
   boss and terminal states. Camera follows the platform.
@@ -124,6 +129,9 @@ Open the generated scene if it is not already active. Set Game View to
 - Health, Energy, ammo, wave and progress update; three waves precede the boss.
 - Purchases cost 30 Energy for up to 20 ammo, 50 for up to 25 health, and 80 for
   a special strike by default. Unaffordable/no-effect commands do not charge.
+- Equip/unequip optional gear, verify the required basic weapon cannot be removed,
+  and confirm active-run edits are blocked. Check plating adds 2 percentage points
+  within the armor cap and the reactor adds 1 Energy per defeated enemy.
 - Boss death while alive yields **VICTORY**; zero platform health yields
   **OUTPOST LOST**. **BETWEEN-RUN MENU** returns to progression. Start again to verify fresh
   inventories/clock/views and current upgrades. Saved victories add 500 Credits
@@ -139,9 +147,9 @@ does not validate this scene.
 
 Outside Play Mode, choose **Window → General → Test Runner**:
 
-1. **EditMode → Run All**: expected **232 cases**, comprising 228 shared core cases
+1. **EditMode → Run All**: expected **289 cases**, comprising 285 shared core cases
    and four Editor generator cases (two existing and two save-failure cases).
-2. **PlayMode → Run All**: expected **23 integration cases** (including six progression adapter cases).
+2. **PlayMode → Run All**: expected **26 integration cases** (including six progression and three equipment cases).
 3. Export/save actual XML results and Editor logs. Inspect any discrepancy in
    discovery/counts; do not substitute .NET results for Unity results.
 

@@ -1,5 +1,10 @@
 # Permanent progression — Task 005
 
+**Task 007 update:** ownership/loadout now use schema-v2 with an explicit v1
+migration. The v1 schema description below is historical; use
+[MODULAR_EQUIPMENT.md](MODULAR_EQUIPMENT.md) for the current extension and migration.
+Credits, permanent formulas and durable run rewards remain unchanged.
+
 Game version remains **0.1.0**. These rules and storage adapters execute in the
 independent C# tests. Task 006 now connects the Unity session and minimal upgrade/
 recovery controls in source; actual Unity execution remains pending. See

@@ -14,7 +14,7 @@ namespace LastOutpost.Tests
 
         [TestCase(false)]
         [TestCase(true)]
-        public void ConfirmedResetBacksUpRawCorruptAndPendingBytesBeforeCreatingSchemaOne(bool primaryExists)
+        public void ConfirmedResetBacksUpRawCorruptAndPendingBytesBeforeCreatingCurrentSchema(bool primaryExists)
         {
             byte[] bad = { 0xff, 0xff, 0, 5 };
             if (primaryExists) File.WriteAllBytes(path, bad);

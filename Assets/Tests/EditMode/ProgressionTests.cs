@@ -360,7 +360,7 @@ namespace LastOutpost.Tests
             using (defeated)
             {
                 defeated.Run.Start();
-                defeated.Run.Platform.Health.TakeDamage(100);
+                defeated.Run.Platform.Health.TakeDamage(int.MaxValue);
                 defeated.Run.Tick(0.01);
                 Assert.That(defeated.LastCompletionResult, Is.EqualTo(ProgressionResult.Succeeded));
                 Assert.That(service.CompleteRun(defeated.Run), Is.EqualTo(ProgressionResult.AlreadyProcessed));

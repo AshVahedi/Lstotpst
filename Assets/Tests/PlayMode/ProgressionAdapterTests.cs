@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using LastOutpost.Core.Progression;
+using LastOutpost.Core.Modules;
 using LastOutpost.Core.Simulation;
 using LastOutpost.Gameplay;
 using LastOutpost.UI;
@@ -88,7 +89,7 @@ namespace LastOutpost.Tests.PlayMode
             yield return null;
             Assert.That(duplicate == null, Is.True);
             Assert.That(UnityEngine.Object.FindObjectsByType<ProgressionHost>(FindObjectsSortMode.None).Length, Is.EqualTo(1));
-            run.Platform.Health.TakeDamage(100); next.StepSimulation(0.1f);
+            run.Platform.Health.TakeDamage(int.MaxValue); next.StepSimulation(0.1f);
             Assert.That(oldFinishes, Is.Zero); Assert.That(newFinishes, Is.EqualTo(1));
         }
 
@@ -139,6 +140,47 @@ namespace LastOutpost.Tests.PlayMode
             var store = ProgressionHost.CreateFileStore(Path.Combine(Path.GetTempPath(), "outpost-path-fixture"));
             Assert.That(store.SavePath, Is.EqualTo(Path.GetFullPath(Path.Combine(Path.GetTempPath(), "outpost-path-fixture", "progression-v1.json"))));
             Assert.Throws<ArgumentException>(() => ProgressionHost.CreateFileStore(""));
+        }
+
+        [Test]
+        public void HudLoadoutCommandsPersistAndRunInitializationAdoptsTheSelection()
+        {
+            var store = Seed(); var host = Host(store); var session = Session(host);
+            var hud = session.gameObject.AddComponent<PrototypeHud>(); hud.Configure(session);
+            Assert.That(host.Controller.ShowLoadout(true), Is.True);
+            Assert.That(hud.ChangeEquipment(LoadoutOperation.Unequip, "primary"), Is.EqualTo(LoadoutResult.RequiredEquipment));
+            Assert.That(hud.ChangeEquipment(LoadoutOperation.Unequip, "utility"), Is.EqualTo(LoadoutResult.Succeeded));
+            Assert.That(hud.ProgressionView.Loadout.Slots[3].EquipmentId, Is.Null);
+            Assert.That(hud.StartRun(), Is.True); Assert.That(session.Run.Configuration.Equipment.EnergyPerDefeat, Is.Zero);
+            Assert.That(hud.ChangeEquipment(LoadoutOperation.RestoreDefaults), Is.EqualTo(LoadoutResult.RunActive));
+            hud.enabled = false; hud.enabled = true;
+            Assert.That(hud.ProgressionView.Loadout.CanEdit, Is.False);
+            hud.ReturnToMenu(); Assert.That(hud.ProgressionView.Loadout.CanEdit, Is.True);
+        }
+
+        [Test]
+        public void HostLoadsV1WithoutWritingAndTheHudCommitsV2ThroughTheSameStore()
+        {
+            const string legacy = "{\"schemaVersion\":1,\"revision\":0,\"credits\":0,\"upgradeLevels\":{" +
+                "\"health\":0,\"armor\":0,\"weaponDamage\":0,\"ammunitionCapacity\":0},\"highestUnlockedLevel\":1,\"completedLevelIds\":[],\"runs\":[]}";
+            var store = new MemoryProgressionStore(legacy); var host = Host(store); var session = Session(host);
+            var hud = session.gameObject.AddComponent<PrototypeHud>(); hud.Configure(session);
+            Assert.That(store.Read(), Is.EqualTo(legacy)); Assert.That(hud.ProgressionView.Loadout.Slots.Count, Is.EqualTo(4));
+            Assert.That(hud.ChangeEquipment(LoadoutOperation.Unequip, "defense"), Is.EqualTo(LoadoutResult.Succeeded));
+            StringAssert.Contains("\"schemaVersion\":2", store.Read());
+        }
+
+        [Test]
+        public void UnrecognizedGearBlocksUnityStartUntilAnExplicitValidSelection()
+        {
+            var data = new ProgressionData(); data.Equipment.OwnedEquipmentIds.Add("removed-gear");
+            data.Equipment.Installations[2].EquipmentId = "removed-gear";
+            var store = new MemoryProgressionStore(new JsonProgressionCodec().Encode(data));
+            var host = Host(store); var session = Session(host); var hud = session.gameObject.AddComponent<PrototypeHud>(); hud.Configure(session);
+            Assert.That(hud.StartRun(), Is.False); Assert.That(hud.ProgressionView.Loadout.Validation, Is.EqualTo(LoadoutResult.UnknownEquipment));
+            Assert.That(hud.ChangeEquipment(LoadoutOperation.Replace, "defense", "armor-plating"), Is.EqualTo(LoadoutResult.Succeeded));
+            Assert.That(hud.StartRun(), Is.True);
+            Assert.That(new ProgressionService(ProgressionConfiguration.Prototype(), store).Snapshot.Loadout.OwnedEquipmentIds, Does.Contain("removed-gear"));
         }
 
         private static void Win(OutpostSession session)

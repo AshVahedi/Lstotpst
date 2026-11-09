@@ -89,7 +89,8 @@ namespace LastOutpost.Core.Simulation
             RefreshState();
         }
 
-        public PurchaseResult BuyAmmunition() => Status == RunStatus.Playing ? purchases.BuyAmmunition() : PurchaseResult.RunNotActive;
+        public PurchaseResult BuyAmmunition() => Status != RunStatus.Playing ? PurchaseResult.RunNotActive :
+            Configuration.Equipment != null && !Configuration.Equipment.HasAdvancedWeapon ? PurchaseResult.NoEffect : purchases.BuyAmmunition();
         public PurchaseResult Repair() => Status == RunStatus.Playing ? purchases.Repair() : PurchaseResult.RunNotActive;
 
         public PurchaseResult ActivateSpecial()
@@ -124,7 +125,7 @@ namespace LastOutpost.Core.Simulation
             {
                 EnemyAgent enemy = enemies[i];
                 if (!enemy.State.Health.IsDead || enemy.DefeatReported) continue;
-                enemy.State.TryCollectDrop(Platform.Resources);
+                enemy.State.TryCollectDrop(Platform.Resources, Configuration.Equipment?.EnergyPerDefeat ?? 0);
                 enemy.DefeatReported = true;
                 EnemyDefeated?.Invoke(enemy);
             }

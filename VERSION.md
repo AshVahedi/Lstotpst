@@ -2,7 +2,7 @@
 
 **0.1.0** — foundation, Unity integration source and independently tested permanent
 progression and Unity-facing lifecycle/UI/recovery wiring; actual Unity/Android
-validation remains pending.
+validation remains pending. Task 007 adds modular equipment and schema-v2 saves.
 
 Task 002 adds runtime adapters, settings, automatic route/combat orchestration,
 spawning, placeholder presentation, minimal UI, and reproducible Editor generation.
@@ -33,3 +33,10 @@ recovery are implemented. **274 independent tests pass** (228 C# + 39 helpers +
 seven Graphify); 27 additional Unity-only cases remain unexecuted (four Editor,
 23 PlayMode), as do the shared cases inside Unity. No Editor/Android claim is made.
 See Documentation/UNITY_PROGRESSION_INTEGRATION.md.
+
+Task 007 retains 0.1.0. Typed modular loadouts, immutable run equipment, minimal
+Unity loadout controls and explicit schema-v1-to-v2 migration are implemented.
+**331 independent tests pass** (285 C# + 39 helpers + seven Graphify). Three new
+PlayMode cases bring the pending Unity inventory to 289 EditMode / 26 PlayMode;
+no Unity compilation, generation or Android/device execution is claimed. See
+Documentation/MODULAR_EQUIPMENT.md.

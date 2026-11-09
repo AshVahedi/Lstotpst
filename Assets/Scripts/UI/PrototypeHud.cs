@@ -1,6 +1,7 @@
 using System;
 using LastOutpost.Core.Economy;
 using LastOutpost.Core.Progression;
+using LastOutpost.Core.Modules;
 using LastOutpost.Core.Simulation;
 using LastOutpost.Gameplay;
 using UnityEngine;
@@ -20,6 +21,8 @@ namespace LastOutpost.UI
         private ProgressionMenuBinding progressionBinding;
         private ProgressionMenuView progressionView;
         private Vector2 upgradeScroll;
+        private Vector2 loadoutScroll;
+        private bool confirmDefaultLoadout;
         public string LastFeedback => feedback;
         public ProgressionMenuView ProgressionView => progressionView;
 
@@ -40,6 +43,7 @@ namespace LastOutpost.UI
         {
             if (session != null) session.ProgressionChanged -= Rebind;
             progressionBinding?.Dispose(); progressionBinding = null; progressionView = null;
+            confirmDefaultLoadout = false;
         }
         private void Rebind()
         {
@@ -51,6 +55,9 @@ namespace LastOutpost.UI
         public void RestartRun() { feedback = ""; session.RestartRun(); }
         public ProgressionResult BuyPermanent(UpgradeKind kind) => session != null && !session.IsPaused && session.Progression != null
             ? session.Progression.BuyUpgrade(kind) : ProgressionResult.NotInitialized;
+        public LoadoutResult ChangeEquipment(LoadoutOperation operation, string slotId = null, string equipmentId = null) =>
+            session != null && !session.IsPaused && session.Progression != null
+                ? session.Progression.ChangeLoadout(operation, slotId, equipmentId) : LoadoutResult.NotInitialized;
         public bool ReturnToMenu() => session != null && session.Progression != null &&
             session.Progression.ReturnToMenu() == ProgressionResult.Succeeded;
         public PurchaseResult BuyAmmunition() => Report(session != null ? session.BuyAmmunition() : PurchaseResult.RunNotActive);
@@ -154,14 +161,69 @@ namespace LastOutpost.UI
                 if (GUI.Button(new Rect(0, top + 4, 468, 48), "BACK", buttonStyle)) session.Progression.ShowUpgrades(false);
                 GUI.EndScrollView();
             }
+            else if (progressionView.Screen == ProgressionScreen.Loadout) DrawLoadout(height);
             else
             {
                 GUI.Label(new Rect(24, 160, 492, 100), "Industrial Wasteland. Three waves and one boss. Permanent upgrades apply when this run starts.", labelStyle);
                 if (GUI.Button(new Rect(24, 280, 492, 56), "UPGRADES", buttonStyle)) session.Progression.ShowUpgrades(true);
+                if (GUI.Button(new Rect(24, 348, 492, 56), "LOADOUT", buttonStyle)) session.Progression.ShowLoadout(true);
             }
-            GUI.Label(new Rect(24, height - 148, 492, 60), progressionView.Message, labelStyle);
+            GUI.Label(new Rect(24, height - 148, 492, 60), progressionView.Message +
+                (progressionView.Loadout.Validation == LoadoutResult.Succeeded ? "" : " Loadout: " + progressionView.Loadout.Validation), labelStyle);
             GUI.enabled = !session.IsPaused && progressionView.CanStart;
             if (GUI.Button(new Rect(24, height - 76, 492, 56), "START LEVEL 1", buttonStyle)) StartRun();
+        }
+
+        private void DrawLoadout(float height)
+        {
+            LoadoutMenuView view = progressionView.Loadout;
+            float contentHeight = 220;
+            foreach (var row in view.Slots) contentHeight += 126 + row.Options.Count * 132;
+            if (view.UnknownOwnedIds.Count > 0) contentHeight += 96;
+            loadoutScroll = GUI.BeginScrollView(new Rect(24, 136, 492, Mathf.Max(100, height - 304)),
+                loadoutScroll, new Rect(0, 0, 468, contentHeight));
+            try
+            {
+                float top = 0;
+                foreach (var row in view.Slots)
+                {
+                    GUI.Label(new Rect(0, top, 468, 66), row.SlotId + " / " + row.Category +
+                        (row.Enabled ? "" : " / DISABLED") + (row.Required ? " / REQUIRED" : "") + "\nInstalled: " + row.EquipmentName, labelStyle);
+                    GUI.enabled = !session.IsPaused && row.CanUnequip;
+                    if (GUI.Button(new Rect(0, top + 70, 468, 44), "UNEQUIP / " + row.UnequipAvailability, buttonStyle))
+                        ChangeEquipment(LoadoutOperation.Unequip, row.SlotId);
+                    top += 126;
+                    foreach (var item in row.Options)
+                    {
+                        GUI.Label(new Rect(8, top, 452, 80), item.Description, labelStyle);
+                        GUI.enabled = !session.IsPaused && item.CanInstall;
+                        if (GUI.Button(new Rect(8, top + 84, 452, 44), item.Name + " / " +
+                            (item.Owned ? item.Availability.ToString() : "NOT OWNED"), buttonStyle))
+                            ChangeEquipment(item.Operation, row.SlotId, item.EquipmentId);
+                        top += 132;
+                    }
+                    GUI.enabled = !session.IsPaused;
+                }
+                if (view.UnknownOwnedIds.Count > 0)
+                {
+                    GUI.Label(new Rect(0, top, 468, 88), "Unrecognized owned IDs are retained: " +
+                        string.Join(", ", view.UnknownOwnedIds), labelStyle);
+                    top += 96;
+                }
+                GUI.enabled = !session.IsPaused && view.CanRestoreDefaults;
+                if (confirmDefaultLoadout)
+                {
+                    GUI.Label(new Rect(0, top, 468, 58), "Replace ALL slot assignments with defaults? Owned IDs are retained.", labelStyle);
+                    if (GUI.Button(new Rect(0, top + 62, 226, 44), "CONFIRM DEFAULTS", buttonStyle))
+                    { ChangeEquipment(LoadoutOperation.RestoreDefaults); confirmDefaultLoadout = false; }
+                    if (GUI.Button(new Rect(238, top + 62, 230, 44), "CANCEL", buttonStyle)) confirmDefaultLoadout = false;
+                }
+                else if (GUI.Button(new Rect(0, top, 468, 52), "RESTORE DEFAULT LOADOUT...", buttonStyle)) confirmDefaultLoadout = true;
+                GUI.enabled = !session.IsPaused;
+                if (GUI.Button(new Rect(0, top + 120, 468, 48), "BACK", buttonStyle))
+                { confirmDefaultLoadout = false; session.Progression.ShowLoadout(false); }
+            }
+            finally { GUI.EndScrollView(); }
         }
 
         private void DrawRecovery(float height)

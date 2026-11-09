@@ -229,3 +229,29 @@ Unity's expected inventory is 232 EditMode (228 shared + four generator) and
 host references are checked in authored Editor tests, not by actual generation.
 Graphify remains AST-only evidence; assembly/lifecycle correctness is checked
 separately. No core-to-Unity dependency is introduced.
+
+## Task 007 equipment boundary
+
+`EquipmentConfiguration` owns ordered slot definitions and the immutable catalog.
+Definition, owned IDs and installed slot/item IDs are separate. `LoadoutRules`
+validates and copies candidate edits; `ProgressionService` persists through the
+existing whole-profile CAS path, never an equipment-specific save file. Unknown
+IDs remain in snapshots/JSON and invalid installations block Start.
+
+`LoadoutRunBuilder` composes permanent snapshots and typed equipment effects,
+rounding weapon damage once at the end and applying the existing armor ceiling.
+`RunConfiguration` carries immutable `RunLoadout` definitions; its installed rack
+is frozen. Simulation depends on that module snapshot, not the profile service.
+Legacy raw templates retain existing module-rack tests. The HUD uses compatible
+options and enum command results from thin menu models. No new assembly or Unity
+runtime package was added. See [MODULAR_EQUIPMENT.md](MODULAR_EQUIPMENT.md).
+
+Schema-v2 adds ownership/installation data. An exact required-field v1 DTO migrates
+progression and the ledger in memory; only a successful later transaction writes
+v2 against the unchanged raw v1 CAS token. Keep the historical save filename.
+New serializer DTO types are preserved in the existing linker XML.
+
+Task 007 verification: 331 independent passes (285 C#, 39 helpers, seven Graphify),
+95 metadata assets/folders, 30 Core sources, 12 shared fixtures and eight acyclic
+assemblies. All 58 asset C# files pass syntax parsing only. Expected Unity tests
+are 289 EditMode and 26 PlayMode, all still unexecuted inside Unity.

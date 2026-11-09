@@ -1,5 +1,10 @@
 # Unity progression integration — Task 006
 
+**Task 007 update:** the same host/controller/session now includes modular loadouts
+and explicit schema-v2 migration. The Task 006 counts/schema statements below
+record that milestone; see [MODULAR_EQUIPMENT.md](MODULAR_EQUIPMENT.md) for current
+behavior and verification. The historical save filename remains unchanged.
+
 Version remains **0.1.0**. The integration code is implemented; **Unity compilation,
 scene generation, UI rendering, PlayMode execution and Android persistence have not
 been verified**. No Unity activation was retried. See [first launch](UNITY_FIRST_LAUNCH.md).

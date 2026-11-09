@@ -12,12 +12,16 @@ was merged automatically. Task 006 is stacked on Task 005 `b3b835b…`, targetin
 [progression integration guide](UNITY_PROGRESSION_INTEGRATION.md). Unity
 compilation/generation/tests remain pending.
 
+Task 007 now builds on verified Task 006 `8e7cbd1…` with PR #7 still open. Its
+branch targets `development/task-006-unity-progression`; no merge occurred. See
+[modular equipment and schema migration](MODULAR_EQUIPMENT.md).
+
 ## Continue development
 
 ```sh
 git clone https://github.com/AshVahedi/Lstotpst.git
 cd Lstotpst
-git switch development/task-006-unity-progression
+git switch development/task-007-modular-equipment
 dotnet restore Tests/LastOutpost.Core.Tests.csproj
 dotnet test Tests/LastOutpost.Core.Tests.csproj --no-restore --configuration Release
 python3 Tools/validate_project.py

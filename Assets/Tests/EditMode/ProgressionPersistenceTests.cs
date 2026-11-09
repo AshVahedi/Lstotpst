@@ -43,7 +43,7 @@ namespace LastOutpost.Tests
                 Assert.That(loaded.CompleteRun(session.Run), Is.EqualTo(ProgressionResult.AlreadyProcessed));
                 Assert.That(loaded.Snapshot.HighestUnlockedLevel, Is.EqualTo(2));
                 Assert.That(File.Exists(store.PendingPath), Is.False);
-                StringAssert.Contains("\"schemaVersion\":1", File.ReadAllText(path));
+                StringAssert.Contains("\"schemaVersion\":" + ProgressionData.CurrentSchema, File.ReadAllText(path));
                 StringAssert.DoesNotContain("Energy", File.ReadAllText(path));
             }
         }
@@ -63,7 +63,7 @@ namespace LastOutpost.Tests
             Assert.That(File.ReadAllText(path), Is.EqualTo(payload));
         }
 
-        [TestCase(2)]
+        [TestCase(3)]
         [TestCase(999)]
         [TestCase(0)]
         public void UnknownSchemasAreRejectedBeforeRequiredV1FieldsAreRead(int version)
@@ -365,7 +365,7 @@ namespace LastOutpost.Tests
         }
 
         [TestCase("credits", "0", "500")]
-        [TestCase("schemaVersion", "1", "2")]
+        [TestCase("schemaVersion", "2", "3")]
         public void DuplicateRequiredMembersInACompleteSaveAreRejected(string member, string first, string second)
         {
             string field = "\"" + member + "\":";
