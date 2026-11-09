@@ -121,6 +121,16 @@ namespace LastOutpost.Core.Progression
             "Progression contains invalid or inconsistent values; no automatic reset was performed.");
     }
 
+    public sealed class RunReceipt
+    {
+        public string RunId { get; }
+        public SavedRunOutcome Outcome { get; }
+        public long AwardedCredits { get; }
+        public bool IsTerminal => Outcome != SavedRunOutcome.Active;
+        internal RunReceipt(string id, SavedRunOutcome outcome, long credits)
+        { RunId = id; Outcome = outcome; AwardedCredits = credits; }
+    }
+
     public sealed class ProgressionSnapshot
     {
         private readonly UpgradeLevelsData levels;

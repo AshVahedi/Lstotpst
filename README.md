@@ -5,15 +5,15 @@ armored platform advances automatically through **Industrial Wasteland**, fights
 three deterministic waves and a final boss, and spends tactical Energy on
 missiles, repairs, and a special strike. The basic gun never needs ammunition.
 
-**Current version: 0.1.0. Task 005 permanent progression is independently tested;
-its Unity session/shop adapter is pending.** Task 002 integration source exists; Unity
+**Current version: 0.1.0. Task 006 progression/session/UI/recovery integration is
+implemented and independently tested.** Unity
 compilation, generated scenes, and gameplay remain unverified. The version is
 retained until the Editor validation gate for 0.2.0 is met. There is no claim of a
 validated playable build or Android APK. No Unity Editor is installed here.
 
 ## Run the prototype locally
 
-1. Check out `development/task-005-permanent-progression` from
+1. Check out `development/task-006-unity-progression` from
    [AshVahedi/Lstotpst](https://github.com/AshVahedi/Lstotpst).
 2. Open this repository root using **Unity 6.3 LTS, 6000.3.0f1**. Allow package
    resolution/import and inspect the Console for compiler/import errors.
@@ -21,8 +21,8 @@ validated playable build or Android APK. No Unity Editor is installed here.
    placeholder art, four prefabs, camera, HUD, and scene, registers it in Build
    Settings, and opens `Assets/LastOutpostGenerated/Scenes/IndustrialWasteland.unity`.
 4. Set Game View to **540 × 960** (9:16 portrait), enter Play Mode, and press
-   **START RUN**. Movement, targeting, and combat are automatic; use the three
-   purchase buttons to spend earned Energy. Victory/defeat offers **RUN AGAIN**.
+   **UPGRADES** to inspect permanent progression, then **START LEVEL 1**. Combat
+   is automatic; three tactical buttons spend Energy. Results offer **BETWEEN-RUN MENU**.
 5. Run all EditMode and PlayMode tests in **Window → General → Test Runner**.
    Complete [the Unity checklist](Documentation/UNITY_CHECKLIST.md) before
    considering this a verified playable milestone.
@@ -31,7 +31,8 @@ Follow [the exact first-launch procedure](Documentation/UNITY_FIRST_LAUNCH.md)
 and [Task 003 readiness audit](Documentation/UNITY_READINESS_REPORT.md).
 PRs #1–4 remain unmerged. The verified `development/integrated-foundation` contains
 all their ancestry; [PR #5](https://github.com/AshVahedi/Lstotpst/pull/5) proposes
-consolidating it into main. Task 005 targets that foundation. See
+consolidating it into main. [PR #6](https://github.com/AshVahedi/Lstotpst/pull/6) adds Task 005 on that foundation.
+Task 006 branches from its complete `b3b835b…` head and targets the Task 005 branch. See
 [ancestry and review order](Documentation/REPOSITORY_CONSOLIDATION.md).
 No Unity compilation, scene execution or APK build has run.
 
@@ -51,13 +52,13 @@ files, imported ProjectSettings, and `Packages/packages-lock.json` after validat
 
 Tune `Assets/LastOutpostGenerated/Configuration/PrototypeSettings.asset` in the
 Inspector. Settings construct existing validated core configuration; edits apply
-when a fresh run is created, including **RUN AGAIN**. Speeds/ranges use world
+when a fresh run is created, through the between-run menu. Speeds/ranges use world
 units, timing uses seconds, and health/damage/Energy/ammunition use integer units.
 
 | Purchase | Initial Energy | Effect |
 | --- | ---: | --- |
-| Missiles | 30 | Up to 20 ammunition, capacity 60 |
-| Repair | 50 | Up to 25 health, maximum 100 |
+| Missiles | 30 | Up to 20 ammunition, base capacity 100 + upgrades |
+| Repair | 50 | Up to 25 health, base maximum 100 + upgrades |
 | Special strike | 80 | 120 damage to the closest live target within 10 units |
 
 Costs, effects, enemy stats, wave counts, weapon intervals/ranges, spawn offsets,
@@ -82,12 +83,11 @@ python3 Tools/validate_assemblies.py --json TestResults/unity-static-audit.json
 dotnet run --project Tools/UnitySyntaxCheck/UnitySyntaxCheck.csproj --configuration Release -- .
 ```
 
-**246 independent tests passed, 0 failed, 0 skipped**: 200 NUnit gameplay cases
-(the unchanged original 82 plus 118 progression/persistence cases), 39 Python
-validator/CI-helper tests and seven Graphify tests. C# compiles to .NET Standard
-2.1 and executes in .NET 8, including deterministic combat and real temporary-file
-save/recovery tests. This is not a Unity scene test. The clean consolidated base
-was separately verified with all 128 pre-Task-005 cases in an isolated checkout.
+**274 independent tests passed, 0 failed, 0 skipped**: 228 NUnit gameplay/progression
+cases, 39 Python validator/CI-helper tests and seven Graphify tests. The original
+246-case baseline was rerun first; Task 006 adds 28 integration/recovery cases.
+Core compiles to .NET Standard 2.1 and executes in .NET 8, including real temporary
+file save/recovery checks. This is not a Unity scene test.
 
 The [cloud verification report](Documentation/CLOUD_UNITY_VERIFICATION.md)
 documents the exact available Unity images, licensing setup and dedicated
@@ -97,12 +97,12 @@ Android is optional and gated on all Editor stages. Configure secrets only in
 GitHub Settings. The [actual Unity CI run](https://github.com/AshVahedi/Lstotpst/actions/runs/42522941291)
 failed activation preflight and published infrastructure evidence; Editor and
 Android jobs were skipped before Unity execution. Independent core/Graphify CI
-passed. Task 005 does not manually retry Unity licensing; independent tests need
+passed. Task 006 does not manually retry Unity licensing; independent tests need
 no Unity account. Earlier task evidence remains in its historical reports.
 
-**21 additional Unity-specific tests are authored and unexecuted:** 17 PlayMode
-and 4 Editor generator cases. The shared 200 have also not run inside Unity.
-Metadata/layer validation passes. All 44 asset C# sources parse without syntax
+**27 additional Unity-specific tests are authored and unexecuted:** 23 PlayMode
+and 4 Editor generator cases. The shared 228 have also not run inside Unity.
+Metadata/layer validation passes. All 50 asset C# sources parse without syntax
 errors, using Roslyn from the installed SDK. Syntax parsing performs **no Unity
 API/type binding or Editor compilation**, and uses no Unity stubs.
 GitHub Actions executes the supported .NET/static checks and preserves actual TRX
@@ -121,9 +121,11 @@ the whole profile before publishing new balance/levels; failures/conflicts block
 unsafe retries. Memory/file stores and versioned JSON support tested persistence.
 
 See [PERMANENT_PROGRESSION.md](Documentation/PERMANENT_PROGRESSION.md) for prices,
-effects, schema, recovery and integration examples. The progression path uses a
-100-round base; the legacy Unity prototype above retains 60 until explicitly wired
-to `ProgressionRunSession`. No graphical upgrade shop or new level is included.
+effects, schema, recovery and integration examples. The Unity session now adopts the registered
+`ProgressionRunSession.Run` with a 100-round base and fixed run-start upgrades.
+A persistent host, thin between-run upgrade controls and explicit backed-up save
+recovery are implemented; Unity execution is still pending. See
+[Unity progression integration](Documentation/UNITY_PROGRESSION_INTEGRATION.md).
 
 ## Architecture and layout
 
@@ -133,11 +135,11 @@ Assets/
     Core/Simulation/       GameRun, route, agents, combat coordination (plain C#)
     Core/Progression/      Credits, upgrade catalog/snapshots, run ledger, JSON and stores
     Core/...               Task 001 health, economy, weapons, modules, level rules
-    Levels/                OutpostSession, serialized settings, generated-root marker
+    Levels/                OutpostSession, persistent ProgressionHost, settings
     Platform/              PlatformMotor transform adapter
     Enemies/               EnemyActor and EnemySpawner
     Presentation/          Tracers, camera follow, health bars
-    UI/                    Start/HUD/purchases/victory/defeat via IMGUI
+    UI/                    Start/upgrades/recovery/HUD/results via IMGUI
   Editor/                  Reproducible scene/prefab/settings generator
   Tests/EditMode/          Shared NUnit core/simulation tests
   Tests/PlayMode/          Actual Unity object/lifecycle/HUD tests (unexecuted)
@@ -161,9 +163,8 @@ See [architecture](Documentation/ARCHITECTURE.md),
 [Task 002 integration](Documentation/TASK002_INTEGRATION.md), and
 [repository handoff](Documentation/REPOSITORY_HANDOFF.md).
 
-Next task: connect the existing Unity session to `ProgressionRunSession` and expose
-minimal between-run progression/recovery commands. Actual Unity import, tests,
-playthrough and Android/device verification remain required when available.
+Next task: execute the Unity import, generation, both test suites and progression
+playthrough, then validate Android persistence/device behavior when available.
 Promote to 0.2.0 only after its validation gate is met.
 
 ## Queryable architecture map for Codex

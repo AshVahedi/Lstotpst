@@ -1,5 +1,6 @@
 using System;
 using LastOutpost.Core.Economy;
+using LastOutpost.Core.Progression;
 using LastOutpost.Core.Simulation;
 using LastOutpost.Gameplay;
 using UnityEngine;
@@ -16,11 +17,42 @@ namespace LastOutpost.UI
         private GUIStyle boxStyle;
         private string feedback = "";
         private float feedbackUntil;
+        private ProgressionMenuBinding progressionBinding;
+        private ProgressionMenuView progressionView;
+        private Vector2 upgradeScroll;
         public string LastFeedback => feedback;
+        public ProgressionMenuView ProgressionView => progressionView;
 
-        public void Configure(OutpostSession owner) => session = owner != null ? owner : throw new ArgumentNullException(nameof(owner));
+        public void Configure(OutpostSession owner)
+        {
+            OnDisable();
+            session = owner != null ? owner : throw new ArgumentNullException(nameof(owner));
+            if (isActiveAndEnabled) OnEnable();
+        }
+        private void OnEnable()
+        {
+            if (session == null) return;
+            session.ProgressionChanged -= Rebind;
+            session.ProgressionChanged += Rebind;
+            Rebind();
+        }
+        private void OnDisable()
+        {
+            if (session != null) session.ProgressionChanged -= Rebind;
+            progressionBinding?.Dispose(); progressionBinding = null; progressionView = null;
+        }
+        private void Rebind()
+        {
+            progressionBinding?.Dispose(); progressionBinding = null; progressionView = null;
+            if (session.Progression != null)
+                progressionBinding = new ProgressionMenuBinding(session.Progression, view => progressionView = view);
+        }
         public bool StartRun() => session != null && session.BeginRun();
         public void RestartRun() { feedback = ""; session.RestartRun(); }
+        public ProgressionResult BuyPermanent(UpgradeKind kind) => session != null && !session.IsPaused && session.Progression != null
+            ? session.Progression.BuyUpgrade(kind) : ProgressionResult.NotInitialized;
+        public bool ReturnToMenu() => session != null && session.Progression != null &&
+            session.Progression.ReturnToMenu() == ProgressionResult.Succeeded;
         public PurchaseResult BuyAmmunition() => Report(session != null ? session.BuyAmmunition() : PurchaseResult.RunNotActive);
         public PurchaseResult Repair() => Report(session != null ? session.Repair() : PurchaseResult.RunNotActive);
         public PurchaseResult ActivateSpecial() => Report(session != null ? session.ActivateSpecial() : PurchaseResult.RunNotActive);
@@ -42,7 +74,7 @@ namespace LastOutpost.UI
 
         private void OnGUI()
         {
-            if (session == null || session.Run == null) return;
+            if (session == null) return;
             EnsureStyles();
             Rect safe = Screen.safeArea;
             if (safe.width <= 0 || safe.height <= 0) return;
@@ -54,11 +86,23 @@ namespace LastOutpost.UI
             GUI.BeginGroup(new Rect(safe.x / scale, (Screen.height - safe.yMax) / scale, 540, height));
             try
             {
+                GUI.enabled = !session.IsPaused;
+                if (progressionView == null)
+                {
+                    GUI.Label(new Rect(24, 80, 492, 110), "Permanent progression is not initialized. Check the assigned progression host.", labelStyle);
+                    if (GUI.Button(new Rect(24, 210, 492, 56), "RETRY STARTUP", buttonStyle)) session.RetryInitialization();
+                    return;
+                }
+                if (progressionView.Screen == ProgressionScreen.Recovery) { DrawRecovery(height); return; }
                 GameRun run = session.Run;
+                if (run == null) { DrawBetweenRuns(height); return; }
                 DrawHud(run);
-                if (run.Status == RunStatus.StartScreen) DrawStart(height);
-                else if (run.Status == RunStatus.Victory || run.Status == RunStatus.Defeat) DrawResult(run, height);
-                else DrawPurchases(run, height);
+                if (run.Status == RunStatus.Victory || run.Status == RunStatus.Defeat) DrawResult(run, height);
+                else
+                {
+                    DrawPurchases(run, height);
+                    if (GUI.Button(new Rect(24, 184, 492, 40), "ABANDON TO MENU", buttonStyle)) ReturnToMenu();
+                }
             }
             finally
             {
@@ -86,14 +130,59 @@ namespace LastOutpost.UI
             GUI.Label(progress, "Level progress " + (run.Level.Progress * 100).ToString("0") + "%", labelStyle);
         }
 
-        private void DrawStart(float height)
+        private void DrawBetweenRuns(float height)
         {
-            float top = height * 0.35f;
-            GUI.Box(new Rect(24, top, 492, 255), "", boxStyle);
-            GUI.Label(new Rect(40, top + 12, 460, 45), "LAST OUTPOST", titleStyle);
-            GUI.Label(new Rect(40, top + 62, 460, 112),
-                "Advance automatically. Defeat three waves and the boss. Spend Energy on missiles, repairs, or a strike.", labelStyle);
-            if (GUI.Button(new Rect(40, top + 184, 460, 54), "START RUN", buttonStyle)) StartRun();
+            GUI.Label(new Rect(24, 18, 492, 45), "LAST OUTPOST", titleStyle);
+            GUI.Label(new Rect(24, 68, 492, 60), "Credits " + progressionView.Credits +
+                "   Unlocked level " + progressionView.HighestUnlockedLevel + " (only Level 1 available)", labelStyle);
+            if (progressionView.Screen == ProgressionScreen.Upgrades)
+            {
+                float top = 0;
+                upgradeScroll = GUI.BeginScrollView(new Rect(24, 136, 492, Mathf.Max(100, height - 304)),
+                    upgradeScroll, new Rect(0, 0, 468, 576));
+                foreach (UpgradeMenuRow row in progressionView.Upgrades)
+                {
+                    GUI.Box(new Rect(0, top, 468, 120), "", boxStyle);
+                    GUI.Label(new Rect(12, top + 4, 444, 28), row.Name + "  " + row.Level + "/" + row.MaximumLevel, labelStyle);
+                    GUI.Label(new Rect(12, top + 32, 444, 28), row.CurrentText + " → " + row.NextText, labelStyle);
+                    GUI.enabled = !session.IsPaused && row.CanPurchase;
+                    if (GUI.Button(new Rect(12, top + 66, 444, 44), row.IsMaximum ? "MAXIMUM" : "BUY / " + row.Price + " Credits", buttonStyle))
+                        BuyPermanent(row.Kind);
+                    GUI.enabled = !session.IsPaused;
+                    top += 128;
+                }
+                if (GUI.Button(new Rect(0, top + 4, 468, 48), "BACK", buttonStyle)) session.Progression.ShowUpgrades(false);
+                GUI.EndScrollView();
+            }
+            else
+            {
+                GUI.Label(new Rect(24, 160, 492, 100), "Industrial Wasteland. Three waves and one boss. Permanent upgrades apply when this run starts.", labelStyle);
+                if (GUI.Button(new Rect(24, 280, 492, 56), "UPGRADES", buttonStyle)) session.Progression.ShowUpgrades(true);
+            }
+            GUI.Label(new Rect(24, height - 148, 492, 60), progressionView.Message, labelStyle);
+            GUI.enabled = !session.IsPaused && progressionView.CanStart;
+            if (GUI.Button(new Rect(24, height - 76, 492, 56), "START LEVEL 1", buttonStyle)) StartRun();
+        }
+
+        private void DrawRecovery(float height)
+        {
+            GUI.Label(new Rect(24, 36, 492, 48), "SAVE RECOVERY", titleStyle);
+            GUI.Label(new Rect(24, 100, 492, 170), progressionView.Message, labelStyle);
+            GUI.Label(new Rect(24, 278, 492, 70), (progressionView.CreditsAreCurrent ? "Saved Credits: " : "Last known Credits: ") + (progressionView.Credits?.ToString() ?? "unavailable") +
+                ". A victory reward is permanent only after it is saved.", labelStyle);
+            if (progressionView.ConfirmingReset)
+            {
+                GUI.enabled = !session.IsPaused && !progressionView.IsBusy;
+                if (GUI.Button(new Rect(24, 380, 492, 60), "CONFIRM BACKUP AND NEW PROFILE", buttonStyle)) session.Progression.ConfirmNewProfile(true);
+                if (GUI.Button(new Rect(24, 454, 492, 56), "CANCEL", buttonStyle)) session.Progression.CancelNewProfile();
+                return;
+            }
+            GUI.enabled = !session.IsPaused && progressionView.CanReload;
+            if (GUI.Button(new Rect(24, 380, 492, 56), "RETRY LOADING", buttonStyle)) session.Progression.RetryLoad();
+            GUI.enabled = !session.IsPaused && progressionView.CanRetrySave;
+            if (GUI.Button(new Rect(24, 448, 492, 56), "RETRY SAVING RUN OUTCOME", buttonStyle)) session.Progression.RetrySave();
+            GUI.enabled = !session.IsPaused && !progressionView.IsBusy;
+            if (GUI.Button(new Rect(24, 540, 492, 56), "REQUEST NEW PROFILE...", buttonStyle)) session.Progression.RequestNewProfile();
         }
 
         private void DrawResult(GameRun run, float height)
@@ -101,9 +190,9 @@ namespace LastOutpost.UI
             float top = height * 0.38f;
             GUI.Box(new Rect(24, top, 492, 220), "", boxStyle);
             GUI.Label(new Rect(40, top + 16, 460, 48), run.Status == RunStatus.Victory ? "VICTORY" : "OUTPOST LOST", titleStyle);
-            GUI.Label(new Rect(40, top + 72, 460, 52), run.Status == RunStatus.Victory ?
-                "Industrial Wasteland cleared." : "Try a different Energy purchase strategy.", labelStyle);
-            if (GUI.Button(new Rect(40, top + 146, 460, 54), "RUN AGAIN", buttonStyle)) RestartRun();
+            GUI.Label(new Rect(40, top + 72, 460, 60), "Saved reward: " + (progressionView.CommittedReward?.ToString() ?? "PENDING") +
+                " Credits. Balance: " + progressionView.Credits, labelStyle);
+            if (GUI.Button(new Rect(40, top + 146, 460, 54), "BETWEEN-RUN MENU", buttonStyle)) ReturnToMenu();
         }
 
         private void DrawPurchases(GameRun run, float height)

@@ -6,9 +6,9 @@
     "semantic_hash": ""
   },
   "Assets/Editor/PrototypeSceneBuilder.cs": {
-    "mtime": 1794166782.6177766,
-    "seen": 1794166787.0314376,
-    "ast_hash": "07697b57d330767f35380b95cef7af0a",
+    "mtime": 1794185059.2262459,
+    "seen": 1794185856.050558,
+    "ast_hash": "73d8b3c9a0e0af666a7b243a8022b40e",
     "semantic_hash": ""
   },
   "Assets/Scripts/Core/Combat/Ammunition.cs": {
@@ -138,10 +138,10 @@
     "semantic_hash": "6f433e2fb4d2b0703d8efaa74b55f0f6"
   },
   "Assets/Scripts/Levels/OutpostSession.cs": {
-    "mtime": 1794161303.1314387,
-    "seen": 1794163132.0788386,
-    "ast_hash": "b4cbd1c442aaf9d4fc994f3b3f9bdf2c",
-    "semantic_hash": "b4cbd1c442aaf9d4fc994f3b3f9bdf2c"
+    "mtime": 1794185385.2304077,
+    "seen": 1794185856.050594,
+    "ast_hash": "c47efe1de6650c33f933f8a83f3126dc",
+    "semantic_hash": ""
   },
   "Assets/Scripts/Levels/PrototypeSettings.cs": {
     "mtime": 1794161302.7554662,
@@ -180,10 +180,10 @@
     "semantic_hash": "6526cad237f01af389ecb11b1dbbc07f"
   },
   "Assets/Scripts/UI/PrototypeHud.cs": {
-    "mtime": 1794161401.7098148,
-    "seen": 1794163132.079854,
-    "ast_hash": "11c2e10a4b203dafa2d38e0df94ea6ff",
-    "semantic_hash": "11c2e10a4b203dafa2d38e0df94ea6ff"
+    "mtime": 1794185528.1520522,
+    "seen": 1794185856.0506032,
+    "ast_hash": "175028f88c74060072673c605ac74929",
+    "semantic_hash": ""
   },
   "Assets/Tests/EditMode/EconomyTests.cs": {
     "mtime": 1794152894.1543362,
@@ -222,16 +222,16 @@
     "semantic_hash": "0d0d303ebe616d3b08ffb39e00ebac50"
   },
   "Assets/Tests/Editor/SceneBuilderTests.cs": {
-    "mtime": 1794166350.713875,
-    "seen": 1794166500.6843657,
-    "ast_hash": "69d4f6eafc03a6790ab88289e6ce1047",
+    "mtime": 1794185059.6182325,
+    "seen": 1794185856.050617,
+    "ast_hash": "f76195ead63865a06f4f30932c73e975",
     "semantic_hash": ""
   },
   "Assets/Tests/PlayMode/GameplayIntegrationTests.cs": {
-    "mtime": 1794161696.1997278,
-    "seen": 1794163132.0813756,
-    "ast_hash": "86188c9f2f6ce773a8a469d97140395b",
-    "semantic_hash": "86188c9f2f6ce773a8a469d97140395b"
+    "mtime": 1794185060.0382183,
+    "seen": 1794185856.0506184,
+    "ast_hash": "042a24d16bcc6e617f82c0fd2ba33acd",
+    "semantic_hash": ""
   },
   "Packages/manifest.json": {
     "mtime": 1794161402.0657957,
@@ -295,21 +295,21 @@
     "semantic_hash": ""
   },
   "CHANGELOG.md": {
-    "mtime": 1794180254.55959,
-    "seen": 1794180276.6783078,
-    "ast_hash": "c0d1f9a16cb6705bda9c60b69e4d4455",
+    "mtime": 1794186050.3584945,
+    "seen": 1794186103.6838996,
+    "ast_hash": "561ee8359dacadc2408740c016cb389d",
     "semantic_hash": ""
   },
   "Documentation/ARCHITECTURE.md": {
-    "mtime": 1794180254.5658083,
-    "seen": 1794180276.678309,
-    "ast_hash": "5fc3e851413b5f5d0772aaac9e3e876c",
+    "mtime": 1794186100.306011,
+    "seen": 1794186103.6839004,
+    "ast_hash": "38f245cdad09204ecd9aeb292306b2dd",
     "semantic_hash": ""
   },
   "Documentation/REPOSITORY_HANDOFF.md": {
-    "mtime": 1794179930.594529,
-    "seen": 1794180276.6783142,
-    "ast_hash": "a693664a3331e3c6b9616c60d1d7aef8",
+    "mtime": 1794186100.3068774,
+    "seen": 1794186103.6839051,
+    "ast_hash": "ade6fd509d52c6100f101dd6268929f9",
     "semantic_hash": ""
   },
   "Documentation/TASK002_INTEGRATION.md": {
@@ -319,9 +319,9 @@
     "semantic_hash": ""
   },
   "Documentation/UNITY_CHECKLIST.md": {
-    "mtime": 1794180254.5688193,
-    "seen": 1794180276.6783166,
-    "ast_hash": "19e8282d59884dd86667331a709b22dd",
+    "mtime": 1794186100.3076577,
+    "seen": 1794186103.6839068,
+    "ast_hash": "8dfab1b8430ece37dac43e7770c1c47c",
     "semantic_hash": ""
   },
   "Documentation/VERIFICATION.md": {
@@ -343,9 +343,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1794180254.5586638,
-    "seen": 1794180276.6783233,
-    "ast_hash": "f43f49825a5e61eb1c99865e189f6e6b",
+    "mtime": 1794186050.3583798,
+    "seen": 1794186103.683915,
+    "ast_hash": "9bd5b56262a0a88aacd473af6edc0348",
     "semantic_hash": ""
   },
   "Tools/Graphify/requirements-lock.txt": {
@@ -361,9 +361,9 @@
     "semantic_hash": ""
   },
   "VERSION.md": {
-    "mtime": 1794180254.5600193,
-    "seen": 1794180276.6783276,
-    "ast_hash": "96603ac73a60cbbd8a707acad579d5e8",
+    "mtime": 1794186050.3587222,
+    "seen": 1794186103.683919,
+    "ast_hash": "5a8e7608a64d42d0a30dcc590d587dca",
     "semantic_hash": ""
   },
   ".github/workflows/graphify.yml": {
@@ -403,9 +403,9 @@
     "semantic_hash": ""
   },
   "Documentation/UNITY_FIRST_LAUNCH.md": {
-    "mtime": 1794180254.5681067,
-    "seen": 1794180276.6783175,
-    "ast_hash": "30c9625ee4d047cbf2a39a5d2119cff6",
+    "mtime": 1794186100.3075345,
+    "seen": 1794186103.6839077,
+    "ast_hash": "8e84eb737716ecc3e0d087837278d727",
     "semantic_hash": ""
   },
   "Documentation/UNITY_READINESS_REPORT.md": {
@@ -415,9 +415,9 @@
     "semantic_hash": ""
   },
   ".github/workflows/unity-verification.yml": {
-    "mtime": 1794180254.57189,
-    "seen": 1794180276.6782374,
-    "ast_hash": "56ebb1404d8832fb582fc4ad1d8f3c2b",
+    "mtime": 1794186050.357687,
+    "seen": 1794186103.6838324,
+    "ast_hash": "bcdffbe4b1b42e01d1091dd57afb78c3",
     "semantic_hash": ""
   },
   "Tools/UnityCi/verify.py": {
@@ -439,27 +439,27 @@
     "semantic_hash": ""
   },
   "Assets/Scripts/Core/Progression/ProgressionConfiguration.cs": {
-    "mtime": 1794179501.457347,
-    "seen": 1794179845.5252259,
-    "ast_hash": "16683ecfb080533c8ec879f0e9782e57",
+    "mtime": 1794184733.2722495,
+    "seen": 1794185856.050576,
+    "ast_hash": "eef2c8ebb6284e406ce42536c0e784db",
     "semantic_hash": ""
   },
   "Assets/Scripts/Core/Progression/ProgressionData.cs": {
-    "mtime": 1794178187.9424486,
-    "seen": 1794179845.525227,
-    "ast_hash": "5b4d4eaeb6ea9fe67bbcd8f7119a1d75",
+    "mtime": 1794184734.1321745,
+    "seen": 1794185856.0505798,
+    "ast_hash": "2b63469396955712fabd6a167b60453b",
     "semantic_hash": ""
   },
   "Assets/Scripts/Core/Progression/ProgressionService.cs": {
-    "mtime": 1794180253.8550608,
-    "seen": 1794180276.6782603,
-    "ast_hash": "b62fb2f22995b6017ba1d9528c1e5e74",
+    "mtime": 1794184733.71621,
+    "seen": 1794185856.0505824,
+    "ast_hash": "bb2ccdb44ac19089fbcde0287b17cfc0",
     "semantic_hash": ""
   },
   "Assets/Scripts/Core/Progression/ProgressionStore.cs": {
-    "mtime": 1794178137.4232535,
-    "seen": 1794179845.5252292,
-    "ast_hash": "eb61783d57ca7010a03b1d080cb6182d",
+    "mtime": 1794184734.7681203,
+    "seen": 1794185856.0505838,
+    "ast_hash": "7cd43d076d6ca6930566bebd64d3db16",
     "semantic_hash": ""
   },
   "Assets/Tests/EditMode/ProgressionPersistenceTests.cs": {
@@ -475,15 +475,57 @@
     "semantic_hash": ""
   },
   "Documentation/PERMANENT_PROGRESSION.md": {
-    "mtime": 1794180388.8810818,
-    "seen": 1794180391.5977879,
-    "ast_hash": "c3406d197dfb5f649db0a5c1b4e46c1a",
+    "mtime": 1794186100.3067112,
+    "seen": 1794186103.6839032,
+    "ast_hash": "e6af1d9cd5d4588ae01887f63c373033",
     "semantic_hash": ""
   },
   "Documentation/REPOSITORY_CONSOLIDATION.md": {
-    "mtime": 1794179807.6075296,
-    "seen": 1794179845.5252821,
-    "ast_hash": "c49b395a75ea20860a59098bb901512b",
+    "mtime": 1794186100.306826,
+    "seen": 1794186103.6839042,
+    "ast_hash": "98b7851b5e284addcc804725e1fedc42",
+    "semantic_hash": ""
+  },
+  "Assets/Scripts/Core/Progression/ProgressionController.cs": {
+    "mtime": 1794185817.1559336,
+    "seen": 1794185856.0505779,
+    "ast_hash": "10fd8be814b0e5eb0abe5d5a353c3aec",
+    "semantic_hash": ""
+  },
+  "Assets/Scripts/Core/Progression/ProgressionMenuView.cs": {
+    "mtime": 1794185527.7120593,
+    "seen": 1794185856.0505812,
+    "ast_hash": "d8eaeb6e3de77b4b23b082ea238f8807",
+    "semantic_hash": ""
+  },
+  "Assets/Scripts/Levels/ProgressionHost.cs": {
+    "mtime": 1794185058.738263,
+    "seen": 1794185856.050595,
+    "ast_hash": "bc0e89b520764a3b05c016e6b49c002d",
+    "semantic_hash": ""
+  },
+  "Assets/Tests/EditMode/ProgressionIntegrationTests.cs": {
+    "mtime": 1794185929.1868331,
+    "seen": 1794186103.6838758,
+    "ast_hash": "df212fd7913707b67be9ff42cb5235e1",
+    "semantic_hash": ""
+  },
+  "Assets/Tests/EditMode/ProgressionRecoveryTests.cs": {
+    "mtime": 1794185957.8297715,
+    "seen": 1794186103.683878,
+    "ast_hash": "2243281d62c55be04ee8915602c01e28",
+    "semantic_hash": ""
+  },
+  "Assets/Tests/PlayMode/ProgressionAdapterTests.cs": {
+    "mtime": 1794185528.5800455,
+    "seen": 1794185856.0506194,
+    "ast_hash": "c8baea97e4742491d71e6c5e9a50d0d4",
+    "semantic_hash": ""
+  },
+  "Documentation/UNITY_PROGRESSION_INTEGRATION.md": {
+    "mtime": 1794186050.1387932,
+    "seen": 1794186103.6839094,
+    "ast_hash": "8080f9e1bed6dd28285b32791d98a186",
     "semantic_hash": ""
   }
 }

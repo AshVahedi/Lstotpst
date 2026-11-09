@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using LastOutpost.Core.Economy;
+using LastOutpost.Core.Progression;
 using LastOutpost.Core.Simulation;
 using LastOutpost.Gameplay;
 using LastOutpost.Presentation;
@@ -22,6 +23,7 @@ namespace LastOutpost.Tests.PlayMode
         private PlatformMotor motor;
         private PrototypeHud hud;
         private Material material;
+        private ProgressionController progression;
 
         [SetUp]
         public void SetUp()
@@ -33,7 +35,9 @@ namespace LastOutpost.Tests.PlayMode
             settings.betweenEncounterSeconds = 0;
             root = new GameObject("Last Outpost test");
             session = root.AddComponent<OutpostSession>();
-            session.Configure(settings, false);
+            progression = new ProgressionController(ProgressionConfiguration.Prototype(), new MemoryProgressionStore());
+            progression.Initialize();
+            session.Configure(settings, progression, false);
             vehicle = Child("Vehicle");
             motor = root.AddComponent<PlatformMotor>();
             motor.Configure(session, vehicle.transform, Vector3.zero);
@@ -52,6 +56,7 @@ namespace LastOutpost.Tests.PlayMode
             UnityEngine.Object.Destroy(root);
             UnityEngine.Object.Destroy(settings);
             if (material != null) UnityEngine.Object.Destroy(material);
+            progression.Dispose();
             yield return null;
         }
 
@@ -315,6 +320,7 @@ namespace LastOutpost.Tests.PlayMode
         [Test]
         public void InvalidInspectorConfigurationDoesNotDiscardAnExistingRun()
         {
+            hud.StartRun();
             GameRun current = session.Run;
             settings.maximumHealth = 0;
             Assert.Throws<ArgumentOutOfRangeException>(() => session.ResetRun());

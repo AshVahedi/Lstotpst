@@ -66,7 +66,8 @@ namespace LastOutpost.Tests.Editor
             scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Additive);
             GameObject loadedRoot = scene.GetRootGameObjects().Single(g => g.GetComponent<GeneratedLevelRoot>() != null);
             Assert.That(scene.GetRootGameObjects().Any(g => g.name == "Preserve this unrelated root"), Is.True);
-            AssertReferences(loadedRoot.GetComponent<OutpostSession>(), "settings");
+            AssertReferences(loadedRoot.GetComponent<OutpostSession>(), "settings", "progressionHost");
+            Assert.That(loadedRoot.GetComponentsInChildren<ProgressionHost>(true).Length, Is.EqualTo(1));
             AssertReferences(loadedRoot.GetComponent<PlatformMotor>(), "session", "vehicle");
             AssertReferences(loadedRoot.GetComponent<EnemySpawner>(), "session", "basicPrefab", "fastPrefab", "bossPrefab", "actorRoot");
             AssertReferences(loadedRoot.GetComponent<CombatFeedback>(), "session", "tracerMaterial", "effectRoot");

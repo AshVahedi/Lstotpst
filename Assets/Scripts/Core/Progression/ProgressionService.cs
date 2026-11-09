@@ -10,7 +10,8 @@ namespace LastOutpost.Core.Progression
     {
         Succeeded, InvalidUpgrade, MaximumLevel, InsufficientCredits, Overflow,
         PersistenceFailed, PersistenceUncertain, Conflict, ReloadRequired, UnknownLevel, LevelLocked,
-        InvalidRun, RunNotFinished, AlreadyProcessed, InvalidRunConfiguration
+        InvalidRun, RunNotFinished, AlreadyProcessed, InvalidRunConfiguration,
+        NotInitialized, Busy, NotBetweenRuns, ConfirmationRequired, RecoveryNotSupported
     }
 
     public interface IRunIdGenerator { string Create(); }
@@ -74,6 +75,17 @@ namespace LastOutpost.Core.Progression
                 if (definition == null || data.UpgradeLevels.Get(kind) >= definition.MaximumLevel) return false;
                 credits = definition.CostAt(data.UpgradeLevels.Get(kind));
                 return true;
+            }
+        }
+
+        /// <summary>Reads durable outcome evidence; AlreadyProcessed alone does not imply a paid victory.</summary>
+        public RunReceipt GetRunReceipt(string runId)
+        {
+            lock (gate)
+            {
+                RunRecordData record = data.Runs.Find(run => run.RunId == runId);
+                return record == null ? null : new RunReceipt(record.RunId, record.Outcome,
+                    record.Outcome == SavedRunOutcome.Victory ? record.VictoryCredits : 0);
             }
         }
 

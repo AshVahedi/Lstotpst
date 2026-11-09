@@ -1,5 +1,6 @@
 using System;
 using LastOutpost.Core.Economy;
+using LastOutpost.Core.Progression;
 using LastOutpost.Core.Simulation;
 using UnityEngine;
 
@@ -9,69 +10,106 @@ namespace LastOutpost.Gameplay
     public sealed class OutpostSession : MonoBehaviour
     {
         [SerializeField] private PrototypeSettings settings;
+        [SerializeField] private ProgressionHost progressionHost;
         [SerializeField, Tooltip("Advance with FixedUpdate. Disable for controlled test/tool stepping.")]
         private bool automaticTick = true;
-        public GameRun Run { get; private set; }
+        private ProgressionController injectedController;
+        private ProgressionController boundController;
+        private ProgressionHost boundHost;
+        public ProgressionController Progression => boundController;
+        public GameRun Run => boundController?.Run;
         public bool IsPaused { get; private set; }
         public event Action<GameRun> RunCreated;
         public event Action<RunStatus> Finished;
+        public event Action ProgressionChanged;
 
-        private void Awake()
-        {
-            if (settings != null) ResetRun();
-        }
-
-        private void FixedUpdate()
-        {
-            if (automaticTick) StepSimulation(Time.fixedDeltaTime);
-        }
-
+        private void OnEnable() { if (settings != null) Bind(); }
+        private void OnDisable() => ReleaseProgressionBinding();
+        private void OnDestroy() => ReleaseProgressionBinding();
+        private void FixedUpdate() { if (automaticTick) StepSimulation(Time.fixedDeltaTime); }
         private void OnApplicationPause(bool paused) => IsPaused = paused;
 
-        private void OnDestroy()
+        public void Configure(PrototypeSettings configuration, ProgressionHost owner, bool advanceAutomatically = true)
         {
-            if (Run != null) Run.Finished -= OnFinished;
-        }
-
-        public void Configure(PrototypeSettings configuration, bool advanceAutomatically = true)
-        {
+            ReleaseProgressionBinding();
             settings = configuration != null ? configuration : throw new ArgumentNullException(nameof(configuration));
+            progressionHost = owner != null ? owner : throw new ArgumentNullException(nameof(owner));
+            injectedController = null;
             automaticTick = advanceAutomatically;
-            if (Application.isPlaying) ResetRun();
+            if (Application.isPlaying && isActiveAndEnabled) Bind();
         }
 
+        /// <summary>Explicit same-owner injection for tests/hosts; never creates a second economy.</summary>
+        public void Configure(PrototypeSettings configuration, ProgressionController owner, bool advanceAutomatically = true)
+        {
+            ReleaseProgressionBinding();
+            settings = configuration != null ? configuration : throw new ArgumentNullException(nameof(configuration));
+            injectedController = owner ?? throw new ArgumentNullException(nameof(owner));
+            progressionHost = null;
+            automaticTick = advanceAutomatically;
+            if (Application.isPlaying && isActiveAndEnabled) Bind();
+        }
+
+        private void Bind()
+        {
+            ReleaseProgressionBinding();
+            boundHost = injectedController == null ? ProgressionHost.Resolve(progressionHost) : null;
+            boundController = injectedController ?? boundHost?.Controller;
+            if (boundController == null) { ProgressionChanged?.Invoke(); return; }
+            boundHost?.ClaimDriver(this);
+            boundController.RunChanged += ForwardRun;
+            boundController.Finished += ForwardFinished;
+            ForwardRun(Run);
+            ProgressionChanged?.Invoke();
+        }
+
+        public void ReleaseProgressionBinding()
+        {
+            if (boundController != null)
+            {
+                boundController.RunChanged -= ForwardRun;
+                boundController.Finished -= ForwardFinished;
+            }
+            boundHost?.ReleaseDriver(this);
+            boundHost = null;
+            boundController = null;
+            RunCreated?.Invoke(null);
+            ProgressionChanged?.Invoke();
+        }
+
+        public void RetryInitialization() { if (boundController == null) Bind(); else boundController.RetryLoad(); }
+        public bool BeginRun()
+        {
+            if (settings == null || boundController == null || IsPaused) return false;
+            return boundController.StartRun(settings.Build()) == ProgressionResult.Succeeded;
+        }
+
+        // Validate first, preserving an existing run if Inspector configuration is invalid.
         public void ResetRun()
         {
             if (settings == null) throw new InvalidOperationException("Assign PrototypeSettings before starting Last Outpost.");
-            // Build first so invalid inspector data cannot discard a valid existing run.
-            var next = new GameRun(settings.Build());
-            if (Run != null) Run.Finished -= OnFinished;
-            Run = next;
-            Run.Finished += OnFinished;
-            RunCreated?.Invoke(Run);
-        }
-
-        public bool BeginRun()
-        {
-            if (Run == null) ResetRun();
-            return Run.Start();
+            settings.Build();
+            boundController?.ReturnToMenu();
         }
 
         public void RestartRun()
         {
-            ResetRun();
-            BeginRun();
+            if (settings == null || boundController == null || IsPaused) return;
+            RunConfiguration template = settings.Build();
+            if (boundController.ReturnToMenu() == ProgressionResult.Succeeded) boundController.StartRun(template);
         }
 
         public void StepSimulation(float deltaSeconds)
         {
-            if (!IsPaused) Run?.Tick(deltaSeconds);
+            if (!IsPaused && (boundHost == null || boundHost.CanDrive(this))) boundController?.Advance(deltaSeconds);
         }
 
         public PurchaseResult BuyAmmunition() => CanCommand ? Run.BuyAmmunition() : PurchaseResult.RunNotActive;
         public PurchaseResult Repair() => CanCommand ? Run.Repair() : PurchaseResult.RunNotActive;
         public PurchaseResult ActivateSpecial() => CanCommand ? Run.ActivateSpecial() : PurchaseResult.RunNotActive;
-        private bool CanCommand => Run != null && !IsPaused;
-        private void OnFinished(RunStatus result) => Finished?.Invoke(result);
+        private bool CanCommand => boundController != null && boundController.Screen == ProgressionScreen.Playing &&
+            !boundController.IsBusy && Run != null && !IsPaused;
+        private void ForwardRun(GameRun run) => RunCreated?.Invoke(run);
+        private void ForwardFinished(RunStatus status) => Finished?.Invoke(status);
     }
 }

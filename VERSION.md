@@ -1,7 +1,8 @@
 # Version
 
 **0.1.0** — foundation, Unity integration source and independently tested permanent
-progression; Unity/Android validation and progression session wiring are pending.
+progression and Unity-facing lifecycle/UI/recovery wiring; actual Unity/Android
+validation remains pending.
 
 Task 002 adds runtime adapters, settings, automatic route/combat orchestration,
 spawning, placeholder presentation, minimal UI, and reproducible Editor generation.
@@ -25,3 +26,10 @@ persistence and a Unity-neutral session boundary. **246 independent tests pass**
 (200 NUnit + 39 Python validators/helpers + seven Graphify). The 200 shared tests
 and 21 additional Unity-only cases have not executed in Unity. See
 Documentation/PERMANENT_PROGRESSION.md and REPOSITORY_CONSOLIDATION.md.
+
+Task 006 retains 0.1.0. Application-lifetime progression ownership, registered-run
+adoption, between-run upgrades, saved reward results and confirmed backed-up
+recovery are implemented. **274 independent tests pass** (228 C# + 39 helpers +
+seven Graphify); 27 additional Unity-only cases remain unexecuted (four Editor,
+23 PlayMode), as do the shared cases inside Unity. No Editor/Android claim is made.
+See Documentation/UNITY_PROGRESSION_INTEGRATION.md.

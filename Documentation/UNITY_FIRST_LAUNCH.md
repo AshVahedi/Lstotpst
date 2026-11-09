@@ -10,7 +10,7 @@ no cloud Unity operation is claimed as successful.
 ```sh
 git clone https://github.com/AshVahedi/Lstotpst.git
 cd Lstotpst
-git switch development/task-005-permanent-progression
+git switch development/task-006-unity-progression
 git status
 ```
 
@@ -22,8 +22,9 @@ has it. Keep existing local edits and do not reset/force-push over them.
 Task 004 starts from the Task 003 head `64e7475a591a1fab9d89572c931c03b16cf5727f`.
 Task 005 uses the verified `development/integrated-foundation` at Task 004's
 `c6440ba…` head. See [consolidation](REPOSITORY_CONSOLIDATION.md) and
-[progression integration requirements](PERMANENT_PROGRESSION.md). The generator
-still creates the legacy prototype; permanent progression is not wired to its UI.
+[progression integration requirements](PERMANENT_PROGRESSION.md). Task 006 starts from Task 005 `b3b835b…`; PRs #1–6 remained open at inspection.
+Its generator now assigns the persistent progression host and between-run UI. See
+[the integration guide](UNITY_PROGRESSION_INTEGRATION.md) for save/recovery behavior.
 
 Optional independent checks require .NET SDK 8.0.4xx and Python 3.12:
 
@@ -84,13 +85,14 @@ Expected outputs below `Assets/LastOutpostGenerated/`:
 | `Prefabs` | `Platform.prefab`, `Basic.prefab`, `Fast.prefab`, `Boss.prefab` |
 | `Scenes` | `IndustrialWasteland.unity` |
 
-The scene has one `GeneratedLevelRoot`, session/settings reference, platform/motor,
+The scene has one `GeneratedLevelRoot`, session/settings/progression-host references, platform/motor,
 enemy view root/spawner with three prefab references, feedback root/material,
 HUD, orthographic camera following the platform and placeholder scenery.
 The platform has a health bar; enemy prefabs bind their own health bars.
 There is no physical projectile prefab: immediate-hit damage is authoritative
 in Core, and `ShotTrace` is a temporary visual LineRenderer only.
-Start/victory/defeat are states of the single IMGUI HUD, not separate scenes.
+Start/upgrades/recovery/victory/defeat are states of the single IMGUI HUD. The
+host detaches and persists at runtime; scene replacement must reuse its profile.
 Wave/resource managers are composed inside `GameRun`, not extra scene components.
 
 Run the menu again. Confirm one owned root, four prefabs, stable GUIDs/settings,
@@ -113,7 +115,7 @@ Create `TestResults` first if needed. On PowerShell invoke the executable with
 ## 5. Play and inspect the Console
 
 Open the generated scene if it is not already active. Set Game View to
-**540 × 960** / 9:16 portrait. Enter Play Mode, press **START RUN**, and check:
+**540 × 960** / 9:16 portrait. Enter Play Mode, inspect **UPGRADES**, then press **START LEVEL 1**, and check:
 
 - Automatic horizontal travel; slowdown during ordinary encounters; stop for
   boss and terminal states. Camera follows the platform.
@@ -123,7 +125,9 @@ Open the generated scene if it is not already active. Set Game View to
 - Purchases cost 30 Energy for up to 20 ammo, 50 for up to 25 health, and 80 for
   a special strike by default. Unaffordable/no-effect commands do not charge.
 - Boss death while alive yields **VICTORY**; zero platform health yields
-  **OUTPOST LOST**. **RUN AGAIN** resets inventories, clock, position and views.
+  **OUTPOST LOST**. **BETWEEN-RUN MENU** returns to progression. Start again to verify fresh
+  inventories/clock/views and current upgrades. Saved victories add 500 Credits
+  once; defeat adds zero. Relaunch to check persistence.
 
 Repeat at different portrait aspect ratios. Clear Console before each run,
 disable Collapse when investigating repeated errors, and preserve exception
@@ -135,9 +139,9 @@ does not validate this scene.
 
 Outside Play Mode, choose **Window → General → Test Runner**:
 
-1. **EditMode → Run All**: expected **204 cases**, comprising 200 shared core cases
+1. **EditMode → Run All**: expected **232 cases**, comprising 228 shared core cases
    and four Editor generator cases (two existing and two save-failure cases).
-2. **PlayMode → Run All**: expected **17 integration cases**.
+2. **PlayMode → Run All**: expected **23 integration cases** (including six progression adapter cases).
 3. Export/save actual XML results and Editor logs. Inspect any discrepancy in
    discovery/counts; do not substitute .NET results for Unity results.
 
@@ -225,6 +229,10 @@ memory. Save logs, device model/API, screenshots and reproducible failures.
 - **ADB unauthorized / installation failure:** approve USB debugging, select the
   correct device and inspect the actual adb message (ABI, API, storage/signature).
   Removing an existing app can delete its data; it is not a routine build step.
+- **Save recovery screen:** preserve `progression-v1.json` and `.pending`; use
+  Retry Loading for conflicts, then Retry Saving for a pending run. New Profile
+  requires confirmation and backs up originals; do not manually delete them.
+  See the integration guide before testing with copied damaged saves.
 - **Clipped/tiny UI:** capture device aspect ratio and safe area. HUD uses
   width-scaled IMGUI within `Screen.safeArea`; physical touch/readability is pending.
 
