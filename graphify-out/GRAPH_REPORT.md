@@ -7,12 +7,12 @@
 - WARNING: 26 of 123 files seen (21%) have no supported extractor and are missing from this graph entirely. It may look complete while representing only part of the codebase.
 
 ## Summary
-- 1600 nodes · 4619 edges · 72 communities (57 shown, 15 thin omitted)
-- Extraction: 75% EXTRACTED · 25% INFERRED · 0% AMBIGUOUS · INFERRED: 1168 edges (avg confidence: 0.85)
+- 1600 nodes · 4650 edges · 89 communities (55 shown, 34 thin omitted)
+- Extraction: 74% EXTRACTED · 26% INFERRED · 0% AMBIGUOUS · INFERRED: 1199 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8e7cbd11`
+- Built from commit: `f5f25b37`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -22,8 +22,8 @@
 - system
 - with
 - GameRun
-- PrototypeSettings.Build
-- GameplayIntegrationTests
+- PrototypeContent.PrototypeContent
+- JsonProgressionCodec
 - PlatformState
 - steps
 - Test
@@ -49,73 +49,70 @@
 - EquipmentSlot
 - LoadoutRules.Change
 - Health
-- ProgressionController
+- ProgressionResult
 - EnemyState
 - LoadoutSnapshot
 - ProgressionData
 - OutpostSession
-- ShotEvent
-- UpgradeDefinition
+- ProgressionController
 - Test
 - EquipmentTests
-- ProgressionAdapterTests
+- MemoryProgressionStore
 - PrototypeContent
 - LoadoutResult
 - EquipmentDefinition
-- ProgressionConfiguration.Prototype
+- ProgressionRecoveryTests
 - PrototypeHud
-- EquipmentConfiguration.Prototype
+- EquipmentConfiguration
 - UpgradeMenuRow
 - LoadoutMenuRow
 - RunConfiguration
-- Guard.NonNegative
+- ProgressionHost
 - ProgressionScreen
-- RunLoadout
-- UpgradeKind
-- PurchaseResult
+- Transform
+- UncertainResetStore
+- ProgressionRunSession
 - LoadoutMenuView
 - LoadoutMenuOption
 - RunReceipt
-- WeaponConfig
+- CombatFeedback
 - ProgressionLoadError
 - LevelState
-- EquipmentStat
 - IRunIdGenerator
 - GameplayIntegrationTests.SetUp
-- LoadoutRunBuilder.Build
 
 ## God Nodes (most connected - your core abstractions)
 1. `ProgressionService` - 84 edges
 2. `ProgressionController` - 71 edges
 3. `ProgressionData` - 60 edges
-4. `GameRun` - 56 edges
+4. `GameRun` - 60 edges
 5. `OutpostSession` - 44 edges
-6. `ProgressionTests` - 43 edges
-7. `ProgressionResult` - 42 edges
+6. `ProgressionResult` - 43 edges
+7. `ProgressionTests` - 43 edges
 8. `PrototypeHud` - 41 edges
 9. `PrototypeContent` - 39 edges
 10. `Health` - 38 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `UpgradeMenuRow` --references--> `UpgradeKind`  [EXTRACTED]
-  Assets/Scripts/Core/Progression/ProgressionMenuView.cs → Assets/Scripts/Core/Progression/ProgressionConfiguration.cs
-- `ProgressionController` --references--> `ProgressionConfiguration`  [EXTRACTED]
-  Assets/Scripts/Core/Progression/ProgressionController.cs → Assets/Scripts/Core/Progression/ProgressionConfiguration.cs
-- `ProgressionService` --references--> `ProgressionConfiguration`  [EXTRACTED]
-  Assets/Scripts/Core/Progression/ProgressionService.cs → Assets/Scripts/Core/Progression/ProgressionConfiguration.cs
-- `ProgressionIntegrationTests` --references--> `ProgressionConfiguration`  [EXTRACTED]
-  Assets/Tests/EditMode/ProgressionIntegrationTests.cs → Assets/Scripts/Core/Progression/ProgressionConfiguration.cs
-- `ProgressionPersistenceTests` --references--> `ProgressionConfiguration`  [EXTRACTED]
-  Assets/Tests/EditMode/ProgressionPersistenceTests.cs → Assets/Scripts/Core/Progression/ProgressionConfiguration.cs
+- `SpawnGroup` --references--> `EnemyDefinition`  [EXTRACTED]
+  Assets/Scripts/Core/Levels/LevelDefinition.cs → Assets/Scripts/Core/Enemies/EnemyState.cs
+- `LevelProgression` --references--> `EnemyState`  [EXTRACTED]
+  Assets/Scripts/Core/Levels/LevelProgression.cs → Assets/Scripts/Core/Enemies/EnemyState.cs
+- `EnemyAgent` --references--> `EnemyState`  [EXTRACTED]
+  Assets/Scripts/Core/Simulation/EnemyAgent.cs → Assets/Scripts/Core/Enemies/EnemyState.cs
+- `EquipmentDefinition` --references--> `ModuleKind`  [EXTRACTED]
+  Assets/Scripts/Core/Modules/EquipmentConfiguration.cs → Assets/Scripts/Core/Modules/ModuleRack.cs
+- `ResolvedInstallation` --references--> `EquipmentDefinition`  [EXTRACTED]
+  Assets/Scripts/Core/Modules/RunLoadout.cs → Assets/Scripts/Core/Modules/EquipmentConfiguration.cs
 
 ## Import Cycles
 - None detected.
 
-## Communities (72 total, 15 thin omitted)
+## Communities (89 total, 34 thin omitted)
 
 ### Community 1 - "EnemySpawner"
-Cohesion: 0.10
-Nodes (11): EnemyActor, Agent, EnemySpawner, ActiveCount, GeneratedLevelRoot, PlatformMotor, Mode, CameraFollow (+3 more)
+Cohesion: 0.17
+Nodes (9): EnemyAgent, DefeatReported, PositionX, State, EnemyActor, Agent, EnemySpawner, ActiveCount (+1 more)
 
 ### Community 2 - "system"
 Cohesion: 0.06
@@ -126,16 +123,20 @@ Cohesion: 0.06
 Nodes (33): env, runs-on, steps, timeout-minutes, GRAPHIFY_BACKEND, GRAPHIFY_MAX_WORKERS, GRAPHIFY_OUT, GRAPHIFY_QUERY_LOG_DISABLE (+25 more)
 
 ### Community 4 - "GameRun"
-Cohesion: 0.06
-Nodes (33): GameRun, Configuration, ElapsedSeconds, Enemies, Level, Platform, Route, RunId (+25 more)
+Cohesion: 0.05
+Nodes (39): GameRun, Configuration, ElapsedSeconds, Enemies, Level, Platform, Route, RunId (+31 more)
 
-### Community 5 - "PrototypeSettings.Build"
-Cohesion: 0.07
-Nodes (28): EnemyDefinition, Attack, EnergyDrop, Id, IsBoss, MaximumHealth, MovementSpeed, LevelDefinition (+20 more)
+### Community 5 - "PrototypeContent.PrototypeContent"
+Cohesion: 0.10
+Nodes (25): ClosestTargetStrategy, SpecialAttackConfig, CooldownSeconds, Damage, EnergyCost, Range, Targeting, TacticalPurchaseConfig (+17 more)
+
+### Community 6 - "JsonProgressionCodec"
+Cohesion: 0.12
+Nodes (5): IProgressionCodec, JsonProgressionCodec, SchemaHeader, UnsupportedReader, FailingCodec
 
 ### Community 7 - "PlatformState"
-Cohesion: 0.14
-Nodes (15): ModuleDefinition, Id, Kind, ModuleKind, Armor, BasicGun, MissileLauncher, Reactor (+7 more)
+Cohesion: 0.10
+Nodes (21): ModuleDefinition, Id, Kind, ModuleKind, Armor, BasicGun, MissileLauncher, Reactor (+13 more)
 
 ### Community 8 - "steps"
 Cohesion: 0.09
@@ -166,20 +167,20 @@ Cohesion: 0.07
 Nodes (29): with, allowDirtyBuild, androidExportType, androidTargetSdkVersion, androidVersionCode, artifactsPath, buildMethod, buildName (+21 more)
 
 ### Community 15 - "EconomyTests"
-Cohesion: 0.18
-Nodes (8): ResourceType, Energy, ResourceWallet, TacticalPurchases, Config, NextSpecialTimeSeconds, SpecialAttack, EconomyTests
+Cohesion: 0.13
+Nodes (15): ResourceType, Energy, ResourceWallet, PurchaseResult, CoolingDown, InsufficientEnergy, NoEffect, PlatformDestroyed (+7 more)
 
 ### Community 16 - "Test"
-Cohesion: 0.13
-Nodes (7): ProgressionService, Configuration, RequiresReload, MemoryProgressionStore, Backups, EquipmentPersistenceTests, FailingPromotion
+Cohesion: 0.14
+Nodes (5): ProgressionService, Configuration, RequiresReload, EquipmentPersistenceTests, FaultStore
 
 ### Community 17 - "FileProgressionStore"
-Cohesion: 0.07
-Nodes (11): FileProgressionStore, HasPendingWrite, PendingPath, SavePath, IProgressionRecoveryStore, IProgressionStore, StoreCommitResult, Committed (+3 more)
+Cohesion: 0.23
+Nodes (4): FileProgressionStore, HasPendingWrite, PendingPath, SavePath
 
 ### Community 20 - "ProgressionConfiguration"
-Cohesion: 0.19
-Nodes (11): LevelRewardDefinition, LevelId, LevelNumber, VictoryCredits, ProgressionConfiguration, BasePlatform, BaseWeaponMultiplier, Equipment (+3 more)
+Cohesion: 0.08
+Nodes (22): LevelRewardDefinition, LevelId, LevelNumber, VictoryCredits, ProgressionConfiguration, BasePlatform, BaseWeaponMultiplier, Equipment (+14 more)
 
 ### Community 22 - "steps"
 Cohesion: 0.24
@@ -190,8 +191,8 @@ Cohesion: 0.17
 Nodes (11): concurrency, cancel-in-progress, group, name, runs-on, timeout-minutes, jobs, infrastructure (+3 more)
 
 ### Community 24 - "Target"
-Cohesion: 0.18
-Nodes (12): Ammunition, Capacity, Count, Target, Distance, Health, Id, Weapon (+4 more)
+Cohesion: 0.17
+Nodes (13): Ammunition, Capacity, Count, ITargetingStrategy, Target, Distance, Health, Id (+5 more)
 
 ### Community 25 - "build_android"
 Cohesion: 0.22
@@ -210,56 +211,52 @@ Cohesion: 0.40
 Nodes (5): name, needs, runs-on, timeout-minutes, editor
 
 ### Community 29 - "EquipmentSlot"
-Cohesion: 0.11
+Cohesion: 0.12
 Nodes (18): EquipmentCategory, AdvancedWeapon, BasicWeapon, DefensiveModule, SupportModule, EquipmentSlot, AllowedCategories, Capacity (+10 more)
 
 ### Community 30 - "LoadoutRules.Change"
-Cohesion: 0.19
-Nodes (7): EquipmentConfiguration, Catalog, Slots, TotalCapacity, EquipmentInstallationData, EquipmentProfileData, LoadoutRules
+Cohesion: 0.24
+Nodes (3): EquipmentInstallationData, EquipmentProfileData, LoadoutRules
 
 ### Community 31 - "Health"
-Cohesion: 0.13
+Cohesion: 0.14
 Nodes (12): Health, Current, DamageReduction, IsDead, Maximum, Missing, PlatformState, AdvancedAmmunition (+4 more)
 
-### Community 32 - "ProgressionController"
-Cohesion: 0.06
-Nodes (36): ProgressionController, CanUseMenu, IsBusy, IsInitialized, LastBackup, LastResult, Message, RequiresReload (+28 more)
+### Community 32 - "ProgressionResult"
+Cohesion: 0.09
+Nodes (22): ProgressionResult, AlreadyProcessed, Busy, ConfirmationRequired, Conflict, InsufficientCredits, InvalidLoadout, InvalidRun (+14 more)
 
 ### Community 33 - "EnemyState"
-Cohesion: 0.18
-Nodes (10): EnemyState, Attack, Definition, DropCollected, Health, Id, EnemyAgent, DefeatReported (+2 more)
+Cohesion: 0.16
+Nodes (6): EnemyState, Attack, Definition, DropCollected, Health, Id
 
 ### Community 34 - "LoadoutSnapshot"
-Cohesion: 0.12
+Cohesion: 0.13
 Nodes (15): InstalledEquipment, EquipmentId, SlotId, LoadoutSnapshot, Installations, OwnedEquipmentIds, ProgressionSnapshot, CompletedLevelIds (+7 more)
 
 ### Community 35 - "ProgressionData"
-Cohesion: 0.10
-Nodes (13): IProgressionCodec, JsonProgressionCodec, ProgressionData, ProgressionLoadException, Reason, RunRecordData, SchemaHeader, UpgradeLevelsData (+5 more)
+Cohesion: 0.13
+Nodes (9): ProgressionData, ProgressionLoadException, Reason, RunRecordData, UpgradeLevelsData, LegacyProgressionData, FailingFileStore, FaultStore (+1 more)
 
 ### Community 36 - "OutpostSession"
-Cohesion: 0.11
-Nodes (8): OutpostSession, CanCommand, IsPaused, Progression, Run, ProgressionHost, BootError, Controller
-
-### Community 37 - "ShotEvent"
 Cohesion: 0.15
-Nodes (11): RunCombat, ShotEvent, FromX, Kind, TargetEnemyId, ToX, ShotKind, BasicGun (+3 more)
+Nodes (5): OutpostSession, CanCommand, IsPaused, Progression, Run
 
-### Community 38 - "UpgradeDefinition"
-Cohesion: 0.19
-Nodes (6): UpgradeDefinition, BaseCost, GrowthFactor, IncreasePerLevel, Kind, MaximumLevel
-
-### Community 39 - "Test"
-Cohesion: 0.18
-Nodes (4): ProgressionMenuBinding, FaultStore, ProbeStore, ProgressionIntegrationTests
+### Community 37 - "ProgressionController"
+Cohesion: 0.14
+Nodes (11): ProgressionController, CanUseMenu, IsBusy, IsInitialized, LastBackup, LastResult, Message, RequiresReload (+3 more)
 
 ### Community 40 - "EquipmentTests"
-Cohesion: 0.28
-Nodes (4): EquipmentModifier, Stat, Value, EquipmentTests
+Cohesion: 0.18
+Nodes (10): EquipmentModifier, Stat, Value, EquipmentStat, AmmunitionCapacity, DamageReduction, EnergyPerDefeat, MaximumHealth (+2 more)
+
+### Community 41 - "MemoryProgressionStore"
+Cohesion: 0.20
+Nodes (7): IProgressionRecoveryStore, IProgressionStore, MemoryProgressionStore, Backups, StoreCommitResult, Committed, Conflict
 
 ### Community 42 - "PrototypeContent"
-Cohesion: 0.14
-Nodes (14): PrototypeContent, BasicEnemy, BasicGun, Boss, FastEnemy, LevelOne, MissileLauncher, Purchases (+6 more)
+Cohesion: 0.08
+Nodes (26): WeaponConfig, AmmunitionPerShot, AttackIntervalSeconds, Damage, Id, Range, Targeting, PrototypeContent (+18 more)
 
 ### Community 43 - "LoadoutResult"
 Cohesion: 0.09
@@ -269,13 +266,17 @@ Nodes (23): LoadoutResult, AlreadyInstalled, Busy, CapacityExceeded, Conflict, D
 Cohesion: 0.15
 Nodes (12): EquipmentDefinition, AvailableByDefault, Category, CompatibleSlots, Description, DisplayName, Id, InstallationSize (+4 more)
 
-### Community 45 - "ProgressionConfiguration.Prototype"
-Cohesion: 0.15
-Nodes (4): FailingFileStore, FailingRecoveryStore, LostAcknowledgmentStore, ProgressionRecoveryTests
+### Community 45 - "ProgressionRecoveryTests"
+Cohesion: 0.22
+Nodes (4): FailingPromotion, FailingRecoveryStore, LostAcknowledgmentStore, ProgressionRecoveryTests
 
 ### Community 46 - "PrototypeHud"
-Cohesion: 0.10
-Nodes (3): PrototypeHud, LastFeedback, ProgressionView
+Cohesion: 0.07
+Nodes (7): ProgressionMenuBinding, PrototypeHud, LastFeedback, ProgressionView, GameplayIntegrationTests, CountingStore, ProgressionAdapterTests
+
+### Community 47 - "EquipmentConfiguration"
+Cohesion: 0.29
+Nodes (6): EquipmentCatalog, Definitions, EquipmentConfiguration, Catalog, Slots, TotalCapacity
 
 ### Community 48 - "UpgradeMenuRow"
 Cohesion: 0.18
@@ -286,24 +287,24 @@ Cohesion: 0.20
 Nodes (10): LoadoutMenuRow, CanUnequip, Category, Enabled, EquipmentId, EquipmentName, Options, Required (+2 more)
 
 ### Community 50 - "RunConfiguration"
-Cohesion: 0.12
-Nodes (11): RunConfiguration, BasicGun, Equipment, InitialAmmunition, Level, MissileLauncher, Platform, Purchases (+3 more)
+Cohesion: 0.07
+Nodes (23): ResolvedInstallation, Definition, SlotId, SlotIndex, RunLoadout, EnergyPerDefeat, HasAdvancedWeapon, Installations (+15 more)
+
+### Community 51 - "ProgressionHost"
+Cohesion: 0.21
+Nodes (3): ProgressionHost, BootError, Controller
 
 ### Community 52 - "ProgressionScreen"
 Cohesion: 0.20
 Nodes (10): ProgressionScreen, Closed, Defeat, Loading, Loadout, Playing, Recovery, Start (+2 more)
 
-### Community 53 - "RunLoadout"
+### Community 53 - "Transform"
+Cohesion: 0.24
+Nodes (4): PlatformMotor, Mode, CameraFollow, HealthBarView
+
+### Community 56 - "ProgressionRunSession"
 Cohesion: 0.18
-Nodes (9): ResolvedInstallation, Definition, SlotId, SlotIndex, RunLoadout, EnergyPerDefeat, HasAdvancedWeapon, Installations (+1 more)
-
-### Community 54 - "UpgradeKind"
-Cohesion: 0.28
-Nodes (5): UpgradeKind, AmmunitionCapacity, Armor, MaximumHealth, WeaponDamage
-
-### Community 56 - "PurchaseResult"
-Cohesion: 0.29
-Nodes (7): PurchaseResult, CoolingDown, InsufficientEnergy, NoEffect, PlatformDestroyed, RunNotActive, Succeeded
+Nodes (8): ProgressionRunSession, LastCompletionResult, Run, RunStatus, Defeat, Playing, StartScreen, Victory
 
 ### Community 57 - "LoadoutMenuView"
 Cohesion: 0.29
@@ -317,49 +318,37 @@ Nodes (13): LoadoutOperation, Equip, Replace, RestoreDefaults, Unequip, LoadoutM
 Cohesion: 0.18
 Nodes (10): RunReceipt, AwardedCredits, IsTerminal, Outcome, RunId, SavedRunOutcome, Abandoned, Active (+2 more)
 
-### Community 62 - "WeaponConfig"
-Cohesion: 0.13
-Nodes (15): ClosestTargetStrategy, ITargetingStrategy, WeaponConfig, AmmunitionPerShot, AttackIntervalSeconds, Damage, Id, Range (+7 more)
-
 ### Community 63 - "ProgressionLoadError"
-Cohesion: 0.33
+Cohesion: 0.29
 Nodes (6): ProgressionLoadError, Corrupt, InterruptedWrite, InvalidValues, StorageUnavailable, UnsupportedSchema
 
 ### Community 64 - "LevelState"
 Cohesion: 0.33
 Nodes (6): LevelState, BetweenEncounters, Defeat, EncounterActive, Ready, Victory
 
-### Community 65 - "EquipmentStat"
-Cohesion: 0.33
-Nodes (6): EquipmentStat, AmmunitionCapacity, DamageReduction, EnergyPerDefeat, MaximumHealth, WeaponDamageMultiplier
-
 ### Community 69 - "IRunIdGenerator"
-Cohesion: 0.36
+Cohesion: 0.38
 Nodes (3): GuidRunIdGenerator, IRunIdGenerator, FixedId
 
-### Community 77 - "LoadoutRunBuilder.Build"
-Cohesion: 0.27
-Nodes (3): LoadoutRunBuilder, PermanentStatsProvider, WeaponMultiplier
-
 ## Knowledge Gaps
-- **363 isolated node(s):** `MaximumHealth`, `Armor`, `WeaponDamage`, `AmmunitionCapacity`, `Kind` (+358 more)
-  These have ≤1 connection - possible missing edges. (Counts symbols only; 563 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **15 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **363 isolated node(s):** `Id`, `MaximumHealth`, `MovementSpeed`, `Attack`, `EnergyDrop` (+358 more)
+  These have ≤1 connection - possible missing edges. (Counts symbols only; 570 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **34 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ProgressionController` connect `ProgressionController` to `system`, `ProgressionData`, `GameRun`, `IRunIdGenerator`, `OutpostSession`, `Test`, `GameplayIntegrationTests`, `ProgressionMenuView`, `GameplayIntegrationTests.SetUp`, `ProgressionConfiguration.Prototype`, `Test`, `ProgressionConfiguration`, `ProgressionScreen`?**
-  _High betweenness centrality (0.101) - this node is a cross-community bridge._
+- **Why does `ProgressionController` connect `ProgressionController` to `ProgressionResult`, `system`, `GameRun`, `IRunIdGenerator`, `ProgressionController.Load`, `Test`, `JsonProgressionCodec`, `OutpostSession`, `ProgressionMenuView`, `GameplayIntegrationTests.SetUp`, `ProgressionRecoveryTests`, `PrototypeHud`, `Test`, `ProgressionHost`, `ProgressionConfiguration`, `ProgressionScreen`, `ProgressionRunSession`, `ProgressionLoadError`?**
+  _High betweenness centrality (0.092) - this node is a cross-community bridge._
 - **Are the 51 inferred relationships involving `ProgressionService` (e.g. with `ProgressionController.Load()` and `EquipmentPersistenceTests.ActiveRunEquipmentAndStatsCannotBeChangedAndTheNextRunUsesTheNewSelection()`) actually correct?**
   _`ProgressionService` has 51 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `MaximumHealth`, `Armor`, `WeaponDamage` to the rest of the system?**
+- **What connects `Id`, `MaximumHealth`, `MovementSpeed` to the rest of the system?**
   _363 weakly-connected nodes found - possible missing edges._
-- **Should `EnemySpawner` be split into smaller, more focused modules?**
-  _Cohesion score 0.10128205128205128 - nodes in this community are weakly interconnected._
-- **Why does `GameRun` connect `GameRun` to `ProgressionController`, `EnemySpawner`, `system`, `ShotEvent`, `PlatformState`, `Test`, `ProgressionTests`, `RunConfiguration`?**
-  _High betweenness centrality (0.049) - this node is a cross-community bridge._
+- **Should `system` be split into smaller, more focused modules?**
+  _Cohesion score 0.06073674752920036 - nodes in this community are weakly interconnected._
+- **Why does `GameRun` connect `GameRun` to `EnemySpawner`, `system`, `LoadoutSnapshot`, `ProgressionData`, `ProgressionController`, `PlatformState`, `PrototypeHud`, `Test`, `ProgressionTests`, `RunConfiguration`, `ProgressionRunSession`, `CombatFeedback`?**
+  _High betweenness centrality (0.044) - this node is a cross-community bridge._
 - **Are the 16 inferred relationships involving `ProgressionController` (e.g. with `ProgressionHost.EnsureBoot()` and `EquipmentPersistenceTests.FailedLoadoutSaveBlocksTheUiUntilReloadAndDoesNotAutomaticallyRepeatTheChange()`) actually correct?**
   _`ProgressionController` has 16 INFERRED edges - model-reasoned connections that need verification._
-- **Should `system` be split into smaller, more focused modules?**
-  _Cohesion score 0.06208791208791209 - nodes in this community are weakly interconnected._
+- **Should `with` be split into smaller, more focused modules?**
+  _Cohesion score 0.058823529411764705 - nodes in this community are weakly interconnected._
