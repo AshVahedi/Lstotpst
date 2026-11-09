@@ -189,7 +189,7 @@ Android rather than extend content.
 
 ## Graphify dependency review
 
-The existing pinned 0.9.104 installation generated **1,352 nodes and 3,921
+The existing pinned 0.9.104 installation generated **1,351 nodes and 3,979
 relationships**, covering 67 code inputs / 51 C# files (50 Assets plus the syntax
 tool). Source hashes validate as fresh. The source graph shows
 `PrototypeHud -> ProgressionMenuBinding -> ProgressionController -> ProgressionService`
