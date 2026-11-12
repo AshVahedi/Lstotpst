@@ -352,15 +352,22 @@ namespace LastOutpost.Tests
             Assert.That(service.RequiresReload, Is.False);
         }
 
-        [TestCase("1.5")]
-        [TestCase("true")]
-        [TestCase("\"-1\"")]
-        [TestCase("9223372036854775808")]
-        public void InvalidStoredCreditValuesAreRejectedWithoutReplacingTheFile(string value)
+        [TestCase("1.5", ProgressionLoadError.Corrupt)]
+        [TestCase("true", ProgressionLoadError.Corrupt)]
+        [TestCase("\"-1\"", ProgressionLoadError.InvalidValues)]
+        [TestCase("9223372036854775808", ProgressionLoadError.Corrupt)]
+        public void InvalidStoredCreditValuesAreRejectedWithoutReplacingTheFile(string value, ProgressionLoadError reason)
         {
             string payload = Codec.Encode(new ProgressionData()).Replace("\"credits\":0", "\"credits\":" + value);
             File.WriteAllText(path, payload);
-            Assert.Throws<ProgressionLoadException>(() => new ProgressionService(Config, new FileProgressionStore(path)));
+            var error = Assert.Throws<ProgressionLoadException>(() => new ProgressionService(Config, new FileProgressionStore(path)));
+            Assert.That(error.Reason, Is.EqualTo(reason));
+            if (reason == ProgressionLoadError.Corrupt)
+            {
+                Assert.That(error.InnerException, Is.Not.Null, "Keep the native parser error for diagnostics on either runtime.");
+                for (Exception cause = error.InnerException; cause != null; cause = cause.InnerException)
+                    TestContext.WriteLine("JSON parser cause: " + cause.GetType().FullName);
+            }
             Assert.That(File.ReadAllText(path), Is.EqualTo(payload));
         }
 

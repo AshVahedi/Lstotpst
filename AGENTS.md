@@ -22,3 +22,9 @@ Rules:
 - After significant source changes, refresh and include the portable graph snapshot in the commit. Native Git hooks update local graphs after commits/checkouts/merges/rewrites; hooks are local and must be installed in each clone.
 - The graph is static evidence, with EXTRACTED/INFERRED confidence tags. It does not parse Unity `.asmdef` files or prove serialized references, Unity compilation, runtime behavior, or test success.
 - Read `Documentation/GRAPHIFY.md` for setup, limitations, CI artifacts, and the distinction between project skill registration and the host's actual skill/hook support.
+
+## Local development interaction
+
+- Do not use Computer Use for this project: do not control the screen, mouse, keyboard, or application windows, and do not request Computer Use permission.
+- Use normal file editing, terminal commands, automated tests, and Unity log/result inspection.
+- When graphical interaction with Unity Editor is required, give exact manual instructions and let the user perform it.

@@ -171,7 +171,8 @@ namespace LastOutpost.Tests
             kinds.Clear();
             run.Tick(2);
             Assert.That(kinds, Does.Contain(ShotKind.BasicGun));
-            Assert.That(kinds, Does.Not.Contain(ShotKind.Missile));
+            // Unity's NUnit fork has only a string overload for the negated Contain expression.
+            Assert.That(kinds, Has.No.Member(ShotKind.Missile));
         }
 
         [Test]

@@ -14,7 +14,7 @@ using UnityEngine.TestTools;
 
 namespace LastOutpost.Tests.PlayMode
 {
-    [NonParallelizable]
+    // Unity's NUnit fork omits NonParallelizableAttribute; SetUp/TearDown enforce fixture isolation.
     public sealed class ProgressionAdapterTests
     {
         private readonly List<GameObject> owned = new List<GameObject>();
@@ -24,9 +24,21 @@ namespace LastOutpost.Tests.PlayMode
         [SetUp]
         public void SetUp()
         {
-            Assert.That(UnityEngine.Object.FindObjectsByType<ProgressionHost>(FindObjectsInactive.Include,
-                FindObjectsSortMode.None), Is.Empty, "Run in an isolated Test Runner scene; do not touch an existing player's profile.");
+            Assert.That(FindHosts(true), Is.Empty, "Run in an isolated Test Runner scene; do not touch an existing player's profile.");
             settings = ScriptableObject.CreateInstance<PrototypeSettings>();
+        }
+
+        private static ProgressionHost[] FindHosts(bool includeInactive = false)
+        {
+            // These checks count hosts and never depend on order. Keep the original overload
+            // for the project's older Editor target, and use the replacement on Unity 6.6+.
+#if UNITY_6000_6_OR_NEWER
+            return UnityEngine.Object.FindObjectsByType<ProgressionHost>(
+                includeInactive ? FindObjectsInactive.Include : FindObjectsInactive.Exclude);
+#else
+            return UnityEngine.Object.FindObjectsByType<ProgressionHost>(
+                includeInactive ? FindObjectsInactive.Include : FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+#endif
         }
 
         [UnityTearDown]
@@ -88,7 +100,7 @@ namespace LastOutpost.Tests.PlayMode
             next.StepSimulation(0.1f); Assert.That(run.ElapsedSeconds, Is.EqualTo(0.1).Within(0.0001));
             yield return null;
             Assert.That(duplicate == null, Is.True);
-            Assert.That(UnityEngine.Object.FindObjectsByType<ProgressionHost>(FindObjectsSortMode.None).Length, Is.EqualTo(1));
+            Assert.That(FindHosts().Length, Is.EqualTo(1));
             run.Platform.Health.TakeDamage(int.MaxValue); next.StepSimulation(0.1f);
             Assert.That(oldFinishes, Is.Zero); Assert.That(newFinishes, Is.EqualTo(1));
         }

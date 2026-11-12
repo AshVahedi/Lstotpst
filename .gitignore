@@ -33,6 +33,18 @@ Thumbs.db
 **/bin/
 **/obj/
 TestResults/
+# Local verification workspace and Unity Test Runner exports (preserve on disk).
+/Assets/Scenes/LocalVerificationWorkspace.unity
+/Assets/Scenes/LocalVerificationWorkspace.unity.meta
+/Assets/Scenes/TestResults_*.xml
+/Assets/Scenes/TestResults_*.xml.meta
+# Default Editor UI/diagnostic state and unused optional subsystems.
+/ProjectSettings/PackageManagerSettings.asset
+/ProjectSettings/ProjectAuditorSettings.asset
+/ProjectSettings/SceneTemplateSettings.json
+/ProjectSettings/ClusterInputManager.asset
+/ProjectSettings/MultiplayerManager.asset
+/ProjectSettings/PhysicsCoreProjectSettings2D.asset
 .dotnet/
 .nuget/
 .env

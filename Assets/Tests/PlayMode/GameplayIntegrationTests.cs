@@ -144,7 +144,8 @@ namespace LastOutpost.Tests.PlayMode
             session.Run.ShotFired += shot => kinds.Add(shot.Kind);
             session.StepSimulation(2);
             Assert.That(kinds, Does.Contain(ShotKind.BasicGun));
-            Assert.That(kinds, Does.Not.Contain(ShotKind.Missile));
+            // Use the collection constraint supported by both desktop and Unity's NUnit.
+            Assert.That(kinds, Has.No.Member(ShotKind.Missile));
         }
 
         [UnityTest]
