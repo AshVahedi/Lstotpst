@@ -35,6 +35,10 @@ env:
 jobs:
   infrastructure:
     name: Unity activation preflight
+    # This local 6000.6 checkpoint stops before persistent generation/PlayMode.
+    # The cloud pipeline below is still pinned to 6000.3 and runs both stages;
+    # leave it available for other PRs and explicit workflow_dispatch requests.
+    if: ${{ github.event_name != 'pull_request' || github.head_ref != 'development/local-unity-6000.6-verification' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:

@@ -23,9 +23,28 @@ namespace LastOutpost.Editor
         [MenuItem("Last Outpost/Generate Level 1 Prototype")]
         public static void GenerateFromMenu()
         {
-            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
-            string scenePath = Generate();
-            EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+            try
+            {
+                TryGenerateAndOpen(OutputRoot, scene => EditorUtility.DisplayDialog("Replace generated scene content?",
+                    "The generated scene has unsaved changes. Replace its generated objects and save this scene? " +
+                    "Other open scenes will remain open and will not be saved.", "Replace and save", "Cancel"));
+            }
+            catch (InvalidOperationException error)
+            {
+                EditorUtility.DisplayDialog("Last Outpost generation blocked", error.Message, "OK");
+            }
+        }
+
+        /// <summary>Cancellation is read-only; opening is additive so unrelated scene edits survive.</summary>
+        public static bool TryGenerateAndOpen(string outputRoot = OutputRoot, Func<Scene, bool> confirmReplacement = null)
+        {
+            string scenePath;
+            try { scenePath = Generate(outputRoot, true, null, confirmReplacement); }
+            catch (OperationCanceledException) { return false; }
+            Scene scene = SceneManager.GetSceneByPath(scenePath);
+            if (!scene.IsValid() || !scene.isLoaded) scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Additive);
+            SceneManager.SetActiveScene(scene); // Only the explicit menu command focuses the generated scene.
+            return true;
         }
 
         /// <summary>Batch entry point: -executeMethod LastOutpost.Editor.PrototypeSceneBuilder.GenerateBatch.</summary>
@@ -33,30 +52,57 @@ namespace LastOutpost.Editor
 
         /// <param name="saveScene">Optional persistence callback for Editor automation; false or an exception rolls back the scene replacement.</param>
         public static string Generate(string outputRoot = OutputRoot, bool registerBuildScene = true,
-            Func<Scene, string, bool> saveScene = null)
+            Func<Scene, string, bool> saveScene = null, Func<Scene, bool> confirmReplacement = null)
         {
             if (Application.isPlaying) throw new InvalidOperationException("Generate the prototype outside Play Mode.");
             if (string.IsNullOrWhiteSpace(outputRoot) || !outputRoot.StartsWith("Assets/", StringComparison.Ordinal) ||
                 outputRoot.Contains("..") || outputRoot.Contains("\\") || outputRoot.EndsWith("/", StringComparison.Ordinal))
                 throw new ArgumentException("Use a dedicated normalized folder below Assets.", nameof(outputRoot));
-            EnsureFolders(outputRoot);
-            PrototypeSettings settings = EnsureSettings(outputRoot + "/Configuration/PrototypeSettings.asset");
-            settings.Build(); // Validate inspector values before replacing any generated scene content.
-            Sprite sprite = EnsureSprite(outputRoot + "/Art/Placeholder.png");
-            Material material = EnsureMaterial(outputRoot + "/Art/Placeholder.mat");
-            GameObject platformPrefab = SavePlatform(outputRoot + "/Prefabs/Platform.prefab", sprite, material);
-            EnemyActor basic = SaveEnemy(outputRoot + "/Prefabs/Basic.prefab", "Basic", sprite, material,
-                new Color(0.9f, 0.3f, 0.2f), new Vector2(0.7f, 0.7f));
-            EnemyActor fast = SaveEnemy(outputRoot + "/Prefabs/Fast.prefab", "Fast", sprite, material,
-                new Color(1, 0.75f, 0.15f), new Vector2(0.55f, 0.55f));
-            EnemyActor boss = SaveEnemy(outputRoot + "/Prefabs/Boss.prefab", "Boss", sprite, material,
-                new Color(0.65f, 0.25f, 0.8f), new Vector2(1.8f, 1.2f));
             string scenePath = outputRoot + SceneRelativePath;
-            BuildScene(scenePath, settings, sprite, material, platformPrefab, basic, fast, boss,
-                saveScene ?? ((scene, path) => EditorSceneManager.SaveScene(scene, path)));
-            if (registerBuildScene) RegisterBuildScene(scenePath);
-            AssetDatabase.SaveAssets();
-            return scenePath;
+            ValidateSceneState(scenePath, confirmReplacement); // No folders, imports or asset writes before consent.
+            bool ownsNewOutput = !Directory.Exists(outputRoot) && !File.Exists(outputRoot);
+            try
+            {
+                EnsureFolders(outputRoot);
+                PrototypeSettings settings = EnsureSettings(outputRoot + "/Configuration/PrototypeSettings.asset");
+                settings.Build(); // Validate inspector values before replacing any generated scene content.
+                Sprite sprite = EnsureSprite(outputRoot + "/Art/Placeholder.png");
+                Material material = EnsureMaterial(outputRoot + "/Art/Placeholder.mat");
+                GameObject platformPrefab = SavePlatform(outputRoot + "/Prefabs/Platform.prefab", sprite, material);
+                EnemyActor basic = SaveEnemy(outputRoot + "/Prefabs/Basic.prefab", "Basic", sprite, material,
+                    new Color(0.9f, 0.3f, 0.2f), new Vector2(0.7f, 0.7f));
+                EnemyActor fast = SaveEnemy(outputRoot + "/Prefabs/Fast.prefab", "Fast", sprite, material,
+                    new Color(1, 0.75f, 0.15f), new Vector2(0.55f, 0.55f));
+                EnemyActor boss = SaveEnemy(outputRoot + "/Prefabs/Boss.prefab", "Boss", sprite, material,
+                    new Color(0.65f, 0.25f, 0.8f), new Vector2(1.8f, 1.2f));
+                BuildScene(scenePath, settings, sprite, material, platformPrefab, basic, fast, boss,
+                    saveScene ?? ((scene, path) => EditorSceneManager.SaveScene(scene, path)));
+                if (registerBuildScene) RegisterBuildScene(scenePath);
+                AssetDatabase.SaveAssetIfDirty(settings); // Never save unrelated dirty assets globally.
+                return scenePath;
+            }
+            catch
+            {
+                // Never delete a preexisting output tree. BuildScene closes only scenes it opened;
+                // a failed first generation can therefore remove its newly owned assets safely.
+                if (ownsNewOutput) AssetDatabase.DeleteAsset(outputRoot);
+                throw;
+            }
+        }
+
+        private static void ValidateSceneState(string scenePath, Func<Scene, bool> confirmReplacement)
+        {
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                Scene scene = SceneManager.GetSceneAt(i);
+                if (scene.isLoaded && string.IsNullOrEmpty(scene.path))
+                    throw new InvalidOperationException("Save each Untitled scene manually with File > Save As before generating. " +
+                        "No scenes have been closed or saved, and no prototype assets have been written.");
+            }
+            Scene target = SceneManager.GetSceneByPath(scenePath);
+            if (target.IsValid() && target.isLoaded && target.isDirty &&
+                (confirmReplacement == null || !confirmReplacement(target)))
+                throw new OperationCanceledException("Generated scene replacement cancelled; unsaved changes are preserved.");
         }
 
         private static void EnsureFolders(string root)

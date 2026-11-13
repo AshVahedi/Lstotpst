@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
@@ -227,6 +228,16 @@ namespace LastOutpost.Core.Progression
 
         private static bool WhiteSpace(char c) => c == ' ' || c == '\t' || c == '\r' || c == '\n';
 
+        private static bool IsMalformedJson(Exception error)
+        {
+            // Unity's Mono serializer invokes numeric readers via reflection; .NET 8 reports
+            // their parsing failures directly. Unwrap only invocation wrappers, never arbitrary
+            // inner exceptions, so unrelated runtime/storage failures keep their classification.
+            while (error is TargetInvocationException && error.InnerException != null)
+                error = error.InnerException;
+            return error is SerializationException || error is System.Xml.XmlException || error is FormatException;
+        }
+
         public ProgressionData Decode(string json, ProgressionConfiguration configuration)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
@@ -255,7 +266,7 @@ namespace LastOutpost.Core.Progression
                     }
                 }
             }
-            catch (Exception error) when (error is SerializationException || error is System.Xml.XmlException || error is FormatException)
+            catch (Exception error) when (IsMalformedJson(error))
             {
                 throw new ProgressionLoadException(ProgressionLoadError.Corrupt, "Invalid progression JSON; original save preserved.", error);
             }

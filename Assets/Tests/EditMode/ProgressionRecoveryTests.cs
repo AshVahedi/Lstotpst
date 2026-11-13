@@ -88,6 +88,43 @@ namespace LastOutpost.Tests
             }
         }
 
+        [TestCase(1, "1.5")]
+        [TestCase(1, "true")]
+        [TestCase(1, "9223372036854775808")]
+        [TestCase(2, "1.5")]
+        [TestCase(2, "true")]
+        [TestCase(2, "9223372036854775808")]
+        public void MalformedCreditsEnterRecoveryWithoutReplacingPrimaryOrPending(int schema, string value)
+        {
+            // Run the same file-backed contract on .NET and Unity's Mono serializer, including
+            // legacy migration. A parse error must never become a missing/default profile.
+            string payload = new JsonProgressionCodec().Encode(new ProgressionData())
+                .Replace("\"schemaVersion\":2", "\"schemaVersion\":" + schema)
+                .Replace("\"credits\":0", "\"credits\":" + value);
+            File.WriteAllText(path, payload);
+            byte[] primary = File.ReadAllBytes(path);
+            byte[] pending = { 0xff, 0, 5, 0x7b };
+            File.WriteAllBytes(path + ".pending", pending);
+            using (var flow = new ProgressionController(ProgressionConfiguration.Prototype(), new FileProgressionStore(path)))
+            {
+                Assert.That(flow.Initialize(), Is.EqualTo(ProgressionResult.PersistenceFailed));
+                Assert.That(flow.Screen, Is.EqualTo(ProgressionScreen.Recovery));
+                Assert.That(flow.View.Credits, Is.Null);
+                Assert.That(flow.View.CanStart, Is.False);
+                Assert.That(flow.Run, Is.Null);
+                Assert.That(flow.StartRun(LastOutpost.Core.Simulation.RunConfiguration.Prototype()), Is.EqualTo(ProgressionResult.NotBetweenRuns));
+                Assert.That(flow.BuyUpgrade(UpgradeKind.MaximumHealth), Is.EqualTo(ProgressionResult.NotBetweenRuns));
+                Assert.That(flow.RetryLoad(), Is.EqualTo(ProgressionResult.PersistenceFailed));
+                Assert.That(flow.ConfirmNewProfile(true), Is.EqualTo(ProgressionResult.ConfirmationRequired));
+                Assert.That(flow.RequestNewProfile(), Is.EqualTo(ProgressionResult.ConfirmationRequired));
+                flow.CancelNewProfile();
+                Assert.That(flow.Screen, Is.EqualTo(ProgressionScreen.Recovery));
+                Assert.That(File.ReadAllBytes(path), Is.EqualTo(primary));
+                Assert.That(File.ReadAllBytes(path + ".pending"), Is.EqualTo(pending));
+                Assert.That(Directory.GetDirectories(directory), Is.Empty, "No reset or backup happens without confirmation.");
+            }
+        }
+
         [Test]
         public void LostAcknowledgmentAfterResetRecognizesTheNewPrimaryAndPreservesTheBackup()
         {
