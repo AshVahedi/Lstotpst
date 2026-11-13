@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/LastOutpostGenerated/Scenes/IndustrialWasteland.unity
+    guid: 9fb9c72d6fe4d23439e7b2986a357184
   m_configObjects: {}
