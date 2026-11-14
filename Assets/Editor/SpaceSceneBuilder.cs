@@ -1,5 +1,8 @@
 using System;
+using LastOutpost.Core.Simulation;
+using LastOutpost.Gameplay;
 using UnityEditor;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace LastOutpost.Editor
@@ -24,5 +27,20 @@ namespace LastOutpost.Editor
             Func<Scene, string, bool> saveScene = null, Func<Scene, bool> confirmReplacement = null) =>
             PrototypeSceneBuilder.GenerateSpace(outputRoot, registerBuildScene, saveScene, confirmReplacement);
         public static void GenerateBatch() => Generate();
+
+        // Editor-only verification aid. Mutates transient emitters, never settings, inventory or
+        // health/reward state. The ordinary combat loop must produce and persist the defeat.
+        [MenuItem("Last Outpost/Verification/Disarm Selected Space Run")]
+        public static void DisarmSelectedSpaceRun()
+        {
+            if (!CanDisarmSelectedSpaceRun()) throw new InvalidOperationException("Select a playing space session in the Hierarchy first.");
+            OutpostSession session = Selection.activeGameObject.GetComponentInParent<OutpostSession>();
+            foreach (var weapon in session.Run.Space.Weapons) weapon.Enabled = false;
+            Debug.Log("Space verification: selected run disarmed. Ordinary enemy combat will determine the outcome; assets and ownership are unchanged.");
+        }
+        [MenuItem("Last Outpost/Verification/Disarm Selected Space Run", true)]
+        public static bool CanDisarmSelectedSpaceRun() => Application.isPlaying && Selection.activeGameObject != null &&
+            Selection.activeGameObject.GetComponentInParent<OutpostSession>()?.Run is GameRun run &&
+            run.Space != null && run.Status == RunStatus.Playing;
     }
 }

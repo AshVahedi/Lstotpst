@@ -20,11 +20,14 @@ namespace LastOutpost.Core.Simulation
         private readonly RunCombat combat;
         private readonly TacticalPurchases purchases;
         private double travelRemaining;
+        private double spaceRemainder;
+        public const double SpaceStepSeconds = 1d / 120;
         public RunConfiguration Configuration { get; }
         public string RunId { get; }
         public PlatformState Platform { get; }
         public LevelProgression Level { get; }
         public RouteMotion Route { get; }
+        public SpaceCombatRun Space { get; }
         public IReadOnlyList<EnemyAgent> Enemies { get; }
         public RunStatus Status { get; private set; }
         public double ElapsedSeconds { get; private set; }
@@ -42,6 +45,7 @@ namespace LastOutpost.Core.Simulation
             Platform = configuration.CreatePlatform();
             Level = new LevelProgression(configuration.Level, Platform.Health);
             Route = new RouteMotion(configuration.Route);
+            if (configuration.SpaceCombat != null) Space = new SpaceCombatRun(configuration.SpaceCombat, Platform, configuration.Equipment);
             combat = new RunCombat(Platform, configuration);
             combat.ShotFired += shot => ShotFired?.Invoke(shot);
             purchases = new TacticalPurchases(Platform, configuration.Purchases, configuration.Special);
@@ -65,6 +69,19 @@ namespace LastOutpost.Core.Simulation
         {
             Guard.NonNegativeFinite(deltaSeconds, nameof(deltaSeconds));
             if (Status != RunStatus.Playing || deltaSeconds == 0) return;
+            if (Space == null) { Advance(deltaSeconds); return; }
+            // Fixed simulation quantum makes collision and independent weapon schedules invariant
+            // to render-frame partitioning. Carry the remainder; never drop time on a long frame.
+            spaceRemainder = Guard.NonNegativeFinite(spaceRemainder + deltaSeconds, nameof(deltaSeconds));
+            while (spaceRemainder + 1e-12 >= SpaceStepSeconds && Status == RunStatus.Playing)
+            {
+                spaceRemainder = Math.Max(0, spaceRemainder - SpaceStepSeconds);
+                Advance(SpaceStepSeconds);
+            }
+        }
+
+        private void Advance(double deltaSeconds)
+        {
             // External damage may have occurred between ticks. Resolve death before movement/fire.
             if (RefreshState()) return;
             double combatSeconds = deltaSeconds;
@@ -73,6 +90,7 @@ namespace LastOutpost.Core.Simulation
                 double travel = Math.Min(deltaSeconds, travelRemaining);
                 Route.SetMode(MovementMode.Travel);
                 Route.Advance(travel);
+                Space?.AdvanceTravel(Route.PositionX);
                 ElapsedSeconds += travel;
                 travelRemaining -= travel;
                 if (travelRemaining > 0) return;
@@ -83,19 +101,24 @@ namespace LastOutpost.Core.Simulation
             {
                 ElapsedSeconds = Guard.NonNegativeFinite(ElapsedSeconds + combatSeconds, nameof(deltaSeconds));
                 Route.Advance(combatSeconds);
-                for (int i = 0; i < enemies.Count; i++) enemies[i].Approach(Route.PositionX, combatSeconds);
-                combat.Tick(Enemies, Route.PositionX, ElapsedSeconds);
+                if (Space != null) Space.Tick(combatSeconds, ElapsedSeconds, Route.PositionX);
+                else
+                {
+                    for (int i = 0; i < enemies.Count; i++) enemies[i].Approach(Route.PositionX, combatSeconds);
+                    combat.Tick(Enemies, Route.PositionX, ElapsedSeconds);
+                }
             }
             RefreshState();
         }
 
-        public PurchaseResult BuyAmmunition() => Status != RunStatus.Playing ? PurchaseResult.RunNotActive :
+        public PurchaseResult BuyAmmunition() => Status != RunStatus.Playing ? PurchaseResult.RunNotActive : Space != null ? PurchaseResult.NoEffect :
             Configuration.Equipment != null && !Configuration.Equipment.HasAdvancedWeapon ? PurchaseResult.NoEffect : purchases.BuyAmmunition();
-        public PurchaseResult Repair() => Status == RunStatus.Playing ? purchases.Repair() : PurchaseResult.RunNotActive;
+        public PurchaseResult Repair() => Status != RunStatus.Playing ? PurchaseResult.RunNotActive : Space != null ? PurchaseResult.NoEffect : purchases.Repair();
 
         public PurchaseResult ActivateSpecial()
         {
             if (Status != RunStatus.Playing) return PurchaseResult.RunNotActive;
+            if (Space != null) return PurchaseResult.NoEffect;
             PurchaseResult result = purchases.ActivateSpecial(combat.BuildTargets(Enemies, Route.PositionX), ElapsedSeconds, out Target hit);
             if (result != PurchaseResult.Succeeded) return result;
             for (int i = 0; i < enemies.Count; i++)
@@ -115,6 +138,7 @@ namespace LastOutpost.Core.Simulation
             for (int i = 0; i < Level.ActiveEnemies.Count; i++)
                 enemies.Add(new EnemyAgent(Level.ActiveEnemies[i], Route.PositionX + Configuration.Spawns.DistanceAhead + i * Configuration.Spawns.Spacing));
             Route.SetMode(Level.BossActive ? MovementMode.Boss : MovementMode.Encounter);
+            Space?.BeginEncounter(Enemies, ElapsedSeconds, Route.PositionX);
             EncounterStarted?.Invoke(Level.CurrentWave, Level.BossActive);
             for (int i = 0; i < enemies.Count; i++) EnemySpawned?.Invoke(enemies[i]);
         }
@@ -125,7 +149,7 @@ namespace LastOutpost.Core.Simulation
             {
                 EnemyAgent enemy = enemies[i];
                 if (!enemy.State.Health.IsDead || enemy.DefeatReported) continue;
-                enemy.State.TryCollectDrop(Platform.Resources, Configuration.Equipment?.EnergyPerDefeat ?? 0);
+                if (Space == null) enemy.State.TryCollectDrop(Platform.Resources, Configuration.Equipment?.EnergyPerDefeat ?? 0);
                 enemy.DefeatReported = true;
                 EnemyDefeated?.Invoke(enemy);
             }
@@ -137,6 +161,7 @@ namespace LastOutpost.Core.Simulation
             if (Status != RunStatus.Playing) return true;
             Status = Level.State == LevelState.Victory ? RunStatus.Victory : RunStatus.Defeat;
             Route.SetMode(MovementMode.Stopped);
+            Space?.ClearProjectiles();
             Finished?.Invoke(Status);
             return true;
         }
@@ -151,6 +176,7 @@ namespace LastOutpost.Core.Simulation
             {
                 travelRemaining = Configuration.Route.BetweenEncounterSeconds;
                 Route.SetMode(MovementMode.Travel);
+                Space?.ClearProjectiles();
             }
             return false;
         }

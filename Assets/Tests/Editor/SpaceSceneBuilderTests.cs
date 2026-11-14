@@ -166,5 +166,50 @@ namespace LastOutpost.Tests.Editor
             Assert.Throws<ArgumentException>(() => SpaceSceneBuilder.Generate(Output));
             Assert.That(settings.widthLimit, Is.EqualTo(1)); Assert.That(Snapshot(Root), Is.EqualTo(before));
         }
+
+        [Test]
+        public void GeneratedCombatBindsSettingsCameraAndPooledView()
+        {
+            string path = SpaceSceneBuilder.Generate(Output);
+            Scene scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
+            var root = scene.GetRootGameObjects().Single(g => g.GetComponent<GeneratedLevelRoot>() != null);
+            var session = root.GetComponent<OutpostSession>(); Assert.That(session.UsesSpaceCombat, Is.True);
+            var combat = new SerializedObject(session).FindProperty("spaceCombatSettings").objectReferenceValue as SpaceCombatSettings;
+            var geometry = new SerializedObject(session).FindProperty("spaceShipSettings").objectReferenceValue as SpaceShipSettings;
+            Assert.That(combat, Is.Not.Null); Assert.That(geometry, Is.Not.Null);
+            Assert.That(combat.Build(geometry).EquipmentWeapons.Count, Is.EqualTo(2));
+            var view = root.GetComponentInChildren<SpaceCombatView>(); Assert.That(view, Is.Not.Null);
+            Transform legacyEffects = new SerializedObject(root.GetComponent<CombatFeedback>()).FindProperty("effectRoot").objectReferenceValue as Transform;
+            Assert.That(view.transform.IsChildOf(legacyEffects), Is.False, "Legacy feedback clears its descendants on menu/restart.");
+            var serialized = new SerializedObject(view);
+            foreach (string field in new[] { "session", "gameplayCamera", "sprite", "material" })
+                Assert.That(serialized.FindProperty(field).objectReferenceValue, Is.Not.Null, field);
+            Assert.That(root.GetComponentsInChildren<Component>(true).Where(c => c != null && c.GetType().Name.Contains("Collider")), Is.Empty,
+                "Core swept collision is the sole damage authority; no Physics2D package is required.");
+        }
+
+        [Test]
+        public void RepeatedGenerationPreservesCombatTuningAndGuid()
+        {
+            SpaceSceneBuilder.Generate(Output);
+            string path = Output + "/Configuration/SpaceCombatSettings.asset";
+            var combat = AssetDatabase.LoadAssetAtPath<SpaceCombatSettings>(path); string guid = AssetDatabase.AssetPathToGUID(path);
+            combat.hullLaser.cooldownSeconds = 0.375f; EditorUtility.SetDirty(combat); AssetDatabase.SaveAssetIfDirty(combat);
+            SpaceSceneBuilder.Generate(Output);
+            Assert.That(AssetDatabase.AssetPathToGUID(path), Is.EqualTo(guid));
+            Assert.That(combat.hullLaser.cooldownSeconds, Is.EqualTo(0.375f));
+        }
+
+        [TestCase(false)] [TestCase(true)]
+        public void InvalidCombatTuningDoesNotReplaceSceneOrPrefabs(bool missingDefinition)
+        {
+            SpaceSceneBuilder.Generate(Output);
+            var combat = AssetDatabase.LoadAssetAtPath<SpaceCombatSettings>(Output + "/Configuration/SpaceCombatSettings.asset");
+            if (missingDefinition) combat.equipmentWeapons = Array.Empty<SpaceEquipmentWeapon>();
+            else combat.hullLaser.cooldownSeconds = 0;
+            EditorUtility.SetDirty(combat); AssetDatabase.SaveAssetIfDirty(combat); string[] before = Snapshot(Root);
+            Assert.Catch<ArgumentException>(() => SpaceSceneBuilder.Generate(Output));
+            Assert.That(Snapshot(Root), Is.EqualTo(before));
+        }
     }
 }

@@ -38,7 +38,7 @@ jobs:
     # These 6000.6 branches execute Unity locally; this cloud pipeline is still
     # pinned to 6000.3. Preserve other PRs and explicit dispatch behavior until
     # cloud target/licensing alignment receives its own verification checkpoint.
-    if: ${{ github.event_name != 'pull_request' || (github.head_ref != 'development/local-unity-6000.6-verification' && github.head_ref != 'development/space-redesign-foundation') }}
+    if: ${{ github.event_name != 'pull_request' || (github.head_ref != 'development/local-unity-6000.6-verification' && github.head_ref != 'development/space-redesign-foundation' && github.head_ref != 'development/space-independent-combat') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
