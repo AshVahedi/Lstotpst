@@ -9,14 +9,17 @@ namespace LastOutpost.Gameplay
     {
         [SerializeField] private OutpostSession session;
         [SerializeField] private Transform vehicle;
-        [SerializeField, Tooltip("World-space route origin. Y/Z stay fixed.")] private Vector3 routeOrigin;
+        [SerializeField, Tooltip("World-space origin; the selected route axis advances automatically.")] private Vector3 routeOrigin;
+        [SerializeField] private RouteOrientation orientation;
         public MovementMode Mode => session != null && session.Run != null ? session.Run.Route.Mode : MovementMode.Idle;
 
-        public void Configure(OutpostSession owner, Transform vehicleTransform, Vector3 origin)
+        public void Configure(OutpostSession owner, Transform vehicleTransform, Vector3 origin,
+            RouteOrientation routeOrientation = RouteOrientation.LegacyHorizontal)
         {
             session = owner != null ? owner : throw new ArgumentNullException(nameof(owner));
             vehicle = vehicleTransform != null ? vehicleTransform : throw new ArgumentNullException(nameof(vehicleTransform));
             routeOrigin = origin;
+            orientation = routeOrientation;
             Synchronize();
         }
 
@@ -25,7 +28,7 @@ namespace LastOutpost.Gameplay
         public void Synchronize()
         {
             if (session == null || session.Run == null || vehicle == null) return;
-            vehicle.position = routeOrigin + new Vector3((float)session.Run.Route.PositionX, 0, 0);
+            vehicle.position = RouteProjection.Position(routeOrigin, session.Run.Route.PositionX, orientation);
         }
     }
 }

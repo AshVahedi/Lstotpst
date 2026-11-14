@@ -14,6 +14,7 @@ namespace LastOutpost.Gameplay
         [SerializeField] private Transform actorRoot;
         [SerializeField, Tooltip("Must match PlatformMotor's world-space route origin.")] private Vector3 routeOrigin;
         private readonly Dictionary<int, EnemyActor> actors = new Dictionary<int, EnemyActor>();
+        [SerializeField] private RouteOrientation orientation;
         private GameRun boundRun;
         public int ActiveCount => actors.Count;
 
@@ -27,7 +28,7 @@ namespace LastOutpost.Gameplay
         private void OnDisable() => Disconnect();
 
         public void Configure(OutpostSession owner, EnemyActor basic, EnemyActor fast, EnemyActor boss,
-            Transform parent, Vector3 origin)
+            Transform parent, Vector3 origin, RouteOrientation routeOrientation = RouteOrientation.LegacyHorizontal)
         {
             Disconnect();
             session = owner != null ? owner : throw new ArgumentNullException(nameof(owner));
@@ -36,6 +37,7 @@ namespace LastOutpost.Gameplay
             bossPrefab = boss != null ? boss : throw new ArgumentNullException(nameof(boss));
             actorRoot = parent != null ? parent : transform;
             routeOrigin = origin;
+            orientation = routeOrientation;
             if (isActiveAndEnabled) OnEnable();
         }
 
@@ -84,7 +86,7 @@ namespace LastOutpost.Gameplay
             if (prefab == null) throw new InvalidOperationException("Assign all three Last Outpost enemy prefabs.");
             EnemyActor actor = Instantiate(prefab, actorRoot);
             actor.name = enemy.State.Definition.Id + "-" + enemy.State.Id;
-            actor.Bind(enemy, routeOrigin);
+            actor.Bind(enemy, routeOrigin, orientation);
             actor.gameObject.SetActive(true);
             actors.Add(enemy.State.Id, actor);
         }

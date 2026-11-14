@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d566eaff1f0c453399136bbd7ef016f8, type: 3}
+  m_Name: SpaceShipSettings
+  m_EditorClassIdentifier: LastOutpost.Gameplay::LastOutpost.Gameplay.SpaceShipSettings
+  coreWidth: 1
+  bayWidth: 0.9
+  gap: 0.15
+  maximumSteps: 2
+  widthLimit: 5.5
+  threatMargin: 1.5
+  minimumCameraHalfHeight: 8
+  mounts:
+  - slotId: primary
+    side: -1
+    step: 1
+  - slotId: secondary
+    side: 1
+    step: 1
+  - slotId: defense
+    side: -1
+    step: 2
+  - slotId: utility
+    side: 1
+    step: 2

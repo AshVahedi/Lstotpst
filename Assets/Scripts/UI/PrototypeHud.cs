@@ -12,6 +12,8 @@ namespace LastOutpost.UI
     public sealed class PrototypeHud : MonoBehaviour
     {
         [SerializeField] private OutpostSession session;
+        [SerializeField] private string levelTitle = "Industrial Wasteland";
+        [SerializeField] private string introduction = "Industrial Wasteland. Three waves and one boss. Permanent upgrades apply when this run starts.";
         private GUIStyle labelStyle;
         private GUIStyle titleStyle;
         private GUIStyle buttonStyle;
@@ -26,10 +28,12 @@ namespace LastOutpost.UI
         public string LastFeedback => feedback;
         public ProgressionMenuView ProgressionView => progressionView;
 
-        public void Configure(OutpostSession owner)
+        public void Configure(OutpostSession owner, string title = null, string intro = null)
         {
             OnDisable();
             session = owner != null ? owner : throw new ArgumentNullException(nameof(owner));
+            if (title != null) levelTitle = title;
+            if (intro != null) introduction = intro;
             if (isActiveAndEnabled) OnEnable();
         }
         private void OnEnable()
@@ -122,7 +126,7 @@ namespace LastOutpost.UI
         private void DrawHud(GameRun run)
         {
             GUI.Box(new Rect(12, 12, 516, 164), "", boxStyle);
-            GUI.Label(new Rect(24, 20, 492, 28), "LAST OUTPOST  /  Industrial Wasteland", labelStyle);
+            GUI.Label(new Rect(24, 20, 492, 28), "LAST OUTPOST  /  " + levelTitle, labelStyle);
             GUI.Label(new Rect(24, 52, 492, 28), "Health " + run.Platform.Health.Current + "/" + run.Platform.Health.Maximum +
                 "    Energy " + run.Platform.Resources.GetBalance(ResourceType.Energy), labelStyle);
             GUI.Label(new Rect(24, 84, 492, 28), "Missiles " + run.Platform.AdvancedAmmunition.Count + "/" +
@@ -164,7 +168,7 @@ namespace LastOutpost.UI
             else if (progressionView.Screen == ProgressionScreen.Loadout) DrawLoadout(height);
             else
             {
-                GUI.Label(new Rect(24, 160, 492, 100), "Industrial Wasteland. Three waves and one boss. Permanent upgrades apply when this run starts.", labelStyle);
+                GUI.Label(new Rect(24, 160, 492, 100), introduction, labelStyle);
                 if (GUI.Button(new Rect(24, 280, 492, 56), "UPGRADES", buttonStyle)) session.Progression.ShowUpgrades(true);
                 if (GUI.Button(new Rect(24, 348, 492, 56), "LOADOUT", buttonStyle)) session.Progression.ShowLoadout(true);
             }
