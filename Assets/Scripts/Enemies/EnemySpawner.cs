@@ -86,8 +86,9 @@ namespace LastOutpost.Gameplay
             if (prefab == null) throw new InvalidOperationException("Assign all three Last Outpost enemy prefabs.");
             EnemyActor actor = Instantiate(prefab, actorRoot);
             actor.name = enemy.State.Definition.Id + "-" + enemy.State.Id;
-            actor.Bind(enemy, routeOrigin, orientation);
-            actor.gameObject.SetActive(true);
+            var space = boundRun?.Space?.FindEnemy(enemy.State.Id);
+            actor.Bind(enemy, routeOrigin, orientation, space);
+            actor.gameObject.SetActive(space == null || space.Active);
             actors.Add(enemy.State.Id, actor);
         }
 

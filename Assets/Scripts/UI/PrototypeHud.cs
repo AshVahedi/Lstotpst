@@ -111,7 +111,8 @@ namespace LastOutpost.UI
                 if (run.Status == RunStatus.Victory || run.Status == RunStatus.Defeat) DrawResult(run, height);
                 else
                 {
-                    DrawPurchases(run, height);
+                    if (run.Space == null) DrawPurchases(run, height);
+                    else DrawSpaceCooldowns(run, height);
                     if (GUI.Button(new Rect(24, 184, 492, 40), "ABANDON TO MENU", buttonStyle)) ReturnToMenu();
                 }
             }
@@ -128,9 +129,9 @@ namespace LastOutpost.UI
             GUI.Box(new Rect(12, 12, 516, 164), "", boxStyle);
             GUI.Label(new Rect(24, 20, 492, 28), "LAST OUTPOST  /  " + levelTitle, labelStyle);
             GUI.Label(new Rect(24, 52, 492, 28), "Health " + run.Platform.Health.Current + "/" + run.Platform.Health.Maximum +
-                "    Energy " + run.Platform.Resources.GetBalance(ResourceType.Energy), labelStyle);
-            GUI.Label(new Rect(24, 84, 492, 28), "Missiles " + run.Platform.AdvancedAmmunition.Count + "/" +
-                run.Platform.AdvancedAmmunition.Capacity + "    Wave " + run.Level.CurrentWave + "/4" +
+                (run.Space == null ? "    Energy " + run.Platform.Resources.GetBalance(ResourceType.Energy) : "    Automatic weapons"), labelStyle);
+            GUI.Label(new Rect(24, 84, 492, 28), (run.Space == null ? "Missiles " + run.Platform.AdvancedAmmunition.Count + "/" +
+                run.Platform.AdvancedAmmunition.Capacity + "    " : "Weapons " + run.Space.Weapons.Count + "    ") + "Wave " + run.Level.CurrentWave + "/4" +
                 (run.Level.BossActive ? "  BOSS" : ""), labelStyle);
             Rect progress = new Rect(24, 124, 492, 28);
             GUI.Box(progress, "", boxStyle);
@@ -255,7 +256,7 @@ namespace LastOutpost.UI
         {
             float top = height * 0.38f;
             GUI.Box(new Rect(24, top, 492, 220), "", boxStyle);
-            GUI.Label(new Rect(40, top + 16, 460, 48), run.Status == RunStatus.Victory ? "VICTORY" : "OUTPOST LOST", titleStyle);
+            GUI.Label(new Rect(40, top + 16, 460, 48), run.Status == RunStatus.Victory ? "VICTORY" : run.Space != null ? "SHIP LOST" : "OUTPOST LOST", titleStyle);
             GUI.Label(new Rect(40, top + 72, 460, 60), "Saved reward: " + (progressionView.CommittedReward?.ToString() ?? "PENDING") +
                 " Credits. Balance: " + progressionView.Credits, labelStyle);
             if (GUI.Button(new Rect(40, top + 146, 460, 54), "BETWEEN-RUN MENU", buttonStyle)) ReturnToMenu();
@@ -272,6 +273,22 @@ namespace LastOutpost.UI
             if (GUI.Button(new Rect(24, top + 64, 492, 56), "Repair +" + config.Purchases.RepairHealth + "  /  " +
                 config.Purchases.RepairCost + " Energy", buttonStyle)) Repair();
             if (GUI.Button(new Rect(24, top + 128, 492, 56), "Special strike  /  " + config.Special.EnergyCost + " Energy", buttonStyle)) ActivateSpecial();
+        }
+
+        private void DrawSpaceCooldowns(GameRun run, float height)
+        {
+            float panelHeight = 42 + run.Space.Weapons.Count * 34;
+            float top = height - panelHeight - 12;
+            GUI.Box(new Rect(12, top - 8, 516, panelHeight + 8), "", boxStyle);
+            int row = 0;
+            foreach (var weapon in run.Space.Weapons)
+            {
+                double remaining = weapon.Remaining(run.ElapsedSeconds);
+                GUI.Label(new Rect(24, top + row * 34, 492, 32), weapon.InstanceId + "  " +
+                    (!weapon.Enabled ? "DISABLED" : remaining <= 0.001 ? "READY" : remaining.ToString("0.00") + " s"), labelStyle);
+                row++;
+            }
+            GUI.Label(new Rect(24, top + row * 34 + 4, 492, 28), "Automatic fire / no Energy or ammunition cost", labelStyle);
         }
 
         private void EnsureStyles()

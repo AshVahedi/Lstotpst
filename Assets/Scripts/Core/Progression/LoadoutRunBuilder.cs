@@ -55,7 +55,7 @@ namespace LastOutpost.Core.Progression
                 return new RunConfiguration(stats, template.Level, PermanentStatsProvider.Scale(basic, multiplier),
                     PermanentStatsProvider.Scale(advanced, multiplier), template.Purchases, template.Special,
                     template.Route, template.Spawns, Math.Min(template.InitialAmmunition, stats.AmmunitionCapacity),
-                    new RunLoadout(layout.Slots.Count, bonus, installed));
+                    new RunLoadout(layout.Slots.Count, bonus, installed), template.SpaceCombat?.Scale(multiplier));
             }
         }
     }

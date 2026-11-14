@@ -179,7 +179,7 @@ namespace LastOutpost.Core.Progression
             if (template.Equipment != null) throw new ArgumentException("Use the original template; equipment is already applied.", nameof(template));
             return new RunConfiguration(stats, template.Level, Scale(template.BasicGun, WeaponMultiplier), Scale(template.MissileLauncher, WeaponMultiplier),
                 template.Purchases, template.Special, template.Route, template.Spawns,
-                Math.Min(template.InitialAmmunition, stats.AmmunitionCapacity));
+                Math.Min(template.InitialAmmunition, stats.AmmunitionCapacity), spaceCombat: template.SpaceCombat?.Scale(WeaponMultiplier));
         }
 
         internal static WeaponConfig Scale(WeaponConfig weapon, decimal multiplier) => new WeaponConfig(weapon.Id,

@@ -51,7 +51,7 @@ MonoBehaviour:
     attack:
       damage: 12
       intervalSeconds: 2.5
-      range: 3
+      range: 6
       ammunitionPerShot: 0
   waveOneBasicCount: 3
   waveTwoFastCount: 4
