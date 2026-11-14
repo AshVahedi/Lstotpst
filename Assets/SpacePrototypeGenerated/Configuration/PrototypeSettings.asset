@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 278ec87267fd5c02a192b7f36c2460e4, type: 3}
+  m_Name: PrototypeSettings
+  m_EditorClassIdentifier: LastOutpost.Gameplay::LastOutpost.Gameplay.PrototypeSettings
+  initialized: 1
+  maximumHealth: 100
+  ammunitionCapacity: 60
+  initialAmmunition: 0
+  basicGun:
+    damage: 8
+    intervalSeconds: 0.6
+    range: 6
+    ammunitionPerShot: 0
+  missileLauncher:
+    damage: 30
+    intervalSeconds: 1.8
+    range: 7
+    ammunitionPerShot: 1
+  basicEnemy:
+    health: 32
+    speed: 0.7
+    energyReward: 12
+    attack:
+      damage: 4
+      intervalSeconds: 1.5
+      range: 0.8
+      ammunitionPerShot: 0
+  fastEnemy:
+    health: 20
+    speed: 1.5
+    energyReward: 10
+    attack:
+      damage: 3
+      intervalSeconds: 0.7
+      range: 0.8
+      ammunitionPerShot: 0
+  boss:
+    health: 300
+    speed: 0.4
+    energyReward: 60
+    attack:
+      damage: 12
+      intervalSeconds: 2.5
+      range: 3
+      ammunitionPerShot: 0
+  waveOneBasicCount: 3
+  waveTwoFastCount: 4
+  waveThreeBasicCount: 3
+  waveThreeFastCount: 3
+  travelSpeed: 0.9
+  encounterSpeed: 0.1
+  initialTravelSeconds: 1.5
+  betweenEncounterSeconds: 2
+  spawnDistanceAhead: 4.4
+  spawnSpacing: 0.6
+  ammunitionCost: 30
+  ammunitionRefill: 20
+  repairCost: 50
+  repairHealth: 25
+  specialCost: 80
+  specialDamage: 120
+  specialRange: 10
+  specialCooldownSeconds: 0

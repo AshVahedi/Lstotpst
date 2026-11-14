@@ -8,4 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/LastOutpostGenerated/Scenes/IndustrialWasteland.unity
     guid: 9fb9c72d6fe4d23439e7b2986a357184
+  - enabled: 1
+    path: Assets/SpacePrototypeGenerated/Scenes/SpaceFoundation.unity
+    guid: 5e13a333c4bfff74fb54fc676e80d6a1
   m_configObjects: {}

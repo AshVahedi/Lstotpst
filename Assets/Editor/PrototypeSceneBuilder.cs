@@ -37,9 +37,15 @@ namespace LastOutpost.Editor
 
         /// <summary>Cancellation is read-only; opening is additive so unrelated scene edits survive.</summary>
         public static bool TryGenerateAndOpen(string outputRoot = OutputRoot, Func<Scene, bool> confirmReplacement = null)
+            => TryGenerateAndOpenVariant(false, outputRoot, confirmReplacement);
+
+        internal static bool TryGenerateSpaceAndOpen(string outputRoot, Func<Scene, bool> confirmReplacement)
+            => TryGenerateAndOpenVariant(true, outputRoot, confirmReplacement);
+
+        private static bool TryGenerateAndOpenVariant(bool space, string outputRoot, Func<Scene, bool> confirmReplacement)
         {
             string scenePath;
-            try { scenePath = Generate(outputRoot, true, null, confirmReplacement); }
+            try { scenePath = GenerateVariant(space, outputRoot, true, null, confirmReplacement); }
             catch (OperationCanceledException) { return false; }
             Scene scene = SceneManager.GetSceneByPath(scenePath);
             if (!scene.IsValid() || !scene.isLoaded) scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Additive);
@@ -53,12 +59,30 @@ namespace LastOutpost.Editor
         /// <param name="saveScene">Optional persistence callback for Editor automation; false or an exception rolls back the scene replacement.</param>
         public static string Generate(string outputRoot = OutputRoot, bool registerBuildScene = true,
             Func<Scene, string, bool> saveScene = null, Func<Scene, bool> confirmReplacement = null)
+            => GenerateVariant(false, outputRoot, registerBuildScene, saveScene, confirmReplacement);
+
+        internal static string GenerateSpace(string outputRoot, bool registerBuildScene,
+            Func<Scene, string, bool> saveScene, Func<Scene, bool> confirmReplacement)
+            => GenerateVariant(true, outputRoot, registerBuildScene, saveScene, confirmReplacement);
+
+        private static string GenerateVariant(bool space, string outputRoot, bool registerBuildScene,
+            Func<Scene, string, bool> saveScene, Func<Scene, bool> confirmReplacement)
         {
             if (Application.isPlaying) throw new InvalidOperationException("Generate the prototype outside Play Mode.");
             if (string.IsNullOrWhiteSpace(outputRoot) || !outputRoot.StartsWith("Assets/", StringComparison.Ordinal) ||
                 outputRoot.Contains("..") || outputRoot.Contains("\\") || outputRoot.EndsWith("/", StringComparison.Ordinal))
                 throw new ArgumentException("Use a dedicated normalized folder below Assets.", nameof(outputRoot));
-            string scenePath = outputRoot + SceneRelativePath;
+            if (space)
+            {
+                // Reject filesystem aliases as well as ordinary legacy paths (Windows is case-insensitive).
+                foreach (string segment in outputRoot.Split('/'))
+                    if (segment.Length == 0 || segment != segment.TrimEnd(' ', '.'))
+                        throw new ArgumentException("Use a normalized space output path without alias segments.", nameof(outputRoot));
+                if (string.Equals(outputRoot, OutputRoot, StringComparison.OrdinalIgnoreCase) ||
+                    outputRoot.StartsWith(OutputRoot + "/", StringComparison.OrdinalIgnoreCase))
+                    throw new ArgumentException("Space output must not overwrite the verified legacy prototype.", nameof(outputRoot));
+            }
+            string scenePath = outputRoot + (space ? SpaceSceneBuilder.SceneRelativePath : SceneRelativePath);
             ValidateSceneState(scenePath, confirmReplacement); // No folders, imports or asset writes before consent.
             bool ownsNewOutput = !Directory.Exists(outputRoot) && !File.Exists(outputRoot);
             try
@@ -66,19 +90,34 @@ namespace LastOutpost.Editor
                 EnsureFolders(outputRoot);
                 PrototypeSettings settings = EnsureSettings(outputRoot + "/Configuration/PrototypeSettings.asset");
                 settings.Build(); // Validate inspector values before replacing any generated scene content.
+                SpaceShipSettings shipSettings = null;
+                if (space)
+                {
+                    string shipPath = outputRoot + "/Configuration/SpaceShipSettings.asset";
+                    shipSettings = AssetDatabase.LoadAssetAtPath<SpaceShipSettings>(shipPath);
+                    if (shipSettings == null)
+                    {
+                        if (File.Exists(shipPath)) throw new InvalidOperationException("Space settings path contains an unrelated asset.");
+                        shipSettings = ScriptableObject.CreateInstance<SpaceShipSettings>();
+                        AssetDatabase.CreateAsset(shipSettings, shipPath);
+                    }
+                    shipSettings.Build();
+                }
                 Sprite sprite = EnsureSprite(outputRoot + "/Art/Placeholder.png");
                 Material material = EnsureMaterial(outputRoot + "/Art/Placeholder.mat");
-                GameObject platformPrefab = SavePlatform(outputRoot + "/Prefabs/Platform.prefab", sprite, material);
+                GameObject platformPrefab = space ? SaveShipCore(outputRoot + "/Prefabs/ShipCore.prefab", sprite, material, shipSettings) :
+                    SavePlatform(outputRoot + "/Prefabs/Platform.prefab", sprite, material);
                 EnemyActor basic = SaveEnemy(outputRoot + "/Prefabs/Basic.prefab", "Basic", sprite, material,
-                    new Color(0.9f, 0.3f, 0.2f), new Vector2(0.7f, 0.7f));
+                    new Color(0.9f, 0.3f, 0.2f), new Vector2(0.7f, 0.7f), space);
                 EnemyActor fast = SaveEnemy(outputRoot + "/Prefabs/Fast.prefab", "Fast", sprite, material,
-                    new Color(1, 0.75f, 0.15f), new Vector2(0.55f, 0.55f));
+                    new Color(1, 0.75f, 0.15f), new Vector2(0.55f, 0.55f), space);
                 EnemyActor boss = SaveEnemy(outputRoot + "/Prefabs/Boss.prefab", "Boss", sprite, material,
-                    new Color(0.65f, 0.25f, 0.8f), new Vector2(1.8f, 1.2f));
+                    new Color(0.65f, 0.25f, 0.8f), new Vector2(1.8f, 1.2f), space);
                 BuildScene(scenePath, settings, sprite, material, platformPrefab, basic, fast, boss,
-                    saveScene ?? ((scene, path) => EditorSceneManager.SaveScene(scene, path)));
+                    saveScene ?? ((scene, path) => EditorSceneManager.SaveScene(scene, path)), shipSettings);
                 if (registerBuildScene) RegisterBuildScene(scenePath);
                 AssetDatabase.SaveAssetIfDirty(settings); // Never save unrelated dirty assets globally.
+                if (shipSettings != null) AssetDatabase.SaveAssetIfDirty(shipSettings);
                 return scenePath;
             }
             catch
@@ -179,7 +218,23 @@ namespace LastOutpost.Editor
             finally { UnityEngine.Object.DestroyImmediate(root); }
         }
 
-        private static EnemyActor SaveEnemy(string path, string name, Sprite sprite, Material material, Color color, Vector2 size)
+        private static GameObject SaveShipCore(string path, Sprite sprite, Material material, SpaceShipSettings settings)
+        {
+            var root = new GameObject("Ship Core");
+            try
+            {
+                Block("Core hull", root.transform, sprite, material, new Color(0.2f, 0.65f, 0.8f),
+                    Vector3.zero, new Vector2(settings.coreWidth, 1.6f), 2);
+                Block("Forward bridge", root.transform, sprite, material, Color.cyan,
+                    new Vector3(0, 0.65f, 0), new Vector2(settings.coreWidth * 0.5f, 0.5f), 3);
+                Block("Engine", root.transform, sprite, material, new Color(1, 0.5f, 0.2f),
+                    new Vector3(0, -0.95f, 0), new Vector2(settings.coreWidth * 0.6f, 0.3f), 3);
+                return SavePrefab(root, path);
+            }
+            finally { UnityEngine.Object.DestroyImmediate(root); }
+        }
+
+        private static EnemyActor SaveEnemy(string path, string name, Sprite sprite, Material material, Color color, Vector2 size, bool space = false)
         {
             var root = new GameObject(name);
             try
@@ -187,8 +242,9 @@ namespace LastOutpost.Editor
                 EnemyActor actor = root.AddComponent<EnemyActor>();
                 GameObject body = Block("Body", root.transform, sprite, material, color, Vector3.zero, size);
                 if (name == "Fast") body.transform.localRotation = Quaternion.Euler(0, 0, 45);
-                if (name == "Boss") Block("Siege cannon", root.transform, sprite, material, Color.red,
-                    new Vector3(-0.95f, 0.2f, 0), new Vector2(0.6f, 0.22f));
+                if (name == "Boss") Block(space ? "Forward cannon" : "Siege cannon", root.transform, sprite, material, Color.red,
+                    space ? new Vector3(0, -0.85f, 0) : new Vector3(-0.95f, 0.2f, 0),
+                    space ? new Vector2(0.22f, 0.6f) : new Vector2(0.6f, 0.22f));
                 AddHealthBar(root, null, actor, sprite, material, size.x, size.y / 2 + 0.3f);
                 return SavePrefab(root, path).GetComponent<EnemyActor>();
             }
@@ -203,7 +259,7 @@ namespace LastOutpost.Editor
 
         private static void BuildScene(string path, PrototypeSettings settings, Sprite sprite, Material material,
             GameObject platformPrefab, EnemyActor basic, EnemyActor fast, EnemyActor boss,
-            Func<Scene, string, bool> saveScene)
+            Func<Scene, string, bool> saveScene, SpaceShipSettings shipSettings = null)
         {
             Scene previousActive = SceneManager.GetActiveScene();
             Scene scene = SceneManager.GetSceneByPath(path);
@@ -218,22 +274,27 @@ namespace LastOutpost.Editor
                 var oldRoots = new List<GameObject>();
                 foreach (GameObject candidate in scene.GetRootGameObjects())
                     if (candidate.GetComponent<GeneratedLevelRoot>() != null) oldRoots.Add(candidate);
-                generated = new GameObject("Last Outpost Prototype");
+                bool space = shipSettings != null;
+                RouteOrientation orientation = space ? RouteOrientation.SpaceForwardY : RouteOrientation.LegacyHorizontal;
+                generated = new GameObject(space ? "Last Outpost Space Foundation" : "Last Outpost Prototype");
                 generated.AddComponent<GeneratedLevelRoot>();
                 ProgressionHost progression = Child("Permanent progression", generated.transform).gameObject.AddComponent<ProgressionHost>();
                 OutpostSession session = generated.AddComponent<OutpostSession>();
                 session.Configure(settings, progression);
                 GameObject platform = (GameObject)PrefabUtility.InstantiatePrefab(platformPrefab, scene);
                 platform.transform.SetParent(generated.transform, false);
-                generated.AddComponent<PlatformMotor>().Configure(session, platform.transform, Vector3.zero);
+                generated.AddComponent<PlatformMotor>().Configure(session, platform.transform, Vector3.zero, orientation);
+                if (space) platform.AddComponent<ShipAssemblyView>().Configure(session, shipSettings, sprite, material);
                 AddHealthBar(platform, session, null, sprite, material, 1.8f, 1.05f);
                 Transform enemies = Child("Enemies", generated.transform);
-                generated.AddComponent<EnemySpawner>().Configure(session, basic, fast, boss, enemies, Vector3.zero);
+                generated.AddComponent<EnemySpawner>().Configure(session, basic, fast, boss, enemies, Vector3.zero, orientation);
                 Transform effects = Child("Shot feedback", generated.transform);
-                generated.AddComponent<CombatFeedback>().Configure(session, material, effects, Vector3.zero);
-                generated.AddComponent<PrototypeHud>().Configure(session);
-                CreateCamera(generated.transform, platform.transform);
-                CreateScenery(generated.transform, sprite, material);
+                generated.AddComponent<CombatFeedback>().Configure(session, material, effects, Vector3.zero, orientation);
+                generated.AddComponent<PrototypeHud>().Configure(session, space ? "Space Foundation" : null,
+                    space ? "Space foundation. Automatic forward travel and horizontal modules. Combat uses the legacy Level 1 harness." : null);
+                CreateCamera(generated.transform, platform.transform, shipSettings);
+                if (space) CreateSpaceScenery(generated.transform, sprite, material);
+                else CreateScenery(generated.transform, sprite, material);
                 // An isolated Undo group restores the previous hierarchy if persistence fails.
                 // Do not roll back unrelated edits or earlier asset generation/import operations.
                 Undo.IncrementCurrentGroup();
@@ -304,17 +365,28 @@ namespace LastOutpost.Editor
             root.AddComponent<HealthBarView>().Configure(session, enemy, fill, width);
         }
 
-        private static void CreateCamera(Transform root, Transform platform)
+        private static void CreateCamera(Transform root, Transform platform, SpaceShipSettings space = null)
         {
             Transform cameraTransform = Child("Main Camera", root);
             cameraTransform.tag = "MainCamera";
-            cameraTransform.position = new Vector3(2.1f, 2, -10);
+            cameraTransform.position = space == null ? new Vector3(2.1f, 2, -10) : new Vector3(0, 0, -10);
             var camera = cameraTransform.gameObject.AddComponent<Camera>();
             camera.orthographic = true;
             camera.orthographicSize = 6.5f;
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = new Color(0.055f, 0.08f, 0.12f);
-            cameraTransform.gameObject.AddComponent<CameraFollow>().Configure(platform);
+            cameraTransform.gameObject.AddComponent<CameraFollow>().Configure(platform, space == null ? 2.1f : 0,
+                space == null ? RouteOrientation.LegacyHorizontal : RouteOrientation.SpaceForwardY);
+            if (space != null) cameraTransform.gameObject.AddComponent<ShipCameraFraming>().Configure(space);
+        }
+
+        private static void CreateSpaceScenery(Transform root, Sprite sprite, Material material)
+        {
+            Transform stars = Child("Placeholder star field", root);
+            // Deterministic world-space placeholders; never consumes Unity's global Random state.
+            for (int i = 0; i < 90; i++)
+                Block("Star " + i, stars, sprite, material, new Color(0.35f, 0.45f, 0.65f),
+                    new Vector3((i * 17 % 19 - 9) * 0.7f, i * 1.7f - 12, 0), new Vector2(0.045f, 0.045f), -20);
         }
 
         private static void CreateScenery(Transform root, Sprite sprite, Material material)

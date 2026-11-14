@@ -11,6 +11,7 @@ namespace LastOutpost.Presentation
         [SerializeField] private Material tracerMaterial;
         [SerializeField] private Transform effectRoot;
         [SerializeField] private Vector3 routeOrigin;
+        [SerializeField] private RouteOrientation orientation;
         [SerializeField, Min(0.01f), Tooltip("Unscaled seconds a resolved shot remains visible.")]
         private float tracerLifetimeSeconds = 0.12f;
         private GameRun boundRun;
@@ -24,13 +25,15 @@ namespace LastOutpost.Presentation
 
         private void OnDisable() => Disconnect();
 
-        public void Configure(OutpostSession owner, Material material, Transform parent, Vector3 origin)
+        public void Configure(OutpostSession owner, Material material, Transform parent, Vector3 origin,
+            RouteOrientation routeOrientation = RouteOrientation.LegacyHorizontal)
         {
             Disconnect();
             session = owner != null ? owner : throw new ArgumentNullException(nameof(owner));
             tracerMaterial = material;
             effectRoot = parent != null ? parent : transform;
             routeOrigin = origin;
+            orientation = routeOrientation;
             if (isActiveAndEnabled) OnEnable();
         }
 
@@ -64,8 +67,9 @@ namespace LastOutpost.Presentation
             var effect = new GameObject("Resolved " + shot.Kind);
             effect.transform.SetParent(effectRoot, false);
             var trace = effect.AddComponent<ShotTrace>();
-            trace.Initialize(routeOrigin + new Vector3((float)shot.FromX, 0.25f, 0),
-                routeOrigin + new Vector3((float)shot.ToX, 0.25f, 0), tracerMaterial, color, tracerLifetimeSeconds);
+            Vector3 offset = orientation == RouteOrientation.LegacyHorizontal ? Vector3.up * 0.25f : Vector3.zero;
+            trace.Initialize(RouteProjection.Position(routeOrigin, shot.FromX, orientation) + offset,
+                RouteProjection.Position(routeOrigin, shot.ToX, orientation) + offset, tracerMaterial, color, tracerLifetimeSeconds);
         }
     }
 }
